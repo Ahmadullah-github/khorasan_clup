@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>هزینه‌ها - کمپ خراسان</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <style>
+        .dropzone {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-secondary);
+            position: relative;
+        }
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--color-primary-500);
+            background: var(--color-primary-50);
+        }
+        [data-theme="dark"] .dropzone:hover, [data-theme="dark"] .dropzone.dragover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .dropzone-input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .dropzone-icon {
+            font-size: 2.5rem;
+            color: var(--color-primary-500);
+            margin-bottom: var(--space-2);
+        }
+        .dropzone-text {
+            font-weight: var(--font-weight-medium);
+            color: var(--text-primary);
+            margin-bottom: var(--space-1);
+        }
+        .dropzone-hint {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        .dropzone-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .preview-file {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+        .preview-icon {
+            font-size: 1.5rem;
+            color: var(--color-success-500);
+        }
+        .preview-name {
+            font-weight: var(--font-weight-medium);
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .preview-remove {
+            background: var(--color-danger-100);
+            border: none;
+            border-radius: var(--radius-full);
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--color-danger-600);
+            transition: all 0.2s;
+        }
+        .preview-remove:hover {
+            background: var(--color-danger-500);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar-app">
+        <a class="navbar-brand" href="index.html">
+            <span class="navbar-brand-icon">🤸‍♂️</span>
+            کمپ خراسان
+        </a>
+        
+        <ul class="navbar-nav-app">
+            <li><a class="nav-link-app" href="index.html">داشبورد</a></li>
+            <li><a class="nav-link-app" href="students.html">دانش‌آموزان</a></li>
+            <li><a class="nav-link-app" href="coaches.html">مربیان</a></li>
+            <li><a class="nav-link-app active" href="expenses.html">هزینه‌ها</a></li>
+            <li><a class="nav-link-app" href="rent.html">اجاره</a></li>
+            <li><a class="nav-link-app" href="accounting.html">درآمد خالص</a></li>
+            <li><a class="nav-link-app" href="reports.html">گزارش‌ها</a></li>
+            <li id="adminNavItem" style="display: none;">
+                <a class="nav-link-app" href="admin.html">مدیر</a>
+            </li>
+        </ul>
+        
+        <div class="navbar-actions">
+            <button type="button" class="theme-switch" id="themeSwitch" title="تغییر تم">
+                <span class="theme-switch-icons">
+                    <span class="theme-switch-icon theme-switch-icon--sun">☀️</span>
+                    <span class="theme-switch-icon theme-switch-icon--moon">🌙</span>
+                </span>
+                <span class="theme-switch-slider"></span>
+            </button>
+            <div class="navbar-user">
+                <span class="navbar-user-icon"><i class="bi bi-person"></i></span>
+                <span id="userName"></span>
+            </div>
+            <button class="navbar-logout" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>خروج</span>
+            </button>
+        </div>
+        
+        <button class="navbar-mobile-toggle" id="mobileMenuToggle">
+            <i class="bi bi-list"></i>
+        </button>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar-app" id="sidebar">
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-item">
+                <a href="index.html" class="sidebar-nav-link">
+                    <i class="bi bi-grid-1x2 sidebar-nav-icon"></i>
+                    داشبورد
+                </a>
+            </div>
+            
+            <div class="sidebar-section-title">مدیریت</div>
+            
+            <div class="sidebar-nav-item">
+                <a href="students.html" class="sidebar-nav-link">
+                    <i class="bi bi-people sidebar-nav-icon"></i>
+                    دانش‌آموزان
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="coaches.html" class="sidebar-nav-link">
+                    <i class="bi bi-person-badge sidebar-nav-icon"></i>
+                    مربیان
+                </a>
+            </div>
+            
+            <div class="sidebar-section-title">مالی</div>
+            
+            <div class="sidebar-nav-item">
+                <a href="expenses.html" class="sidebar-nav-link active">
+                    <i class="bi bi-cash-stack sidebar-nav-icon"></i>
+                    هزینه‌ها
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="rent.html" class="sidebar-nav-link">
+                    <i class="bi bi-house sidebar-nav-icon"></i>
+                    اجاره
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="accounting.html" class="sidebar-nav-link">
+                    <i class="bi bi-calculator sidebar-nav-icon"></i>
+                    درآمد خالص
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="reports.html" class="sidebar-nav-link">
+                    <i class="bi bi-bar-chart sidebar-nav-icon"></i>
+                    گزارش‌ها
+                </a>
+            </div>
+            
+            <div class="sidebar-section-title">سیستم</div>
+            
+            <div class="sidebar-nav-item" id="adminSidebarItem" style="display: none;">
+                <a href="admin.html" class="sidebar-nav-link">
+                    <i class="bi bi-gear sidebar-nav-icon"></i>
+                    مدیر
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="#" class="sidebar-nav-link" onclick="logout()">
+                    <i class="bi bi-box-arrow-right sidebar-nav-icon"></i>
+                    خروج
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="container-app">
+            <!-- Alert Container -->
+            <div id="alertContainer"></div>
+            
+            <!-- Page Header -->
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="page-title mb-0">
+                    <i class="bi bi-cash-stack me-2"></i>
+                    مدیریت هزینه‌ها
+                </h1>
+                <button class="btn-app btn-app--primary" data-bs-toggle="modal" data-bs-target="#expenseModal">
+                    <i class="bi bi-plus-lg"></i>
+                    افزودن هزینه
+                </button>
+            </div>
+            
+            <!-- Summary Card -->
+            <div class="card-app mb-4 animate-slideUp" id="summaryCard" style="display: none;">
+                <div class="card-app-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted">مجموع هزینه‌ها:</span>
+                            <strong class="text-danger fs-5 ms-2" id="totalExpenses">0 افغانی</strong>
+                        </div>
+                        <div>
+                            <span class="text-muted">تعداد:</span>
+                            <strong class="ms-2" id="expenseCount">0</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expenses List -->
+            <div class="card-app animate-slideUp">
+                <div class="card-app-header">
+                    <h2 class="card-app-title">
+                        <i class="bi bi-list-ul"></i>
+                        لیست هزینه‌ها
+                    </h2>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <select class="form-control-app form-select-app" id="categoryFilter" style="width: auto; min-width: 150px;">
+                            <option value="">همه دسته‌ها</option>
+                            <option value="Rent">اجاره</option>
+                            <option value="Equipment">تجهیزات</option>
+                            <option value="Taxes">مالیات</option>
+                            <option value="Services">خدمات</option>
+                            <option value="Other">سایر</option>
+                        </select>
+                        <div class="search-box-app">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" class="search-input" id="searchInput" placeholder="جستجو...">
+                        </div>
+                    </div>
+                </div>
+                <div class="card-app-body p-0">
+                    <div class="table-responsive">
+                        <table class="table-app">
+                            <thead>
+                                <tr>
+                                    <th>عنوان</th>
+                                    <th>دسته</th>
+                                    <th>مبلغ</th>
+                                    <th>تاریخ</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expensesTableBody">
+                                <tr>
+                                    <td colspan="5">
+                                        <div class="text-center py-4">
+                                            <div class="spinner-app mx-auto mb-3"></div>
+                                            <div class="text-muted">در حال بارگذاری...</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-app-footer" id="paginationContainer"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Expense Modal -->
+    <div class="modal fade modal-app" id="expenseModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle"></i>
+                        افزودن هزینه
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="expenseForm">
+                        <div class="form-group">
+                            <label class="form-label-app required">
+                                <i class="bi bi-card-text"></i>
+                                عنوان
+                            </label>
+                            <input type="text" class="form-control-app" id="expenseTitle" required placeholder="عنوان هزینه">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app required">
+                                <i class="bi bi-tag"></i>
+                                دسته
+                            </label>
+                            <select class="form-control-app form-select-app" id="expenseCategory" required>
+                                <option value="">انتخاب کنید...</option>
+                                <option value="Rent">اجاره</option>
+                                <option value="Equipment">تجهیزات</option>
+                                <option value="Taxes">مالیات</option>
+                                <option value="Services">خدمات</option>
+                                <option value="Other">سایر</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app required">
+                                <i class="bi bi-cash"></i>
+                                مبلغ
+                            </label>
+                            <div class="input-group-app">
+                                <span class="input-group-prepend">افغانی</span>
+                                <input type="number" class="form-control-app" id="expenseAmount" min="0" step="0.01" required placeholder="0">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app required">
+                                <i class="bi bi-calendar3"></i>
+                                تاریخ (جلالی)
+                            </label>
+                            <input type="text" class="form-control-app" id="expenseDate" required placeholder="1404/01/01">
+                            <input type="hidden" id="expenseDateAlt">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app">
+                                <i class="bi bi-receipt"></i>
+                                رسید
+                            </label>
+                            <div class="dropzone" id="receiptDropzone">
+                                <input type="file" class="dropzone-input" id="receiptUpload" accept="image/*,application/pdf">
+                                <div class="dropzone-content" id="dropzoneContent">
+                                    <i class="bi bi-cloud-arrow-up dropzone-icon"></i>
+                                    <p class="dropzone-text">فایل را اینجا بکشید یا کلیک کنید</p>
+                                    <p class="dropzone-hint">حداکثر 5 مگابایت (JPEG, PNG, PDF)</p>
+                                </div>
+                                <div class="dropzone-preview d-none" id="dropzonePreview">
+                                    <div class="preview-file">
+                                        <i class="bi bi-file-earmark-check preview-icon"></i>
+                                        <span class="preview-name" id="previewFileName"></span>
+                                        <button type="button" class="preview-remove" id="removeFile" title="حذف">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app">
+                                <i class="bi bi-sticky"></i>
+                                جزئیات
+                            </label>
+                            <textarea class="form-control-app" id="expenseDetails" rows="3" placeholder="جزئیات اضافی..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-app btn-app--secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="submit" class="btn-app btn-app--primary" id="submitBtn" form="expenseForm">
+                        <span class="spinner-app spinner-app--sm d-none" id="btnSpinner"></span>
+                        <span id="btnText">ذخیره</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.0.0/dist/persian-date.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/jalali.js"></script>
+    <script>
+        let currentPage = 1;
+        let currentSearch = '';
+        let currentCategory = '';
+        let editingExpenseId = null;
+
+        // Convert Persian/Dari numerals to ASCII
+        function convertPersianToEnglishNumbers(str) {
+            if (!str) return str;
+            const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            for (let i = 0; i < 10; i++) {
+                str = str.replace(new RegExp(persianNumbers[i], 'g'), i.toString());
+                str = str.replace(new RegExp(arabicNumbers[i], 'g'), i.toString());
+            }
+            return str;
+        }
+
+        // Check auth
+        const user = checkAuth();
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = user.username;
+            if (user.role === 'admin') {
+                document.getElementById('adminNavItem').style.display = 'block';
+                document.getElementById('adminSidebarItem').style.display = 'block';
+            }
+        }
+
+        // Dropzone functionality
+        const dropzone = document.getElementById('receiptDropzone');
+        const fileInput = document.getElementById('receiptUpload');
+        const dropzoneContent = document.getElementById('dropzoneContent');
+        const dropzonePreview = document.getElementById('dropzonePreview');
+        const previewFileName = document.getElementById('previewFileName');
+        const removeFileBtn = document.getElementById('removeFile');
+
+        function showFilePreview(file) {
+            dropzoneContent.classList.add('d-none');
+            dropzonePreview.classList.remove('d-none');
+            previewFileName.textContent = file.name;
+        }
+
+        function clearFilePreview() {
+            dropzoneContent.classList.remove('d-none');
+            dropzonePreview.classList.add('d-none');
+            fileInput.value = '';
+        }
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+                    // Create a new DataTransfer to set the file
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    fileInput.files = dt.files;
+                    showFilePreview(file);
+                } else {
+                    showAlert('فقط فایل‌های تصویری و PDF مجاز هستند', 'warning');
+                }
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                showFilePreview(e.target.files[0]);
+            }
+        });
+
+        removeFileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            clearFilePreview();
+        });
+
+        // Initialize date picker
+        $(document).ready(function() {
+            $('#expenseDate').persianDatepicker({
+                observer: true,
+                format: 'YYYY/MM/DD',
+                altField: '#expenseDateAlt',
+                altFormat: 'YYYY-MM-DD',
+                onSelect: function(unix) {
+                    // Manually set the alt field value in correct format with ASCII numbers
+                    const pd = new persianDate(unix);
+                    const formatted = pd.format('YYYY-MM-DD');
+                    // Convert to ASCII numbers
+                    const asciiFormatted = convertPersianToEnglishNumbers(formatted);
+                    $('#expenseDateAlt').val(asciiFormatted);
+                }
+            });
+        });
+
+        // Category labels
+        const categoryLabels = {
+            'Rent': 'اجاره',
+            'Equipment': 'تجهیزات',
+            'Taxes': 'مالیات',
+            'Services': 'خدمات',
+            'Other': 'سایر'
+        };
+
+        const categoryColors = {
+            'Rent': 'warning',
+            'Equipment': 'primary',
+            'Taxes': 'danger',
+            'Services': 'success',
+            'Other': 'gray'
+        };
+
+        async function loadExpenses(page = 1, search = '', category = '') {
+            const tbody = document.getElementById('expensesTableBody');
+            
+            // Show loading state
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5">
+                        <div class="text-center py-4">
+                            <div class="spinner-app mx-auto mb-3"></div>
+                            <div class="text-muted">در حال بارگذاری...</div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            try {
+                const params = { page, per_page: 20 };
+                if (search) params.q = search;
+                if (category) params.category = category;
+                
+                const data = await APIClient.get('expenses.php', params);
+                if (data.success) {
+                    // Update summary
+                    const summaryCard = document.getElementById('summaryCard');
+                    const totalExpenses = data.data.expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+                    document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
+                    document.getElementById('expenseCount').textContent = data.data.pagination.total;
+                    summaryCard.style.display = 'block';
+                    
+                    if (data.data.expenses.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="5">
+                                    <div class="table-empty">
+                                        <div class="table-empty-icon">💰</div>
+                                        <div class="table-empty-text">هزینه‌ای یافت نشد</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        summaryCard.style.display = 'none';
+                    } else {
+                        tbody.innerHTML = data.data.expenses.map(expense => `
+                            <tr>
+                                <td><strong>${expense.title}</strong></td>
+                                <td>
+                                    <span class="badge-app badge-app--${categoryColors[expense.category] || 'gray'}">
+                                        ${categoryLabels[expense.category] || expense.category}
+                                    </span>
+                                </td>
+                                <td><strong class="text-danger">${formatCurrency(expense.amount)}</strong></td>
+                                <td>${formatJalaliDate(expense.expense_date_jalali)}</td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <button class="btn-app btn-app--primary btn-app--sm" onclick="viewExpense(${expense.id})" title="مشاهده">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn-app btn-app--secondary btn-app--sm" onclick="editExpense(${expense.id})" title="ویرایش">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+
+                    const paginationContainer = document.getElementById('paginationContainer');
+                    if (data.data.pagination.total_pages > 1) {
+                        new Pagination('paginationContainer', page, data.data.pagination.total_pages, (newPage) => {
+                            currentPage = newPage;
+                            loadExpenses(newPage, currentSearch, currentCategory);
+                        });
+                        paginationContainer.style.display = 'block';
+                    } else {
+                        paginationContainer.innerHTML = '';
+                        paginationContainer.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                showAlert('خطا در بارگذاری لیست', 'danger');
+            }
+        }
+
+        // Form submission
+        const expenseForm = document.getElementById('expenseForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const btnText = document.getElementById('btnText');
+
+        expenseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            submitBtn.disabled = true;
+            btnSpinner.classList.remove('d-none');
+            btnText.textContent = 'در حال ذخیره...';
+            
+            let receiptPath = null;
+            const receiptFile = document.getElementById('receiptUpload').files[0];
+            
+            if (receiptFile) {
+                // Validate file size (5MB max)
+                if (receiptFile.size > 5 * 1024 * 1024) {
+                    showAlert('حجم فایل نباید بیشتر از 5 مگابایت باشد', 'warning');
+                    submitBtn.disabled = false;
+                    btnSpinner.classList.add('d-none');
+                    btnText.textContent = 'ذخیره';
+                    return;
+                }
+                
+                try {
+                    btnText.textContent = 'در حال آپلود رسید...';
+                    const formData = new FormData();
+                    formData.append('file', receiptFile);
+                    const uploadRes = await fetch(API_BASE + 'upload.php?type=receipt', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const uploadData = await uploadRes.json();
+                    if (uploadData.success) {
+                        receiptPath = uploadData.data.file_path;
+                    } else {
+                        showAlert('خطا در آپلود رسید: ' + (uploadData.error || 'خطای نامشخص'), 'warning');
+                    }
+                } catch (error) {
+                    console.error('Receipt upload error:', error);
+                    showAlert('خطا در آپلود رسید. هزینه بدون رسید ثبت می‌شود.', 'warning');
+                }
+                btnText.textContent = 'در حال ذخیره...';
+            }
+            
+            let expenseDate = document.getElementById('expenseDateAlt').value;
+            const visibleDate = document.getElementById('expenseDate').value;
+            
+            // If altField is empty, try to parse from the visible date field
+            if (!expenseDate || expenseDate.trim() === '') {
+                if (visibleDate) {
+                    // Convert YYYY/MM/DD to YYYY-MM-DD
+                    expenseDate = visibleDate.replace(/\//g, '-');
+                } else {
+                    // Use current Jalali date as fallback
+                    expenseDate = getCurrentJalaliDate();
+                }
+            }
+            
+            // Convert Persian/Dari numerals to ASCII
+            expenseDate = convertPersianToEnglishNumbers(expenseDate);
+            
+            // Validate date format (YYYY-MM-DD)
+            if (!expenseDate || !validateJalaliDate(expenseDate)) {
+                showAlert('لطفاً تاریخ معتبر وارد کنید', 'warning');
+                submitBtn.disabled = false;
+                btnSpinner.classList.add('d-none');
+                btnText.textContent = 'ذخیره';
+                return;
+            }
+            
+            try {
+                const expenseData = {
+                    title: document.getElementById('expenseTitle').value.trim(),
+                    category: document.getElementById('expenseCategory').value,
+                    amount: parseFloat(document.getElementById('expenseAmount').value),
+                    expense_date_jalali: expenseDate,
+                    details: document.getElementById('expenseDetails').value.trim()
+                };
+                
+                // Only include receipt_path if we have one
+                if (receiptPath) {
+                    expenseData.receipt_path = receiptPath;
+                }
+                
+                let result;
+                if (editingExpenseId) {
+                    // Update existing expense
+                    result = await APIClient.put(`expenses.php?id=${editingExpenseId}`, expenseData);
+                } else {
+                    // Create new expense
+                    result = await APIClient.post('expenses.php', expenseData);
+                }
+                
+                if (result.success) {
+                    showAlert(editingExpenseId ? 'هزینه با موفقیت ویرایش شد' : 'هزینه با موفقیت ثبت شد', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('expenseModal')).hide();
+                    expenseForm.reset();
+                    editingExpenseId = null;
+                    loadExpenses();
+                }
+            } catch (error) {
+                showAlert(error.message || 'خطا در ثبت هزینه', 'danger');
+            } finally {
+                submitBtn.disabled = false;
+                btnSpinner.classList.add('d-none');
+                btnText.textContent = 'ذخیره';
+            }
+        });
+        
+        document.getElementById('expenseModal').addEventListener('hidden.bs.modal', () => {
+            expenseForm.reset();
+            // Reset date picker
+            $('#expenseDate').val('');
+            $('#expenseDateAlt').val('');
+            // Reset dropzone
+            clearFilePreview();
+            // Reset edit mode
+            editingExpenseId = null;
+            document.querySelector('#expenseModal .modal-title').innerHTML = '<i class="bi bi-plus-circle"></i> افزودن هزینه';
+            btnText.textContent = 'ذخیره';
+        });
+
+        const searchDebounced = debounce((value) => {
+            currentSearch = value;
+            currentPage = 1;
+            loadExpenses(1, value, currentCategory);
+        }, 500);
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchDebounced(e.target.value);
+        });
+
+        document.getElementById('categoryFilter').addEventListener('change', (e) => {
+            currentCategory = e.target.value;
+            currentPage = 1;
+            loadExpenses(1, currentSearch, currentCategory);
+        });
+
+        function viewExpense(id) {
+            window.location.href = `expense-detail.html?id=${id}`;
+        }
+
+        // Mobile sidebar toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+                sidebarOverlay.classList.toggle('show');
+            });
+        }
+
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        }
+
+        // Edit expense function
+        async function editExpense(id) {
+            try {
+                const data = await APIClient.get(`expenses.php?id=${id}`);
+                if (data.success) {
+                    const e = data.data;
+                    editingExpenseId = id;
+                    
+                    // Populate form
+                    document.getElementById('expenseTitle').value = e.title;
+                    document.getElementById('expenseCategory').value = e.category;
+                    document.getElementById('expenseAmount').value = e.amount;
+                    document.getElementById('expenseDetails').value = e.details || '';
+                    
+                    // Set date picker value
+                    if (e.expense_date_jalali) {
+                        const dateParts = e.expense_date_jalali.split('-');
+                        const formattedDate = `${dateParts[0]}/${dateParts[1]}/${dateParts[2]}`;
+                        $('#expenseDate').val(formattedDate);
+                        $('#expenseDateAlt').val(e.expense_date_jalali);
+                    }
+                    
+                    // Update modal title
+                    document.querySelector('#expenseModal .modal-title').innerHTML = '<i class="bi bi-pencil"></i> ویرایش هزینه';
+                    
+                    // Show modal
+                    new bootstrap.Modal(document.getElementById('expenseModal')).show();
+                }
+            } catch (error) {
+                showAlert('خطا در بارگذاری اطلاعات هزینه', 'danger');
+            }
+        }
+        
+        // Check for edit mode from URL or sessionStorage
+        function checkEditMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get('edit') || sessionStorage.getItem('editExpenseId');
+            if (editId) {
+                sessionStorage.removeItem('editExpenseId');
+                // Clear URL parameter
+                window.history.replaceState({}, document.title, window.location.pathname);
+                editExpense(editId);
+            }
+        }
+
+        // Initialize
+        loadExpenses();
+        initDarkMode();
+        
+        // Check edit mode after page loads
+        setTimeout(checkEditMode, 500);
+    </script>
+</body>
+</html>

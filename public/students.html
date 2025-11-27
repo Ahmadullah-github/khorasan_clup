@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دانش‌آموزان - کمپ خراسان</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar-app">
+        <a class="navbar-brand" href="index.html">
+            <span class="navbar-brand-icon">🤸‍♂️</span>
+            کمپ خراسان
+        </a>
+        
+        <ul class="navbar-nav-app">
+            <li><a class="nav-link-app" href="index.html">داشبورد</a></li>
+            <li><a class="nav-link-app active" href="students.html">دانش‌آموزان</a></li>
+            <li><a class="nav-link-app" href="coaches.html">مربیان</a></li>
+            <li><a class="nav-link-app" href="expenses.html">هزینه‌ها</a></li>
+            <li><a class="nav-link-app" href="rent.html">اجاره</a></li>
+            <li><a class="nav-link-app" href="accounting.html">درآمد خالص</a></li>
+            <li><a class="nav-link-app" href="reports.html">گزارش‌ها</a></li>
+            <li id="adminNavItem" style="display: none;">
+                <a class="nav-link-app" href="admin.html">مدیر</a>
+            </li>
+        </ul>
+        
+        <div class="navbar-actions">
+            <button type="button" class="theme-switch" id="themeSwitch" title="تغییر تم">
+                <span class="theme-switch-icons">
+                    <span class="theme-switch-icon theme-switch-icon--sun">☀️</span>
+                    <span class="theme-switch-icon theme-switch-icon--moon">🌙</span>
+                </span>
+                <span class="theme-switch-slider"></span>
+            </button>
+            <div class="navbar-user">
+                <span class="navbar-user-icon"><i class="bi bi-person"></i></span>
+                <span id="userName"></span>
+            </div>
+            <button class="navbar-logout" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>خروج</span>
+            </button>
+        </div>
+        
+        <button class="navbar-mobile-toggle" id="mobileMenuToggle">
+            <i class="bi bi-list"></i>
+        </button>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar-app" id="sidebar">
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-item">
+                <a href="index.html" class="sidebar-nav-link">
+                    <i class="bi bi-grid-1x2 sidebar-nav-icon"></i>
+                    داشبورد
+                </a>
+            </div>
+            
+            <div class="sidebar-section-title">مدیریت</div>
+            
+            <div class="sidebar-nav-item">
+                <a href="students.html" class="sidebar-nav-link active">
+                    <i class="bi bi-people sidebar-nav-icon"></i>
+                    دانش‌آموزان
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="students.html?tab=new" class="sidebar-nav-link">
+                    <i class="bi bi-person-plus sidebar-nav-icon"></i>
+                    ثبت جدید
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="coaches.html" class="sidebar-nav-link">
+                    <i class="bi bi-person-badge sidebar-nav-icon"></i>
+                    مربیان
+                </a>
+            </div>
+            
+            <div class="sidebar-section-title">مالی</div>
+            
+            <div class="sidebar-nav-item">
+                <a href="expenses.html" class="sidebar-nav-link">
+                    <i class="bi bi-cash-stack sidebar-nav-icon"></i>
+                    هزینه‌ها
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="rent.html" class="sidebar-nav-link">
+                    <i class="bi bi-house sidebar-nav-icon"></i>
+                    اجاره
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="accounting.html" class="sidebar-nav-link">
+                    <i class="bi bi-calculator sidebar-nav-icon"></i>
+                    درآمد خالص
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="reports.html" class="sidebar-nav-link">
+                    <i class="bi bi-bar-chart sidebar-nav-icon"></i>
+                    گزارش‌ها
+                </a>
+            </div>
+            
+            <div class="sidebar-section-title">سیستم</div>
+            
+            <div class="sidebar-nav-item" id="adminSidebarItem" style="display: none;">
+                <a href="admin.html" class="sidebar-nav-link">
+                    <i class="bi bi-gear sidebar-nav-icon"></i>
+                    مدیر
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="#" class="sidebar-nav-link" onclick="logout()">
+                    <i class="bi bi-box-arrow-right sidebar-nav-icon"></i>
+                    خروج
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="container-app">
+            <!-- Page Header -->
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="page-title mb-0">
+                    <i class="bi bi-people me-2"></i>
+                    مدیریت دانش‌آموزان
+                </h1>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs-app" id="studentTabs">
+                <button class="tab-app" data-tab="newStudent">
+                    <i class="bi bi-person-plus me-2"></i>
+                    دانش‌آموز جدید
+                </button>
+                <button class="tab-app active" data-tab="existingStudents">
+                    <i class="bi bi-list-ul me-2"></i>
+                    دانش‌آموزان موجود
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- New Student Form -->
+                <div class="tab-pane" id="newStudent" style="display: none;">
+                    <div class="card-app animate-slideUp">
+                        <div class="card-app-header">
+                            <h2 class="card-app-title">
+                                <i class="bi bi-person-plus"></i>
+                                ثبت دانش‌آموز جدید
+                            </h2>
+                        </div>
+                        <div class="card-app-body">
+                            <form id="newStudentForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label-app required">
+                                                <i class="bi bi-person"></i>
+                                                نام
+                                            </label>
+                                            <input type="text" class="form-control-app" id="firstName" required placeholder="نام دانش‌آموز">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label-app required">
+                                                <i class="bi bi-person"></i>
+                                                نام خانوادگی
+                                            </label>
+                                            <input type="text" class="form-control-app" id="lastName" required placeholder="نام خانوادگی">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label-app">
+                                                <i class="bi bi-person-badge"></i>
+                                                نام پدر
+                                            </label>
+                                            <input type="text" class="form-control-app" id="fatherName" placeholder="نام پدر">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label-app">
+                                                <i class="bi bi-telephone"></i>
+                                                شماره تماس
+                                            </label>
+                                            <input type="text" class="form-control-app" id="contactNumber" placeholder="07XXXXXXXX">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label-app required">
+                                                <i class="bi bi-cash"></i>
+                                                مبلغ حق‌الاشتراک
+                                            </label>
+                                            <div class="input-group-app">
+                                                <span class="input-group-prepend">افغانی</span>
+                                                <input type="number" class="form-control-app" id="feeAmount" min="0" required placeholder="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label-app required">
+                                                <i class="bi bi-calendar3"></i>
+                                                تاریخ ثبت (جلالی)
+                                            </label>
+                                            <input type="text" class="form-control-app" id="registrationDate" required placeholder="1404/01/01">
+                                            <input type="hidden" id="registrationDateAlt">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label-app required">
+                                                <i class="bi bi-person-badge"></i>
+                                                مربی
+                                            </label>
+                                            <select class="form-control-app form-select-app" id="coachId" required>
+                                                <option value="">انتخاب کنید...</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label-app required">
+                                                <i class="bi bi-clock"></i>
+                                                زمان کلاس
+                                            </label>
+                                            <select class="form-control-app form-select-app" id="timeSlotId" required>
+                                                <option value="">انتخاب کنید...</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label-app">
+                                        <i class="bi bi-image"></i>
+                                        عکس
+                                    </label>
+                                    <div class="photo-upload-container" id="photoUploadContainer">
+                                        <div class="photo-preview" id="photoPreview" style="display: none;">
+                                            <img id="photoPreviewImg" src="" alt="Preview">
+                                            <button type="button" class="photo-preview-remove" id="removePhoto" title="حذف عکس">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </div>
+                                        <div class="photo-dropzone" id="photoDropzone">
+                                            <i class="bi bi-cloud-upload photo-dropzone-icon"></i>
+                                            <p class="photo-dropzone-text">عکس را اینجا بکشید یا کلیک کنید</p>
+                                            <p class="photo-dropzone-hint">حداکثر 5 مگابایت (JPEG, PNG, GIF)</p>
+                                            <input type="file" class="photo-input-hidden" id="photoUpload" accept="image/*">
+                                        </div>
+                                        <div class="photo-upload-progress" id="photoProgress" style="display: none;">
+                                            <div class="progress-bar-app">
+                                                <div class="progress-bar-fill" id="photoProgressBar" style="width: 0%"></div>
+                                            </div>
+                                            <span class="progress-text" id="photoProgressText">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label-app">
+                                        <i class="bi bi-sticky"></i>
+                                        یادداشت
+                                    </label>
+                                    <textarea class="form-control-app" id="notes" rows="3" placeholder="یادداشت‌های اضافی..."></textarea>
+                                </div>
+                                <button type="submit" class="btn-app btn-app--primary btn-app--lg">
+                                    <i class="bi bi-check-lg"></i>
+                                    ثبت دانش‌آموز
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Existing Students List -->
+                <div class="tab-pane" id="existingStudents">
+                    <div class="card-app animate-slideUp">
+                        <div class="card-app-header">
+                            <h2 class="card-app-title">
+                                <i class="bi bi-list-ul"></i>
+                                لیست دانش‌آموزان
+                            </h2>
+                            <div class="header-actions">
+                                <div class="search-box-app">
+                                    <i class="bi bi-search search-icon"></i>
+                                    <input type="text" class="search-input" id="searchInput" placeholder="جستجو...">
+                                    <button type="button" class="search-clear" id="searchClear" style="display: none;" title="پاک کردن">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                                <div class="bulk-actions" id="bulkActions" style="display: none;">
+                                    <button class="btn-app btn-app--danger btn-app--sm" id="bulkDeleteBtn">
+                                        <i class="bi bi-trash"></i>
+                                        حذف انتخاب شده
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-app-body p-0">
+                            <div class="table-responsive">
+                                <table class="table-app">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;">
+                                                <input type="checkbox" class="form-check-input" id="selectAll" title="انتخاب همه">
+                                            </th>
+                                            <th>نام</th>
+                                            <th>نام خانوادگی</th>
+                                            <th>نام پدر</th>
+                                            <th>شماره تماس</th>
+                                            <th>وضعیت</th>
+                                            <th>عملیات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="studentsTableBody">
+                                        <tr>
+                                            <td colspan="6">
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-app mx-auto mb-3"></div>
+                                                    <div class="text-muted">در حال بارگذاری...</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-app-footer" id="paginationContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade modal-app" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalTitle">
+                        <i class="bi bi-exclamation-triangle text-warning"></i>
+                        تأیید عملیات
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmModalMessage">آیا مطمئن هستید؟</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-app btn-app--secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="button" class="btn-app btn-app--danger" id="confirmModalBtn">تأیید</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Student Modal -->
+    <div class="modal fade modal-app" id="editStudentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil"></i>
+                        ویرایش دانش‌آموز
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editStudentForm">
+                        <input type="hidden" id="editStudentId">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label-app required">نام</label>
+                                    <input type="text" class="form-control-app" id="editFirstName" required>
+                                    <div class="invalid-feedback">نام الزامی است</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label-app required">نام خانوادگی</label>
+                                    <input type="text" class="form-control-app" id="editLastName" required>
+                                    <div class="invalid-feedback">نام خانوادگی الزامی است</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label-app">نام پدر</label>
+                                    <input type="text" class="form-control-app" id="editFatherName">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label-app">شماره تماس</label>
+                                    <input type="text" class="form-control-app" id="editContactNumber" placeholder="07XXXXXXXX">
+                                    <div class="invalid-feedback">فرمت شماره تماس نامعتبر است</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label-app">وضعیت</label>
+                                    <select class="form-control-app form-select-app" id="editStatus">
+                                        <option value="active">فعال</option>
+                                        <option value="inactive">غیرفعال</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app">یادداشت</label>
+                            <textarea class="form-control-app" id="editNotes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-app btn-app--secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="button" class="btn-app btn-app--primary" id="saveEditBtn">
+                        <i class="bi bi-check-lg"></i>
+                        ذخیره تغییرات
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Modal -->
+    <div class="modal fade modal-app" id="invoiceModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-receipt"></i>
+                        فاکتور ایجاد شد
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-4">شماره فاکتور: <strong id="invoiceNumber"></strong></p>
+                    <div class="d-grid gap-3">
+                        <button class="btn-app btn-app--primary w-100" id="viewInvoiceBtn">
+                            <i class="bi bi-eye"></i>
+                            مشاهده فاکتور
+                        </button>
+                        <button class="btn-app btn-app--success w-100" id="shareWhatsAppBtn">
+                            <i class="bi bi-whatsapp"></i>
+                            ارسال واتساپ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.0.0/dist/persian-date.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/jalali.js"></script>
+    <script>
+        let currentPage = 1;
+        let currentSearch = '';
+        let currentInvoiceId = null;
+
+        // Check auth
+        const user = checkAuth();
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = user.username;
+            if (user.role === 'admin') {
+                document.getElementById('adminNavItem').style.display = 'block';
+                document.getElementById('adminSidebarItem').style.display = 'block';
+            }
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab-app').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update tab buttons
+                document.querySelectorAll('.tab-app').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update tab content
+                const tabId = tab.getAttribute('data-tab');
+                document.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.style.display = pane.id === tabId ? 'block' : 'none';
+                });
+            });
+        });
+
+        // Check URL for tab parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        if (tabParam === 'new') {
+            document.querySelector('[data-tab="newStudent"]').click();
+        }
+
+        // Load form data
+        async function loadFormData() {
+            try {
+                const data = await APIClient.get('students.php?action=new');
+                if (data.success) {
+                    const coachSelect = document.getElementById('coachId');
+                    const timeSlotSelect = document.getElementById('timeSlotId');
+                    
+                    coachSelect.innerHTML = '<option value="">انتخاب کنید...</option>';
+                    data.data.coaches.forEach(coach => {
+                        const option = document.createElement('option');
+                        option.value = coach.id;
+                        option.textContent = `${coach.first_name} ${coach.last_name}`;
+                        coachSelect.appendChild(option);
+                    });
+
+                    timeSlotSelect.innerHTML = '<option value="">انتخاب کنید...</option>';
+                    data.data.time_slots.forEach(slot => {
+                        const option = document.createElement('option');
+                        option.value = slot.id;
+                        option.textContent = slot.name;
+                        timeSlotSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                showAlert('خطا در بارگذاری اطلاعات', 'danger');
+            }
+        }
+
+        // Initialize date picker
+        $(document).ready(function() {
+            // Set default to today's Jalali date
+            const now = new Date();
+            const jalali = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+            const todayJalali = `${jalali.year}/${String(jalali.month).padStart(2, '0')}/${String(jalali.day).padStart(2, '0')}`;
+            
+            $('#registrationDate').val(todayJalali);
+            
+            $('#registrationDate').persianDatepicker({
+                observer: true,
+                format: 'YYYY/MM/DD',
+                altField: '#registrationDateAlt',
+                altFormat: 'YYYY-MM-DD',
+                initialValue: true
+            });
+        });
+
+        // Handle form submission
+        document.getElementById('newStudentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalHTML = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-app spinner-app--sm"></span> در حال ثبت...';
+            
+            let photoPath = null;
+            const photoFile = document.getElementById('photoUpload').files[0];
+            
+            if (photoFile) {
+                try {
+                    photoPath = await uploadPhotoWithProgress(photoFile);
+                    if (!photoPath) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalHTML;
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Photo upload error:', error);
+                    showAlert('خطا در آپلود عکس: ' + (error.message || 'خطای ارتباط با سرور'), 'danger');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalHTML;
+                    return;
+                }
+            }
+            
+            // Get Jalali date from the date picker
+            let registrationDate = null;
+            const dateInput = document.getElementById('registrationDate');
+            let dateValue = dateInput.value.trim();
+            
+            console.log('Date input value (raw):', dateValue); // Debug
+            
+            // Convert Persian digits to English digits if present
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            persianDigits.forEach((persian, index) => {
+                dateValue = dateValue.replace(new RegExp(persian, 'g'), englishDigits[index]);
+            });
+            
+            console.log('Date input value (converted):', dateValue); // Debug
+            
+            if (dateValue) {
+                // The date picker stores date in YYYY/MM/DD format
+                // Convert to YYYY-MM-DD format
+                registrationDate = dateValue.replace(/\//g, '-');
+                
+                // Ensure proper format (handle cases where date might have spaces or other characters)
+                registrationDate = registrationDate.replace(/\s+/g, ''); // Remove spaces
+                
+                // Validate the format (should be YYYY-MM-DD)
+                const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+                if (!datePattern.test(registrationDate)) {
+                    console.error('Invalid date format after conversion:', registrationDate, 'Original:', dateInput.value);
+                    showAlert('فرمت تاریخ نامعتبر است. لطفاً تاریخ را از تقویم انتخاب کنید.', 'danger');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalHTML;
+                    return;
+                }
+                
+                // Validate actual date validity using jalali validation function
+                if (!validateJalaliDate(registrationDate)) {
+                    console.error('Invalid Jalali date:', registrationDate);
+                    showAlert('تاریخ وارد شده نامعتبر است. لطفاً یک تاریخ معتبر جلالی وارد کنید.', 'danger');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalHTML;
+                    return;
+                }
+            } else {
+                // If no date selected, use current Jalali date
+                const now = new Date();
+                const jalali = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+                registrationDate = `${jalali.year}-${String(jalali.month).padStart(2, '0')}-${String(jalali.day).padStart(2, '0')}`;
+                console.log('Using current date:', registrationDate);
+            }
+            
+            console.log('Final registration date:', registrationDate); // Debug
+            
+            // Client-side validation
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const contactNumber = document.getElementById('contactNumber').value.trim();
+            const feeAmount = parseFloat(document.getElementById('feeAmount').value);
+            const coachId = parseInt(document.getElementById('coachId').value);
+            const timeSlotId = parseInt(document.getElementById('timeSlotId').value);
+            
+            // Validate required fields
+            if (!firstName || !lastName) {
+                showAlert('نام و نام خانوادگی الزامی است', 'danger');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalHTML;
+                return;
+            }
+            
+            // Validate contact number format if provided
+            if (contactNumber && !/^0[0-9]{9}$/.test(contactNumber)) {
+                showAlert('شماره تماس باید با 0 شروع شود و 10 رقم باشد', 'danger');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalHTML;
+                return;
+            }
+            
+            // Validate fee amount
+            if (isNaN(feeAmount) || feeAmount < 0) {
+                showAlert('مبلغ حق‌الاشتراک باید یک عدد معتبر و مثبت باشد', 'danger');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalHTML;
+                return;
+            }
+            
+            // Validate coach and time slot
+            if (!coachId || isNaN(coachId)) {
+                showAlert('لطفاً مربی را انتخاب کنید', 'danger');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalHTML;
+                return;
+            }
+            
+            if (!timeSlotId || isNaN(timeSlotId)) {
+                showAlert('لطفاً زمان کلاس را انتخاب کنید', 'danger');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalHTML;
+                return;
+            }
+            
+            const formData = {
+                first_name: firstName,
+                last_name: lastName,
+                father_name: document.getElementById('fatherName').value.trim(),
+                contact_number: contactNumber,
+                fee_amount: feeAmount,
+                registration_date_jalali: registrationDate,
+                coach_id: coachId,
+                time_slot_id: timeSlotId,
+                photo_path: photoPath,
+                notes: document.getElementById('notes').value.trim()
+            };
+
+            try {
+                const result = await APIClient.post('students.php', formData);
+                if (result.success) {
+                    showAlert('دانش‌آموز با موفقیت ثبت شد', 'success');
+                    document.getElementById('newStudentForm').reset();
+                    showInvoiceModal(result.data.invoice_id, result.data.invoice_number);
+                    loadStudents();
+                }
+            } catch (error) {
+                // Show detailed error message from server
+                const errorMsg = error.message || 'خطا در ثبت دانش‌آموز';
+                showAlert(errorMsg, 'danger');
+                console.error('Student creation error:', error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalHTML;
+            }
+        });
+
+        // Load students list
+        async function loadStudents(page = 1, search = '') {
+            try {
+                const params = { page, per_page: 20 };
+                if (search) params.q = search;
+                
+                const data = await APIClient.get('students.php', params);
+                if (data.success) {
+                    const tbody = document.getElementById('studentsTableBody');
+                    if (data.data.students.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="6">
+                                    <div class="table-empty">
+                                        <div class="table-empty-icon">📋</div>
+                                        <div class="table-empty-text">دانش‌آموزی یافت نشد</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        tbody.innerHTML = data.data.students.map(student => `
+                            <tr data-student-id="${student.id}">
+                                <td>
+                                    <input type="checkbox" class="form-check-input student-checkbox" data-id="${student.id}">
+                                </td>
+                                <td>
+                                    <div class="student-name-cell">
+                                        ${student.photo_path ? `<img src="${student.photo_path}" class="student-avatar" alt="">` : `<div class="student-avatar-placeholder"><i class="bi bi-person"></i></div>`}
+                                        <span>${student.first_name}</span>
+                                    </div>
+                                </td>
+                                <td>${student.last_name}</td>
+                                <td>${student.father_name || '-'}</td>
+                                <td>${student.contact_number || '-'}</td>
+                                <td>
+                                    <button class="badge-app badge-app--clickable ${student.status === 'active' ? 'badge-app--success' : 'badge-app--gray'}" 
+                                            onclick="toggleStatus(${student.id}, '${student.status}')" title="کلیک برای تغییر وضعیت">
+                                        <span class="status-dot ${student.status === 'active' ? 'status-dot--active' : 'status-dot--inactive'}"></span>
+                                        ${student.status === 'active' ? 'فعال' : 'غیرفعال'}
+                                    </button>
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="btn-app btn-app--primary btn-app--sm" onclick="viewStudent(${student.id})" title="مشاهده">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn-app btn-app--warning btn-app--sm" onclick="editStudent(${student.id})" title="ویرایش">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn-app btn-app--success btn-app--sm" onclick="renewStudent(${student.id})" title="تمدید">
+                                            <i class="bi bi-arrow-repeat"></i>
+                                        </button>
+                                        <button class="btn-app btn-app--danger btn-app--sm" onclick="deleteStudent(${student.id}, '${student.first_name} ${student.last_name}')" title="حذف">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+
+                    // Pagination
+                    const paginationContainer = document.getElementById('paginationContainer');
+                    if (data.data.pagination.total_pages > 1) {
+                        new Pagination('paginationContainer', page, data.data.pagination.total_pages, (newPage) => {
+                            currentPage = newPage;
+                            loadStudents(newPage, currentSearch);
+                        });
+                        paginationContainer.style.display = 'block';
+                    } else {
+                        paginationContainer.innerHTML = '';
+                        paginationContainer.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                showAlert('خطا در بارگذاری لیست', 'danger');
+            }
+        }
+
+        // Search with debounce
+        const searchDebounced = debounce((value) => {
+            currentSearch = value;
+            currentPage = 1;
+            loadStudents(1, value);
+        }, 500);
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchDebounced(e.target.value);
+        });
+
+        // Invoice modal
+        function showInvoiceModal(invoiceId, invoiceNumber) {
+            currentInvoiceId = invoiceId;
+            document.getElementById('invoiceNumber').textContent = invoiceNumber;
+            const modal = new bootstrap.Modal(document.getElementById('invoiceModal'));
+            modal.show();
+        }
+
+        document.getElementById('viewInvoiceBtn').addEventListener('click', () => {
+            if (currentInvoiceId) {
+                window.open(`invoice.html?id=${currentInvoiceId}`, '_blank');
+            }
+        });
+
+        document.getElementById('shareWhatsAppBtn').addEventListener('click', async () => {
+            if (currentInvoiceId) {
+                try {
+                    const result = await APIClient.post(`invoices.php?id=${currentInvoiceId}&action=whatsapp`, { method: 'link' });
+                    if (result.success && result.data.whatsapp_link) {
+                        window.open(result.data.whatsapp_link, '_blank');
+                    }
+                } catch (error) {
+                    showAlert('خطا در ایجاد لینک واتساپ', 'danger');
+                }
+            }
+        });
+
+        function viewStudent(id) {
+            window.location.href = `student-detail.html?id=${id}`;
+        }
+
+        async function renewStudent(id) {
+            const feeAmount = prompt('مبلغ حق‌الاشتراک جدید را وارد کنید:');
+            if (feeAmount) {
+                try {
+                    const result = await APIClient.post(`students.php?id=${id}&action=renew`, { fee_amount: parseFloat(feeAmount) });
+                    if (result.success) {
+                        showAlert('تمدید با موفقیت انجام شد', 'success');
+                        showInvoiceModal(result.data.invoice_id, result.data.invoice_number);
+                    }
+                } catch (error) {
+                    showAlert(error.message || 'خطا در تمدید', 'danger');
+                }
+            }
+        }
+
+        // Edit student
+        async function editStudent(id) {
+            try {
+                const result = await APIClient.get(`students.php?id=${id}`);
+                if (result.success) {
+                    const student = result.data;
+                    document.getElementById('editStudentId').value = student.id;
+                    document.getElementById('editFirstName').value = student.first_name || '';
+                    document.getElementById('editLastName').value = student.last_name || '';
+                    document.getElementById('editFatherName').value = student.father_name || '';
+                    document.getElementById('editContactNumber').value = student.contact_number || '';
+                    document.getElementById('editStatus').value = student.status || 'active';
+                    document.getElementById('editNotes').value = student.notes || '';
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('editStudentModal'));
+                    modal.show();
+                }
+            } catch (error) {
+                showAlert('خطا در بارگذاری اطلاعات دانش‌آموز', 'danger');
+            }
+        }
+
+        // Save edit
+        document.getElementById('saveEditBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('saveEditBtn');
+            const studentId = document.getElementById('editStudentId').value;
+            
+            // Validate
+            const firstName = document.getElementById('editFirstName').value.trim();
+            const lastName = document.getElementById('editLastName').value.trim();
+            const contactNumber = document.getElementById('editContactNumber').value.trim();
+            
+            // Clear previous validation
+            document.querySelectorAll('#editStudentForm .is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            
+            let hasError = false;
+            if (!firstName) {
+                document.getElementById('editFirstName').classList.add('is-invalid');
+                hasError = true;
+            }
+            if (!lastName) {
+                document.getElementById('editLastName').classList.add('is-invalid');
+                hasError = true;
+            }
+            if (contactNumber && !/^0[0-9]{9}$/.test(contactNumber)) {
+                document.getElementById('editContactNumber').classList.add('is-invalid');
+                hasError = true;
+            }
+            
+            if (hasError) return;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-app spinner-app--sm"></span> در حال ذخیره...';
+            
+            try {
+                const result = await APIClient.put(`students.php?id=${studentId}`, {
+                    first_name: firstName,
+                    last_name: lastName,
+                    father_name: document.getElementById('editFatherName').value.trim(),
+                    contact_number: contactNumber,
+                    status: document.getElementById('editStatus').value,
+                    notes: document.getElementById('editNotes').value.trim()
+                });
+                
+                if (result.success) {
+                    showAlert('اطلاعات با موفقیت ذخیره شد', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
+                    loadStudents(currentPage, currentSearch);
+                }
+            } catch (error) {
+                showAlert(error.message || 'خطا در ذخیره اطلاعات', 'danger');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> ذخیره تغییرات';
+            }
+        });
+
+        // Delete student with confirmation
+        function deleteStudent(id, name) {
+            showConfirmModal(
+                'حذف دانش‌آموز',
+                `آیا از حذف "${name}" مطمئن هستید؟ این عملیات قابل بازگشت نیست.`,
+                async () => {
+                    try {
+                        const result = await APIClient.delete(`students.php?id=${id}`);
+                        if (result.success) {
+                            showAlert('دانش‌آموز با موفقیت حذف شد', 'success');
+                            loadStudents(currentPage, currentSearch);
+                        }
+                    } catch (error) {
+                        showAlert(error.message || 'خطا در حذف دانش‌آموز', 'danger');
+                    }
+                }
+            );
+        }
+
+        // Toggle status
+        async function toggleStatus(id, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            try {
+                const result = await APIClient.put(`students.php?id=${id}`, { status: newStatus });
+                if (result.success) {
+                    showAlert(`وضعیت به "${newStatus === 'active' ? 'فعال' : 'غیرفعال'}" تغییر کرد`, 'success');
+                    loadStudents(currentPage, currentSearch);
+                }
+            } catch (error) {
+                showAlert(error.message || 'خطا در تغییر وضعیت', 'danger');
+            }
+        }
+
+        // Confirmation modal helper
+        function showConfirmModal(title, message, onConfirm) {
+            document.getElementById('confirmModalTitle').innerHTML = `<i class="bi bi-exclamation-triangle text-warning"></i> ${title}`;
+            document.getElementById('confirmModalMessage').textContent = message;
+            
+            const confirmBtn = document.getElementById('confirmModalBtn');
+            const newBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            
+            newBtn.addEventListener('click', async () => {
+                newBtn.disabled = true;
+                newBtn.innerHTML = '<span class="spinner-app spinner-app--sm"></span>';
+                await onConfirm();
+                newBtn.disabled = false;
+                newBtn.innerHTML = 'تأیید';
+                bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+            });
+            
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        // Select all checkbox
+        document.getElementById('selectAll').addEventListener('change', (e) => {
+            const checkboxes = document.querySelectorAll('.student-checkbox');
+            checkboxes.forEach(cb => cb.checked = e.target.checked);
+            updateBulkActions();
+        });
+
+        // Update bulk actions visibility
+        function updateBulkActions() {
+            const checked = document.querySelectorAll('.student-checkbox:checked').length;
+            document.getElementById('bulkActions').style.display = checked > 0 ? 'flex' : 'none';
+        }
+
+        // Delegate checkbox change events
+        document.getElementById('studentsTableBody').addEventListener('change', (e) => {
+            if (e.target.classList.contains('student-checkbox')) {
+                updateBulkActions();
+            }
+        });
+
+        // Bulk delete
+        document.getElementById('bulkDeleteBtn').addEventListener('click', () => {
+            const selected = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.dataset.id);
+            if (selected.length === 0) return;
+            
+            showConfirmModal(
+                'حذف گروهی',
+                `آیا از حذف ${selected.length} دانش‌آموز مطمئن هستید؟`,
+                async () => {
+                    let successCount = 0;
+                    for (const id of selected) {
+                        try {
+                            await APIClient.delete(`students.php?id=${id}`);
+                            successCount++;
+                        } catch (e) { /* continue */ }
+                    }
+                    showAlert(`${successCount} دانش‌آموز حذف شد`, 'success');
+                    loadStudents(currentPage, currentSearch);
+                }
+            );
+        });
+
+        // Search clear button
+        const searchInput = document.getElementById('searchInput');
+        const searchClear = document.getElementById('searchClear');
+        
+        searchInput.addEventListener('input', () => {
+            searchClear.style.display = searchInput.value ? 'flex' : 'none';
+        });
+        
+        searchClear.addEventListener('click', () => {
+            searchInput.value = '';
+            searchClear.style.display = 'none';
+            currentSearch = '';
+            loadStudents(1, '');
+        });
+
+        // Mobile sidebar toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+                sidebarOverlay.classList.toggle('show');
+            });
+        }
+
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        }
+
+        // Photo upload with progress
+        async function uploadPhotoWithProgress(file) {
+            return new Promise((resolve, reject) => {
+                const progressContainer = document.getElementById('photoProgress');
+                const progressBar = document.getElementById('photoProgressBar');
+                const progressText = document.getElementById('photoProgressText');
+                
+                progressContainer.style.display = 'flex';
+                
+                const xhr = new XMLHttpRequest();
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        progressBar.style.width = percent + '%';
+                        progressText.textContent = percent + '%';
+                    }
+                });
+                
+                xhr.addEventListener('load', () => {
+                    progressContainer.style.display = 'none';
+                    progressBar.style.width = '0%';
+                    
+                    if (xhr.status === 200) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            if (data.success) {
+                                resolve(data.data.file_path);
+                            } else {
+                                showAlert('خطا در آپلود: ' + (data.error || 'خطای ناشناخته'), 'danger');
+                                resolve(null);
+                            }
+                        } catch (e) {
+                            showAlert('خطا در پردازش پاسخ سرور', 'danger');
+                            resolve(null);
+                        }
+                    } else {
+                        showAlert('خطا در آپلود عکس', 'danger');
+                        resolve(null);
+                    }
+                });
+                
+                xhr.addEventListener('error', () => {
+                    progressContainer.style.display = 'none';
+                    showAlert('خطا در ارتباط با سرور', 'danger');
+                    resolve(null);
+                });
+                
+                xhr.open('POST', API_BASE + 'upload.php?type=photo');
+                xhr.withCredentials = true;
+                xhr.send(formData);
+            });
+        }
+
+        // Photo drag and drop
+        const dropzone = document.getElementById('photoDropzone');
+        const photoInput = document.getElementById('photoUpload');
+        const photoPreview = document.getElementById('photoPreview');
+        const photoPreviewImg = document.getElementById('photoPreviewImg');
+        
+        // Click to select
+        dropzone.addEventListener('click', () => photoInput.click());
+        
+        // Drag events
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => dropzone.classList.add('dragover'));
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'));
+        });
+        
+        // Handle drop
+        dropzone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handlePhotoSelect(files[0]);
+            }
+        });
+        
+        // Handle file input change
+        photoInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handlePhotoSelect(e.target.files[0]);
+            }
+        });
+        
+        // Handle photo selection
+        function handlePhotoSelect(file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showAlert('لطفاً یک فایل تصویری انتخاب کنید', 'danger');
+                return;
+            }
+            
+            // Validate file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showAlert('حجم فایل نباید بیشتر از 5 مگابایت باشد', 'danger');
+                return;
+            }
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                photoPreviewImg.src = e.target.result;
+                photoPreview.style.display = 'block';
+                dropzone.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+            
+            // Update file input
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            photoInput.files = dataTransfer.files;
+        }
+        
+        // Remove photo
+        document.getElementById('removePhoto').addEventListener('click', () => {
+            photoInput.value = '';
+            photoPreview.style.display = 'none';
+            dropzone.style.display = 'flex';
+            photoPreviewImg.src = '';
+        });
+
+        // Initialize
+        loadFormData();
+        loadStudents();
+        initDarkMode();
+    </script>
+</body>
+</html>

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>درآمد خالص - کمپ خراسان</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <style>
+        /* Special styles for Accounting Page */
+        .accounting-hero {
+            background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-800) 50%, #1e1b4b 100%);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-6);
+            position: relative;
+            overflow: hidden;
+        }
+        .accounting-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .accounting-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hero-content { position: relative; z-index: 1; }
+        .hero-title {
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            color: white;
+            margin-bottom: var(--space-2);
+        }
+        .hero-subtitle { color: rgba(255,255,255,0.7); font-size: var(--font-size-base); }
+
+        /* Filter Card */
+        .filter-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: var(--space-5);
+            display: flex;
+            gap: var(--space-4);
+            align-items: flex-end;
+            flex-wrap: wrap;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            z-index: 2;
+            margin-top: calc(-1 * var(--space-10));
+            margin-left: var(--space-6);
+            margin-right: var(--space-6);
+        }
+        .filter-group { flex: 1; min-width: 150px; }
+        .filter-group label {
+            display: block;
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-2);
+        }
+        .calculate-btn {
+            min-width: 160px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-700) 100%);
+            border: none;
+            border-radius: var(--radius-lg);
+            color: white;
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-base);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            transition: all var(--transition-base);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+        }
+        .calculate-btn:active { transform: translateY(0); }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+        @media (max-width: 991px) { .summary-grid { grid-template-columns: 1fr; } }
+        .summary-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-base);
+        }
+        .summary-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+        .summary-card--income { border-top: 4px solid var(--color-success-500); }
+        .summary-card--expense { border-top: 4px solid var(--color-danger-500); }
+        .summary-card--net { border-top: 4px solid var(--color-primary-500); }
+        .summary-card-icon {
+            width: 56px; height: 56px;
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: var(--space-4);
+        }
+        .summary-card--income .summary-card-icon { background: var(--color-success-100); color: var(--color-success-600); }
+        .summary-card--expense .summary-card-icon { background: var(--color-danger-100); color: var(--color-danger-600); }
+        .summary-card--net .summary-card-icon { background: var(--color-primary-100); color: var(--color-primary-600); }
+        [data-theme="dark"] .summary-card--income .summary-card-icon { background: rgba(16,185,129,0.2); }
+        [data-theme="dark"] .summary-card--expense .summary-card-icon { background: rgba(239,68,68,0.2); }
+        [data-theme="dark"] .summary-card--net .summary-card-icon { background: rgba(59,130,246,0.2); }
+        .summary-card-label { font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: var(--space-1); }
+        .summary-card-value { font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); margin-bottom: var(--space-3); }
+        .summary-card--income .summary-card-value { color: var(--color-success-600); }
+        .summary-card--expense .summary-card-value { color: var(--color-danger-600); }
+        .summary-card--net .summary-card-value { color: var(--color-primary-600); }
+        .summary-card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+            font-size: var(--font-size-sm);
+            color: var(--color-primary-600);
+            text-decoration: none;
+            font-weight: var(--font-weight-medium);
+        }
+        .summary-card-link:hover { text-decoration: underline; }
+
+        /* Coach Payout Table */
+        .payout-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .payout-header {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            padding: var(--space-5) var(--space-6);
+            color: white;
+        }
+        .payout-header h2 {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-semibold);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+        .payout-table { width: 100%; border-collapse: collapse; }
+        .payout-table thead th {
+            background: var(--bg-secondary);
+            padding: var(--space-4);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+            color: var(--text-secondary);
+            text-align: right;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .payout-table tbody td {
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--border-color-light);
+            vertical-align: middle;
+        }
+        .payout-table tbody tr:hover { background: var(--bg-hover); }
+        .payout-table tbody tr:last-child td { border-bottom: none; }
+        .coach-name { font-weight: var(--font-weight-semibold); color: var(--text-primary); }
+        .time-slot-tags { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+        .time-slot-tag {
+            background: var(--color-primary-100);
+            color: var(--color-primary-700);
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-medium);
+        }
+        [data-theme="dark"] .time-slot-tag { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+        .payout-total {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-success-600);
+        }
+        /* Algorithm Info */
+        .algorithm-info {
+            background: linear-gradient(135deg, var(--color-primary-50) 0%, #ede9fe 100%);
+            border: 1px solid var(--color-primary-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            margin-top: var(--space-4);
+        }
+        [data-theme="dark"] .algorithm-info {
+            background: linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(139,92,246,0.1) 100%);
+            border-color: rgba(99,102,241,0.3);
+        }
+        .algorithm-info h4 {
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-primary-700);
+            margin-bottom: var(--space-3);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        [data-theme="dark"] .algorithm-info h4 { color: var(--color-primary-300); }
+        .algorithm-info ul { margin: 0; padding-right: var(--space-5); }
+        .algorithm-info li {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-2);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar-app">
+        <a class="navbar-brand" href="index.html">
+            <span class="navbar-brand-icon">🤸‍♂️</span>
+            کمپ خراسان
+        </a>
+        <ul class="navbar-nav-app">
+            <li><a class="nav-link-app" href="index.html">داشبورد</a></li>
+            <li><a class="nav-link-app" href="students.html">دانش‌آموزان</a></li>
+            <li><a class="nav-link-app" href="coaches.html">مربیان</a></li>
+            <li><a class="nav-link-app" href="expenses.html">هزینه‌ها</a></li>
+            <li><a class="nav-link-app" href="rent.html">اجاره</a></li>
+            <li><a class="nav-link-app active" href="accounting.html">درآمد خالص</a></li>
+            <li><a class="nav-link-app" href="reports.html">گزارش‌ها</a></li>
+            <li id="adminNavItem" style="display: none;"><a class="nav-link-app" href="admin.html">مدیر</a></li>
+        </ul>
+        <div class="navbar-actions">
+            <button type="button" class="theme-switch" id="themeSwitch" title="تغییر تم">
+                <span class="theme-switch-icons">
+                    <span class="theme-switch-icon theme-switch-icon--sun">☀️</span>
+                    <span class="theme-switch-icon theme-switch-icon--moon">🌙</span>
+                </span>
+                <span class="theme-switch-slider"></span>
+            </button>
+            <div class="navbar-user">
+                <span class="navbar-user-icon"><i class="bi bi-person"></i></span>
+                <span id="userName"></span>
+            </div>
+            <button class="navbar-logout" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>خروج</span>
+            </button>
+        </div>
+        <button class="navbar-mobile-toggle" id="mobileMenuToggle"><i class="bi bi-list"></i></button>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar-app" id="sidebar">
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-item"><a href="index.html" class="sidebar-nav-link"><i class="bi bi-grid-1x2 sidebar-nav-icon"></i>داشبورد</a></div>
+            <div class="sidebar-section-title">مدیریت</div>
+            <div class="sidebar-nav-item"><a href="students.html" class="sidebar-nav-link"><i class="bi bi-people sidebar-nav-icon"></i>دانش‌آموزان</a></div>
+            <div class="sidebar-nav-item"><a href="coaches.html" class="sidebar-nav-link"><i class="bi bi-person-badge sidebar-nav-icon"></i>مربیان</a></div>
+            <div class="sidebar-section-title">مالی</div>
+            <div class="sidebar-nav-item"><a href="expenses.html" class="sidebar-nav-link"><i class="bi bi-cash-stack sidebar-nav-icon"></i>هزینه‌ها</a></div>
+            <div class="sidebar-nav-item"><a href="rent.html" class="sidebar-nav-link"><i class="bi bi-house sidebar-nav-icon"></i>اجاره</a></div>
+            <div class="sidebar-nav-item"><a href="accounting.html" class="sidebar-nav-link active"><i class="bi bi-calculator sidebar-nav-icon"></i>درآمد خالص</a></div>
+            <div class="sidebar-nav-item"><a href="reports.html" class="sidebar-nav-link"><i class="bi bi-bar-chart sidebar-nav-icon"></i>گزارش‌ها</a></div>
+            <div class="sidebar-section-title">سیستم</div>
+            <div class="sidebar-nav-item" id="adminSidebarItem" style="display: none;"><a href="admin.html" class="sidebar-nav-link"><i class="bi bi-gear sidebar-nav-icon"></i>مدیر</a></div>
+            <div class="sidebar-nav-item"><a href="#" class="sidebar-nav-link" onclick="logout()"><i class="bi bi-box-arrow-right sidebar-nav-icon"></i>خروج</a></div>
+        </nav>
+    </aside>
+    
+<!-- Main Content -->
+    <main class="app-main">
+        <div class="container-app">
+            <!-- Hero Section -->
+            <div class="accounting-hero animate-slideUp">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        <i class="bi bi-calculator me-2"></i>
+                        محاسبه درآمد خالص و پرداخت مربیان
+                    </h1>
+                    <p class="hero-subtitle">محاسبه دقیق درآمد، هزینه و سهم مربیان بر اساس الگوریتم عادلانه</p>
+                </div>
+            </div>
+
+            <!-- Filter Card -->
+            <div class="filter-card animate-slideUp" style="animation-delay: 100ms;">
+                <div class="filter-group">
+                    <label><i class="bi bi-calendar3 me-1"></i> ماه (جلالی)</label>
+                    <select class="form-control-app form-select-app" id="monthSelect">
+                        <option value="1">حمل</option>
+                        <option value="2">ثور</option>
+                        <option value="3">جوزا</option>
+                        <option value="4">سرطان</option>
+                        <option value="5">اسد</option>
+                        <option value="6">سنبله</option>
+                        <option value="7">میزان</option>
+                        <option value="8">عقرب</option>
+                        <option value="9">قوس</option>
+                        <option value="10">جدی</option>
+                        <option value="11">دلو</option>
+                        <option value="12">حوت</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="bi bi-calendar-range me-1"></i> سال (جلالی)</label>
+                    <input type="number" class="form-control-app" id="yearSelect" value="1403" min="1380" max="1450">
+                </div>
+                <button class="calculate-btn" onclick="loadAccounting()">
+                    <i class="bi bi-calculator"></i>
+                    محاسبه کن
+                </button>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-grid mt-6 animate-slideUp" style="animation-delay: 200ms;">
+                <div class="summary-card summary-card--income">
+                    <div class="summary-card-icon">💰</div>
+                    <div class="summary-card-label">درآمد کل</div>
+                    <div class="summary-card-value" id="totalIncome">
+                        <span class="skeleton" style="width: 120px; height: 36px; display: inline-block;"></span>
+                    </div>
+                    <a href="#" class="summary-card-link" onclick="showBreakdown('income'); return false;">
+                        مشاهده جزئیات
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                </div>
+                <div class="summary-card summary-card--expense">
+                    <div class="summary-card-icon">📉</div>
+                    <div class="summary-card-label">هزینه کل</div>
+                    <div class="summary-card-value" id="totalExpenses">
+                        <span class="skeleton" style="width: 120px; height: 36px; display: inline-block;"></span>
+                    </div>
+                    <a href="#" class="summary-card-link" onclick="showBreakdown('expense'); return false;">
+                        مشاهده جزئیات
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                </div>
+                <div class="summary-card summary-card--net">
+                    <div class="summary-card-icon">📊</div>
+                    <div class="summary-card-label">درآمد خالص</div>
+                    <div class="summary-card-value" id="netIncome">
+                        <span class="skeleton" style="width: 120px; height: 36px; display: inline-block;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coach Payouts -->
+            <div class="payout-card animate-slideUp" style="animation-delay: 300ms;">
+                <div class="payout-header">
+                    <h2><i class="bi bi-people"></i> پرداخت مربیان</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="payout-table">
+                        <thead>
+                            <tr>
+                                <th>مربی</th>
+                                <th>نوع قرارداد</th>
+                                <th>کل درآمد جمع‌آوری</th>
+                                <th>درآمد واجد شرایط</th>
+                                <th>پرداخت محاسبه شده</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payoutsTableBody">
+                            <tr>
+                                <td colspan="6">
+                                    <div class="text-center py-5">
+                                        <div style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;">📋</div>
+                                        <div class="text-muted">لطفاً ماه و سال را انتخاب کرده و دکمه محاسبه را بزنید</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-4">
+                    <div class="algorithm-info">
+                        <h4><i class="bi bi-lightbulb"></i> الگوریتم محاسبه پرداخت</h4>
+                        <ul>
+                            <li><strong>درصدی:</strong> درآمد واجد شرایط × درصد قرارداد</li>
+                            <li><strong>حقوق ثابت:</strong> مبلغ ماهانه ثابت</li>
+                            <li><strong>ترکیبی:</strong> حقوق ثابت + (درآمد واجد شرایط × درصد)</li>
+                            <li><strong>درآمد واجد شرایط:</strong> فقط شامل دانش‌آموزان صبح/شام (پیش‌فرض)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Camp Summary -->
+            <div class="payout-card animate-slideUp mt-4" style="animation-delay: 400ms;">
+                <div class="payout-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <h2><i class="bi bi-building"></i> خلاصه مالی کمپ</h2>
+                </div>
+                <div class="p-4">
+                    <div class="row g-4">
+                        <div class="col-md-3">
+                            <div class="text-muted small">کل درآمد دانش‌آموزان</div>
+                            <div class="fs-4 fw-bold text-success" id="summaryTotalFees">-</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-muted small">کل پرداخت مربیان</div>
+                            <div class="fs-4 fw-bold text-primary" id="summaryCoachPayments">-</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-muted small">کل هزینه‌ها</div>
+                            <div class="fs-4 fw-bold text-danger" id="summaryExpenses">-</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-muted small">درآمد خالص کمپ</div>
+                            <div class="fs-4 fw-bold" id="summaryCampNet">-</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 p-3 rounded" style="background: var(--bg-secondary);">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            فرمول: درآمد خالص کمپ = کل درآمد دانش‌آموزان - کل پرداخت مربیان - کل هزینه‌ها
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/jalali.js"></script>
+
+    <script>
+        // Check auth
+        const user = checkAuth();
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = user.username;
+            if (user.role === 'admin') {
+                document.getElementById('adminNavItem').style.display = 'block';
+                document.getElementById('adminSidebarItem').style.display = 'block';
+            }
+        }
+
+        let currentMonth = 0;
+        let currentYear = 0;
+        
+        // Get badge color based on contract type
+        function getContractTypeBadgeColor(contractType) {
+            switch (contractType) {
+                case 'percentage': return '#6366f1'; // indigo
+                case 'salary': return '#10b981'; // green
+                case 'hybrid': return '#f59e0b'; // amber
+                default: return '#6b7280'; // gray
+            }
+        }
+
+        // Set current Jalali month/year as default
+        (function setDefaultDate() {
+            const now = new Date();
+            const jalali = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+            const parts = jalali.split('-');
+            document.getElementById('monthSelect').value = parseInt(parts[1]);
+            document.getElementById('yearSelect').value = parts[0];
+        })();
+
+        async function loadAccounting() {
+            const month = parseInt(document.getElementById('monthSelect').value);
+            const year = parseInt(document.getElementById('yearSelect').value);
+            
+            // Validate year input
+            if (isNaN(year) || year < 1380 || year > 1450) {
+                showAlert('سال باید بین ۱۳۸۰ تا ۱۴۵۰ باشد', 'warning');
+                return;
+            }
+            
+            currentMonth = month;
+            currentYear = year;
+
+            // Disable button and show loading state
+            const btn = document.querySelector('.calculate-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-app spinner-app--sm"></span> در حال محاسبه...';
+
+            // Show loading state in cards
+            document.getElementById('totalIncome').innerHTML = '<span class="spinner-app"></span>';
+            document.getElementById('totalExpenses').innerHTML = '<span class="spinner-app"></span>';
+            document.getElementById('netIncome').innerHTML = '<span class="spinner-app"></span>';
+            document.getElementById('payoutsTableBody').innerHTML = `
+                <tr><td colspan="7"><div class="text-center py-4"><div class="spinner-app mx-auto"></div></div></td></tr>
+            `;
+
+            try {
+                // Load net income
+                const netIncomeData = await APIClient.get(`accounting.php?action=net-income&month=${month}&year=${year}`);
+                if (netIncomeData.success) {
+                    document.getElementById('totalIncome').textContent = formatCurrency(netIncomeData.data.total_income);
+                    document.getElementById('totalExpenses').textContent = formatCurrency(netIncomeData.data.total_expenses);
+                    document.getElementById('netIncome').textContent = formatCurrency(netIncomeData.data.net_income);
+                } else {
+                    // Show error state in summary cards
+                    const errorMsg = netIncomeData.message || 'خطا در محاسبه درآمد';
+                    document.getElementById('totalIncome').textContent = '-';
+                    document.getElementById('totalExpenses').textContent = '-';
+                    document.getElementById('netIncome').textContent = '-';
+                    showAlert(errorMsg, 'danger');
+                }
+
+                // Load payouts
+                const payoutsData = await APIClient.get(`accounting.php?action=payouts&month=${month}&year=${year}`);
+                if (payoutsData.success) {
+                    const tbody = document.getElementById('payoutsTableBody');
+                    const data = payoutsData.data;
+                    
+                    // Update camp summary section
+                    document.getElementById('summaryTotalFees').textContent = formatCurrency(data.total_student_fees);
+                    document.getElementById('summaryCoachPayments').textContent = formatCurrency(data.total_coach_payments);
+                    document.getElementById('summaryExpenses').textContent = formatCurrency(data.total_expenses);
+                    const campNet = document.getElementById('summaryCampNet');
+                    campNet.textContent = formatCurrency(data.camp_net_income);
+                    campNet.className = 'fs-4 fw-bold ' + (data.camp_net_income >= 0 ? 'text-success' : 'text-danger');
+                    
+                    if (data.payouts.length === 0) {
+                        tbody.innerHTML = `
+                            <tr><td colspan="6">
+                                <div class="text-center py-5">
+                                    <div style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;">👤</div>
+                                    <div class="text-muted">مربی فعال در این ماه یافت نشد</div>
+                                </div>
+                            </td></tr>
+                        `;
+                    } else {
+                        // Calculate totals for footer row
+                        const totals = data.payouts.reduce((acc, p) => ({
+                            totalFees: acc.totalFees + p.total_fees_collected,
+                            eligibleFees: acc.eligibleFees + p.eligible_fees,
+                            payments: acc.payments + p.calculated_payment
+                        }), { totalFees: 0, eligibleFees: 0, payments: 0 });
+                        
+                        const rows = data.payouts.map((payout, index) => `
+                            <tr>
+                                <td>
+                                    <span class="coach-name">${payout.coach_name}</span>
+                                </td>
+                                <td>
+                                    <span class="badge" style="background: ${getContractTypeBadgeColor(payout.contract_type)}; font-size: 11px;">
+                                        ${payout.contract_type_label}
+                                    </span>
+                                    ${payout.contract_type === 'percentage' || payout.contract_type === 'hybrid' 
+                                        ? `<small class="text-muted d-block">${payout.percentage_rate}%</small>` 
+                                        : ''}
+                                </td>
+                                <td>${formatCurrency(payout.total_fees_collected)}</td>
+                                <td>
+                                    ${formatCurrency(payout.eligible_fees)}
+                                    <small class="text-muted d-block" style="font-size: 10px;">
+                                        ${payout.fee_calculation_slots === 'morning_evening' ? 'صبح/شام' : 
+                                          payout.fee_calculation_slots === 'all' ? 'همه' : 'سفارشی'}
+                                    </small>
+                                </td>
+                                <td>
+                                    <span class="payout-total">${formatCurrency(payout.calculated_payment)}</span>
+                                    <button class="btn-link p-0 ms-1" style="border: none; background: none; cursor: pointer;" 
+                                            onclick="toggleCalculation(${index})" title="جزئیات محاسبه">
+                                        <i class="bi bi-info-circle text-primary"></i>
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn-app btn-app--primary btn-app--sm" onclick="viewCoachTransactions(${payout.coach_id})">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="calculation-row" id="calc-row-${index}" style="display: none;">
+                                <td colspan="6" style="background: var(--bg-secondary); padding: 12px 20px;">
+                                    <div style="font-size: 13px; color: var(--text-secondary);">
+                                        <strong><i class="bi bi-calculator me-1"></i>جزئیات محاسبه:</strong>
+                                        <div style="margin-top: 8px; direction: ltr; text-align: left; font-family: monospace;">
+                                            ${payout.calculation_breakdown || 'محاسبه‌ای موجود نیست'}
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('');
+                        
+                        // Add total footer row
+                        const footerRow = `
+                            <tr style="background: var(--bg-secondary); font-weight: bold; border-top: 2px solid var(--border-color);">
+                                <td colspan="2" style="text-align: right;">مجموع</td>
+                                <td>${formatCurrency(totals.totalFees)}</td>
+                                <td>${formatCurrency(totals.eligibleFees)}</td>
+                                <td><span class="payout-total">${formatCurrency(totals.payments)}</span></td>
+                                <td></td>
+                            </tr>
+                        `;
+                        
+                        tbody.innerHTML = rows + footerRow;
+                    }
+                } else {
+                    // Show error state in payouts table
+                    const errorMsg = payoutsData.message || 'خطا در محاسبه پرداخت مربیان';
+                    document.getElementById('payoutsTableBody').innerHTML = `
+                        <tr><td colspan="7">
+                            <div class="text-center py-5">
+                                <div style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;">⚠️</div>
+                                <div class="text-danger">${errorMsg}</div>
+                            </div>
+                        </td></tr>
+                    `;
+                    showAlert(errorMsg, 'danger');
+                }
+            } catch (error) {
+                // Log error for debugging (Task 11)
+                console.error('Accounting load error:', error);
+                
+                // Determine appropriate error message
+                let errorMsg = 'خطای ناشناخته';
+                if (!navigator.onLine) {
+                    errorMsg = 'اتصال اینترنت برقرار نیست';
+                } else if (error && error.message) {
+                    errorMsg = 'خطای سرور: ' + error.message;
+                }
+                
+                // Show error state in all elements
+                document.getElementById('totalIncome').textContent = '-';
+                document.getElementById('totalExpenses').textContent = '-';
+                document.getElementById('netIncome').textContent = '-';
+                document.getElementById('payoutsTableBody').innerHTML = `
+                    <tr><td colspan="7">
+                        <div class="text-center py-5">
+                            <div style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;">⚠️</div>
+                            <div class="text-danger">${errorMsg}</div>
+                        </div>
+                    </td></tr>
+                `;
+                showAlert(errorMsg, 'danger');
+            } finally {
+                // Re-enable button
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-calculator"></i> محاسبه کن';
+            }
+        }
+
+        function toggleCalculation(index) {
+            const row = document.getElementById(`calc-row-${index}`);
+            if (row) {
+                row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+            }
+        }
+
+        function showBreakdown(type) {
+            if (!currentMonth || !currentYear) {
+                showAlert('لطفاً ابتدا ماه و سال را انتخاب کنید', 'warning');
+                return;
+            }
+            window.open(`breakdown.html?type=${type}&month=${currentMonth}&year=${currentYear}`, '_blank');
+        }
+
+        function viewCoachTransactions(coachId) {
+            if (!currentMonth || !currentYear) return;
+            window.open(`breakdown.html?type=coach&id=${coachId}&month=${currentMonth}&year=${currentYear}`, '_blank');
+        }
+
+        // Mobile sidebar toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+                sidebarOverlay.classList.toggle('show');
+            });
+        }
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        }
+
+        initDarkMode();
+    </script>
+</body>
+</html>

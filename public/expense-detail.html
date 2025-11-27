@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جزئیات هزینه - کمپ خراسان</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <style>
+        .expense-hero {
+            background: linear-gradient(135deg, var(--color-danger-500) 0%, var(--color-danger-700) 100%);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            color: white;
+            margin-bottom: var(--space-6);
+            position: relative;
+            overflow: hidden;
+        }
+        .expense-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        .expense-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .expense-hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        .expense-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-4);
+            backdrop-filter: blur(10px);
+        }
+        .expense-icon { font-size: 40px; }
+        .expense-category-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            margin-bottom: var(--space-3);
+            backdrop-filter: blur(10px);
+        }
+        .expense-title { 
+            font-size: var(--font-size-2xl); 
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--space-2);
+        }
+        .expense-amount { 
+            font-size: 2.5rem; 
+            font-weight: var(--font-weight-bold);
+            letter-spacing: -0.02em;
+        }
+        .expense-amount-label {
+            font-size: var(--font-size-sm);
+            opacity: 0.8;
+            margin-bottom: var(--space-1);
+        }
+        
+        .detail-card {
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .detail-card-header {
+            padding: var(--space-5);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-secondary);
+        }
+        .detail-card-title {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin: 0;
+        }
+        .detail-card-body {
+            padding: var(--space-5);
+        }
+        
+        .info-grid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: var(--space-4); 
+        }
+        @media (max-width: 767px) { 
+            .info-grid { grid-template-columns: 1fr; } 
+        }
+        .info-card {
+            padding: var(--space-4);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+        .info-card:hover {
+            border-color: var(--color-primary-300);
+            box-shadow: var(--shadow-sm);
+        }
+        .info-card-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--color-primary-100);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-3);
+            color: var(--color-primary-600);
+            font-size: 1.2rem;
+        }
+        [data-theme="dark"] .info-card-icon {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        .info-label { 
+            font-size: var(--font-size-sm); 
+            color: var(--text-secondary); 
+            margin-bottom: var(--space-1); 
+        }
+        .info-value { 
+            font-weight: var(--font-weight-semibold); 
+            color: var(--text-primary);
+            font-size: var(--font-size-base);
+        }
+        
+        .details-section {
+            margin-top: var(--space-5);
+            padding-top: var(--space-5);
+            border-top: 1px solid var(--border-color);
+        }
+        .details-label {
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--space-2);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        .details-text {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            background: var(--bg-secondary);
+            padding: var(--space-4);
+            border-radius: var(--radius-md);
+        }
+        
+        .rent-info-card {
+            background: linear-gradient(135deg, var(--color-warning-50) 0%, #fef3c7 100%);
+            border: 1px solid var(--color-warning-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            margin-top: var(--space-5);
+        }
+        [data-theme="dark"] .rent-info-card { 
+            background: rgba(245,158,11,0.1); 
+            border-color: rgba(245,158,11,0.3); 
+        }
+        .rent-info-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--space-3);
+            color: var(--color-warning-700);
+        }
+        [data-theme="dark"] .rent-info-header {
+            color: var(--color-warning-400);
+        }
+        .rent-info-grid {
+            display: flex;
+            gap: var(--space-6);
+            flex-wrap: wrap;
+        }
+        .rent-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+        }
+        .rent-info-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
+        .rent-info-value {
+            font-weight: var(--font-weight-medium);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: var(--space-2);
+        }
+        
+        .receipt-preview {
+            margin-top: var(--space-5);
+            padding-top: var(--space-5);
+            border-top: 1px solid var(--border-color);
+        }
+        .receipt-preview-label {
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--space-3);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        .receipt-preview-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+        .receipt-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--color-success-100);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-success-600);
+            font-size: 1.5rem;
+        }
+        [data-theme="dark"] .receipt-icon {
+            background: rgba(34, 197, 94, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar-app">
+        <a class="navbar-brand" href="index.html"><span class="navbar-brand-icon">🤸‍♂️</span>کمپ خراسان</a>
+        <div class="navbar-actions">
+            <a href="expenses.html" class="btn-app btn-app--secondary btn-app--sm"><i class="bi bi-arrow-right"></i> بازگشت</a>
+            <button type="button" class="theme-switch" id="themeSwitch" title="تغییر تم">
+                <span class="theme-switch-icons"><span class="theme-switch-icon theme-switch-icon--sun">☀️</span><span class="theme-switch-icon theme-switch-icon--moon">🌙</span></span>
+                <span class="theme-switch-slider"></span>
+            </button>
+        </div>
+    </nav>
+    <main class="app-main" style="margin-right: 0;">
+        <div class="container-app">
+            <!-- Alert Container -->
+            <div id="alertContainer"></div>
+            <div id="expenseDetail">
+                <div class="text-center py-5"><div class="spinner-app mx-auto"></div></div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>تأیید حذف</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>آیا مطمئن هستید که می‌خواهید این هزینه را حذف کنید؟</p>
+                    <p class="text-muted small">این عملیات قابل بازگشت نیست.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <span class="spinner-border spinner-border-sm d-none" id="deleteSpinner"></span>
+                        حذف
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/jalali.js"></script>
+    <script>
+        if (!checkAuth()) window.location.href = 'login.html';
+        const expenseId = new URLSearchParams(window.location.search).get('id');
+        const categoryIcons = { 'Rent': '🏠', 'Equipment': '🏋️', 'Taxes': '📋', 'Services': '🔧', 'Other': '📦' };
+        const categoryLabels = { 'Rent': 'اجاره', 'Equipment': 'تجهیزات', 'Taxes': 'مالیات', 'Services': 'خدمات', 'Other': 'سایر' };
+        
+        if (!expenseId) {
+            window.location.href = 'expenses.html';
+        }
+
+        async function loadExpenseDetail() {
+            try {
+                const data = await APIClient.get(`expenses.php?id=${expenseId}`);
+                if (data.success) {
+                    const e = data.data;
+                    const icon = categoryIcons[e.category] || '💰';
+                    const categoryLabel = categoryLabels[e.category] || e.category;
+                    document.getElementById('expenseDetail').innerHTML = `
+                        <!-- Hero Section -->
+                        <div class="expense-hero animate-slideUp">
+                            <div class="expense-hero-content">
+                                <div class="expense-icon-wrapper">
+                                    <span class="expense-icon">${icon}</span>
+                                </div>
+                                <div class="expense-category-badge">${categoryLabel}</div>
+                                <h1 class="expense-title">${e.title}</h1>
+                                <div class="expense-amount-label">مبلغ هزینه</div>
+                                <div class="expense-amount">${formatCurrency(e.amount)}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Details Card -->
+                        <div class="detail-card animate-slideUp" style="animation-delay: 100ms;">
+                            <div class="detail-card-header">
+                                <h2 class="detail-card-title">
+                                    <i class="bi bi-info-circle"></i>
+                                    اطلاعات هزینه
+                                </h2>
+                                <div class="action-buttons">
+                                    <button class="btn-app btn-app--secondary btn-app--sm" onclick="editExpense(${e.id})">
+                                        <i class="bi bi-pencil"></i> ویرایش
+                                    </button>
+                                    <button class="btn-app btn-app--danger btn-app--sm" onclick="confirmDelete()">
+                                        <i class="bi bi-trash"></i> حذف
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="detail-card-body">
+                                <div class="info-grid">
+                                    <div class="info-card">
+                                        <div class="info-card-icon"><i class="bi bi-calendar3"></i></div>
+                                        <div class="info-label">تاریخ هزینه</div>
+                                        <div class="info-value">${formatJalaliDate(e.expense_date_jalali)}</div>
+                                    </div>
+                                    <div class="info-card">
+                                        <div class="info-card-icon"><i class="bi bi-person"></i></div>
+                                        <div class="info-label">ثبت شده توسط</div>
+                                        <div class="info-value">${e.created_by_username || '-'}</div>
+                                    </div>
+                                    <div class="info-card">
+                                        <div class="info-card-icon"><i class="bi bi-clock-history"></i></div>
+                                        <div class="info-label">تاریخ ثبت</div>
+                                        <div class="info-value">${formatJalaliDate(e.created_at_jalali)}</div>
+                                    </div>
+                                    <div class="info-card">
+                                        <div class="info-card-icon"><i class="bi bi-tag"></i></div>
+                                        <div class="info-label">دسته‌بندی</div>
+                                        <div class="info-value">${categoryLabel}</div>
+                                    </div>
+                                </div>
+                                
+                                ${e.receipt_path ? `
+                                    <div class="receipt-preview">
+                                        <div class="receipt-preview-label">
+                                            <i class="bi bi-file-earmark-check"></i>
+                                            رسید پیوست شده
+                                        </div>
+                                        <div class="receipt-preview-box">
+                                            <div class="receipt-icon"><i class="bi bi-file-earmark-pdf"></i></div>
+                                            <div class="flex-grow-1">
+                                                <div class="info-value">فایل رسید</div>
+                                                <div class="info-label">برای مشاهده کلیک کنید</div>
+                                            </div>
+                                            <a href="${e.receipt_path}" target="_blank" class="btn-app btn-app--primary btn-app--sm">
+                                                <i class="bi bi-eye"></i> مشاهده
+                                            </a>
+                                            <a href="${e.receipt_path}" download class="btn-app btn-app--secondary btn-app--sm">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                
+                                ${e.details ? `
+                                    <div class="details-section">
+                                        <div class="details-label">
+                                            <i class="bi bi-card-text"></i>
+                                            توضیحات
+                                        </div>
+                                        <div class="details-text">${e.details}</div>
+                                    </div>
+                                ` : ''}
+                                
+                                ${e.rent_info ? `
+                                    <div class="rent-info-card">
+                                        <div class="rent-info-header">
+                                            <i class="bi bi-house-door"></i>
+                                            اطلاعات اجاره
+                                        </div>
+                                        <div class="rent-info-grid">
+                                            <div class="rent-info-item">
+                                                <span class="rent-info-label">ماه</span>
+                                                <span class="rent-info-value">${getJalaliMonthName(e.rent_info.month_jalali)} ${e.rent_info.year_jalali}</span>
+                                            </div>
+                                            <div class="rent-info-item">
+                                                <span class="rent-info-label">وضعیت پرداخت</span>
+                                                <span class="badge-app ${e.rent_info.paid ? 'badge-app--success' : 'badge-app--danger'}">
+                                                    ${e.rent_info.paid ? '✓ پرداخت شده' : '✗ پرداخت نشده'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Load error:', error);
+                document.getElementById('expenseDetail').innerHTML = `
+                    <div class="card-app">
+                        <div class="card-app-body text-center py-5">
+                            <div class="text-danger mb-3"><i class="bi bi-exclamation-circle" style="font-size: 3rem;"></i></div>
+                            <h5>خطا در بارگذاری اطلاعات</h5>
+                            <p class="text-muted">${error.message || 'هزینه مورد نظر یافت نشد'}</p>
+                            <a href="expenses.html" class="btn-app btn-app--primary mt-3">بازگشت به لیست</a>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function editExpense(id) {
+            // Store expense ID and redirect to expenses page with edit mode
+            sessionStorage.setItem('editExpenseId', id);
+            window.location.href = 'expenses.html?edit=' + id;
+        }
+        
+        function confirmDelete() {
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+        
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+            const btn = this;
+            const spinner = document.getElementById('deleteSpinner');
+            
+            btn.disabled = true;
+            spinner.classList.remove('d-none');
+            
+            try {
+                const result = await APIClient.delete(`expenses.php?id=${expenseId}`);
+                if (result.success) {
+                    showAlert('هزینه با موفقیت حذف شد', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'expenses.html';
+                    }, 1000);
+                }
+            } catch (error) {
+                showAlert(error.message || 'خطا در حذف هزینه', 'danger');
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+                bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+            }
+        });
+        
+        loadExpenseDetail();
+        initDarkMode();
+    </script>
+</body>
+</html>

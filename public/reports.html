@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>گزارش‌ها - کمپ خراسان</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <style>
+        /* Report Cards Grid */
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-5);
+            margin-bottom: var(--space-6);
+        }
+        @media (max-width: 991px) { .reports-grid { grid-template-columns: 1fr; } }
+        
+        .report-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: all var(--transition-base);
+        }
+        .report-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+        .report-card-header {
+            padding: var(--space-5);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+        .report-card--monthly .report-card-header { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
+        .report-card--students .report-card-header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .report-card--coaches .report-card-header { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .report-card-icon { font-size: 24px; }
+        .report-card-title { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); margin: 0; }
+        .report-card-body { padding: var(--space-5); }
+
+        .report-btn {
+            width: 100%;
+            height: 44px;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-weight-medium);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            border: none;
+        }
+        .report-btn--primary {
+            background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
+            color: white;
+        }
+        .report-btn--primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37,99,235,0.4); }
+        .report-btn--success {
+            background: linear-gradient(135deg, var(--color-success-500) 0%, var(--color-success-600) 100%);
+            color: white;
+        }
+        .report-btn--success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.4); }
+        
+        /* Results Card */
+        .results-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .results-header {
+            background: linear-gradient(135deg, var(--color-gray-700) 0%, var(--color-gray-800) 100%);
+            padding: var(--space-5) var(--space-6);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        [data-theme="dark"] .results-header { background: linear-gradient(135deg, var(--color-gray-600) 0%, var(--color-gray-700) 100%); }
+        .results-title { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); margin: 0; display: flex; align-items: center; gap: var(--space-3); }
+        .results-body { padding: var(--space-6); }
+        
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); margin-bottom: var(--space-5); }
+        @media (max-width: 767px) { .stats-grid { grid-template-columns: 1fr; } }
+        .stat-item {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            text-align: center;
+        }
+        .stat-label { font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: var(--space-1); }
+        .stat-value { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); }
+        .stat-value--success { color: var(--color-success-600); }
+        .stat-value--danger { color: var(--color-danger-600); }
+        .stat-value--primary { color: var(--color-primary-600); }
+        
+        /* Category List */
+        .category-list { list-style: none; padding: 0; margin: 0; }
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-3) 0;
+            border-bottom: 1px solid var(--border-color-light);
+        }
+        .category-item:last-child { border-bottom: none; }
+        .category-name { font-weight: var(--font-weight-medium); color: var(--text-primary); }
+        .category-value { font-weight: var(--font-weight-semibold); color: var(--color-danger-600); }
+        
+        /* Expiring List */
+        .expiring-list { list-style: none; padding: 0; margin: 0; }
+        .expiring-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3);
+            background: var(--color-warning-50);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+        }
+        [data-theme="dark"] .expiring-item { background: rgba(245,158,11,0.1); }
+        .expiring-icon { color: var(--color-warning-600); }
+        .expiring-name { font-weight: var(--font-weight-medium); color: var(--text-primary); }
+        .expiring-date { font-size: var(--font-size-sm); color: var(--text-secondary); }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar-app">
+        <a class="navbar-brand" href="index.html">
+            <span class="navbar-brand-icon">🤸‍♂️</span>
+            کمپ خراسان
+        </a>
+        <ul class="navbar-nav-app">
+            <li><a class="nav-link-app" href="index.html">داشبورد</a></li>
+            <li><a class="nav-link-app" href="students.html">دانش‌آموزان</a></li>
+            <li><a class="nav-link-app" href="coaches.html">مربیان</a></li>
+            <li><a class="nav-link-app" href="expenses.html">هزینه‌ها</a></li>
+            <li><a class="nav-link-app" href="rent.html">اجاره</a></li>
+            <li><a class="nav-link-app" href="accounting.html">درآمد خالص</a></li>
+            <li><a class="nav-link-app active" href="reports.html">گزارش‌ها</a></li>
+            <li id="adminNavItem" style="display: none;"><a class="nav-link-app" href="admin.html">مدیر</a></li>
+        </ul>
+        <div class="navbar-actions">
+            <button type="button" class="theme-switch" id="themeSwitch" title="تغییر تم">
+                <span class="theme-switch-icons">
+                    <span class="theme-switch-icon theme-switch-icon--sun">☀️</span>
+                    <span class="theme-switch-icon theme-switch-icon--moon">🌙</span>
+                </span>
+                <span class="theme-switch-slider"></span>
+            </button>
+            <div class="navbar-user">
+                <span class="navbar-user-icon"><i class="bi bi-person"></i></span>
+                <span id="userName"></span>
+            </div>
+            <button class="navbar-logout" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>خروج</span>
+            </button>
+        </div>
+        <button class="navbar-mobile-toggle" id="mobileMenuToggle"><i class="bi bi-list"></i></button>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar-app" id="sidebar">
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-item"><a href="index.html" class="sidebar-nav-link"><i class="bi bi-grid-1x2 sidebar-nav-icon"></i>داشبورد</a></div>
+            <div class="sidebar-section-title">مدیریت</div>
+            <div class="sidebar-nav-item"><a href="students.html" class="sidebar-nav-link"><i class="bi bi-people sidebar-nav-icon"></i>دانش‌آموزان</a></div>
+            <div class="sidebar-nav-item"><a href="coaches.html" class="sidebar-nav-link"><i class="bi bi-person-badge sidebar-nav-icon"></i>مربیان</a></div>
+            <div class="sidebar-section-title">مالی</div>
+            <div class="sidebar-nav-item"><a href="expenses.html" class="sidebar-nav-link"><i class="bi bi-cash-stack sidebar-nav-icon"></i>هزینه‌ها</a></div>
+            <div class="sidebar-nav-item"><a href="rent.html" class="sidebar-nav-link"><i class="bi bi-house sidebar-nav-icon"></i>اجاره</a></div>
+            <div class="sidebar-nav-item"><a href="accounting.html" class="sidebar-nav-link"><i class="bi bi-calculator sidebar-nav-icon"></i>درآمد خالص</a></div>
+            <div class="sidebar-nav-item"><a href="reports.html" class="sidebar-nav-link active"><i class="bi bi-bar-chart sidebar-nav-icon"></i>گزارش‌ها</a></div>
+            <div class="sidebar-section-title">سیستم</div>
+            <div class="sidebar-nav-item" id="adminSidebarItem" style="display: none;"><a href="admin.html" class="sidebar-nav-link"><i class="bi bi-gear sidebar-nav-icon"></i>مدیر</a></div>
+            <div class="sidebar-nav-item"><a href="#" class="sidebar-nav-link" onclick="logout()"><i class="bi bi-box-arrow-right sidebar-nav-icon"></i>خروج</a></div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="container-app">
+            <!-- Page Header -->
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="page-title mb-0">
+                    <i class="bi bi-bar-chart me-2"></i>
+                    گزارش‌ها
+                </h1>
+            </div>
+
+            <!-- Report Cards -->
+            <div class="reports-grid">
+                <!-- Monthly Report -->
+                <div class="report-card report-card--monthly animate-slideUp">
+                    <div class="report-card-header">
+                        <span class="report-card-icon">📊</span>
+                        <h3 class="report-card-title">گزارش ماهانه</h3>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="form-group">
+                            <label class="form-label-app"><i class="bi bi-calendar3 me-1"></i> ماه</label>
+                            <select class="form-control-app form-select-app" id="reportMonth">
+                                <option value="1">حمل</option>
+                                <option value="2">ثور</option>
+                                <option value="3">جوزا</option>
+                                <option value="4">سرطان</option>
+                                <option value="5">اسد</option>
+                                <option value="6">سنبله</option>
+                                <option value="7">میزان</option>
+                                <option value="8">عقرب</option>
+                                <option value="9">قوس</option>
+                                <option value="10">جدی</option>
+                                <option value="11">دلو</option>
+                                <option value="12">حوت</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app"><i class="bi bi-calendar-range me-1"></i> سال</label>
+                            <input type="number" class="form-control-app" id="reportYear" value="1403">
+                        </div>
+                        <button class="report-btn report-btn--primary mb-2" onclick="loadMonthlyReport()">
+                            <i class="bi bi-eye"></i> مشاهده گزارش
+                        </button>
+                        <button class="report-btn report-btn--success" onclick="exportReport('monthly', 'csv')">
+                            <i class="bi bi-download"></i> خروجی CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Students Report -->
+                <div class="report-card report-card--students animate-slideUp" style="animation-delay: 100ms;">
+                    <div class="report-card-header">
+                        <span class="report-card-icon">👥</span>
+                        <h3 class="report-card-title">گزارش دانش‌آموزان</h3>
+                    </div>
+                    <div class="report-card-body">
+                        <p class="text-muted mb-4">مشاهده آمار کلی دانش‌آموزان، ثبت‌نام‌های جدید و لیست در حال انقضا</p>
+                        <button class="report-btn report-btn--primary mb-2" onclick="loadStudentReport()">
+                            <i class="bi bi-eye"></i> مشاهده گزارش
+                        </button>
+                        <button class="report-btn report-btn--success" onclick="exportReport('students', 'csv')">
+                            <i class="bi bi-download"></i> خروجی CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Coaches Report -->
+                <div class="report-card report-card--coaches animate-slideUp" style="animation-delay: 200ms;">
+                    <div class="report-card-header">
+                        <span class="report-card-icon">🏅</span>
+                        <h3 class="report-card-title">گزارش مربیان</h3>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="form-group">
+                            <label class="form-label-app"><i class="bi bi-calendar3 me-1"></i> ماه</label>
+                            <select class="form-control-app form-select-app" id="coachReportMonth">
+                                <option value="">همه ماه‌ها</option>
+                                <option value="1">حمل</option>
+                                <option value="2">ثور</option>
+                                <option value="3">جوزا</option>
+                                <option value="4">سرطان</option>
+                                <option value="5">اسد</option>
+                                <option value="6">سنبله</option>
+                                <option value="7">میزان</option>
+                                <option value="8">عقرب</option>
+                                <option value="9">قوس</option>
+                                <option value="10">جدی</option>
+                                <option value="11">دلو</option>
+                                <option value="12">حوت</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app"><i class="bi bi-calendar-range me-1"></i> سال</label>
+                            <input type="number" class="form-control-app" id="coachReportYear" value="1403">
+                        </div>
+                        <button class="report-btn report-btn--primary mb-2" onclick="loadCoachReport()">
+                            <i class="bi bi-eye"></i> مشاهده گزارش
+                        </button>
+                        <button class="report-btn report-btn--success" onclick="exportReport('coaches', 'csv')">
+                            <i class="bi bi-download"></i> خروجی CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Results -->
+            <div class="results-card animate-slideUp" id="reportResults" style="display: none;">
+                <div class="results-header">
+                    <h2 class="results-title"><i class="bi bi-clipboard-data"></i> <span id="reportTitle">نتایج گزارش</span></h2>
+                </div>
+                <div class="results-body" id="reportContent"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/jalali.js"></script>
+
+    <script>
+        // Check auth
+        const user = checkAuth();
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = user.username;
+            if (user.role === 'admin') {
+                document.getElementById('adminNavItem').style.display = 'block';
+                document.getElementById('adminSidebarItem').style.display = 'block';
+            }
+        }
+
+        // Set current Jalali year as default
+        (function setDefaultDate() {
+            const now = new Date();
+            const jalali = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+            const parts = jalali.split('-');
+            document.getElementById('reportMonth').value = parseInt(parts[1]);
+            document.getElementById('reportYear').value = parts[0];
+            document.getElementById('coachReportYear').value = parts[0];
+        })();
+
+        async function loadMonthlyReport() {
+            const month = parseInt(document.getElementById('reportMonth').value);
+            const year = parseInt(document.getElementById('reportYear').value);
+            
+            document.getElementById('reportResults').style.display = 'block';
+            document.getElementById('reportTitle').textContent = 'در حال بارگذاری...';
+            document.getElementById('reportContent').innerHTML = '<div class="text-center py-5"><div class="spinner-app mx-auto"></div></div>';
+            
+            try {
+                const data = await APIClient.get(`reports.php?action=monthly&month=${month}&year=${year}`);
+                if (data.success) {
+                    document.getElementById('reportTitle').textContent = `گزارش ماهانه - ${data.data.month_name} ${data.data.year}`;
+                    document.getElementById('reportContent').innerHTML = `
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-label">درآمد کل</div>
+                                <div class="stat-value stat-value--success">${formatCurrency(data.data.revenue.total)}</div>
+                                <div class="text-muted mt-1">تعداد ثبت‌نام: ${data.data.revenue.count}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">هزینه کل</div>
+                                <div class="stat-value stat-value--danger">${formatCurrency(data.data.expenses.total)}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">درآمد خالص</div>
+                                <div class="stat-value stat-value--primary">${formatCurrency(data.data.net_income)}</div>
+                            </div>
+                        </div>
+                        <h5 class="mb-3"><i class="bi bi-pie-chart me-2"></i>هزینه‌ها بر اساس دسته:</h5>
+                        <ul class="category-list">
+                            ${data.data.expenses.by_category.map(e => `
+                                <li class="category-item">
+                                    <span class="category-name">${e.category}</span>
+                                    <span class="category-value">${formatCurrency(e.total_expenses)}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+                }
+            } catch (error) {
+                showAlert('خطا در بارگذاری گزارش', 'danger');
+                document.getElementById('reportResults').style.display = 'none';
+            }
+        }
+
+        async function loadStudentReport() {
+            document.getElementById('reportResults').style.display = 'block';
+            document.getElementById('reportTitle').textContent = 'در حال بارگذاری...';
+            document.getElementById('reportContent').innerHTML = '<div class="text-center py-5"><div class="spinner-app mx-auto"></div></div>';
+            
+            try {
+                const data = await APIClient.get('reports.php?action=students');
+                if (data.success) {
+                    document.getElementById('reportTitle').textContent = 'گزارش فعالیت دانش‌آموزان';
+                    const expiringHtml = data.data.expiring_students.length > 0 
+                        ? data.data.expiring_students.map(s => `
+                            <li class="expiring-item">
+                                <i class="bi bi-exclamation-triangle expiring-icon"></i>
+                                <div>
+                                    <div class="expiring-name">${s.first_name} ${s.last_name}</div>
+                                    <div class="expiring-date">تا ${formatJalaliDate(s.end_date_jalali)}</div>
+                                </div>
+                            </li>
+                        `).join('')
+                        : '<li class="text-muted text-center py-3">هیچ دانش‌آموزی در حال انقضا نیست</li>';
+                    
+                    document.getElementById('reportContent').innerHTML = `
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-label">دانش‌آموزان جدید</div>
+                                <div class="stat-value stat-value--success">${data.data.activity.new_students}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">تمدید شده</div>
+                                <div class="stat-value stat-value--primary">${data.data.activity.renewed_students}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">کل دانش‌آموزان</div>
+                                <div class="stat-value">${data.data.activity.total_students}</div>
+                            </div>
+                        </div>
+                        <h5 class="mb-3"><i class="bi bi-exclamation-triangle me-2 text-warning"></i>دانش‌آموزان در حال انقضا:</h5>
+                        <ul class="expiring-list">${expiringHtml}</ul>
+                    `;
+                }
+            } catch (error) {
+                showAlert('خطا در بارگذاری گزارش', 'danger');
+                document.getElementById('reportResults').style.display = 'none';
+            }
+        }
+
+        async function loadCoachReport() {
+            const month = document.getElementById('coachReportMonth').value;
+            const year = document.getElementById('coachReportYear').value;
+            
+            document.getElementById('reportResults').style.display = 'block';
+            document.getElementById('reportTitle').textContent = 'در حال بارگذاری...';
+            document.getElementById('reportContent').innerHTML = '<div class="text-center py-5"><div class="spinner-app mx-auto"></div></div>';
+            
+            try {
+                const params = {};
+                if (month) params.month = month;
+                if (year) params.year = year;
+                
+                const data = await APIClient.get('reports.php?action=coaches', params);
+                if (data.success) {
+                    document.getElementById('reportTitle').textContent = 'گزارش درآمد مربیان';
+                    document.getElementById('reportContent').innerHTML = `
+                        <div class="table-responsive">
+                            <table class="table-app">
+                                <thead>
+                                    <tr>
+                                        <th>مربی</th>
+                                        <th>کل درآمد</th>
+                                        <th>تعداد ثبت‌نام</th>
+                                        <th>تعداد دانش‌آموزان</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.data.map(c => `
+                                        <tr>
+                                            <td><strong>${c.first_name} ${c.last_name}</strong></td>
+                                            <td class="text-success">${formatCurrency(c.total_earnings || 0)}</td>
+                                            <td><span class="badge-app badge-app--primary">${c.registration_count || 0}</span></td>
+                                            <td><span class="badge-app badge-app--success">${c.student_count || 0}</span></td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                showAlert('خطا در بارگذاری گزارش', 'danger');
+                document.getElementById('reportResults').style.display = 'none';
+            }
+        }
+
+        function exportReport(type, format) {
+            const month = document.getElementById('reportMonth')?.value || document.getElementById('coachReportMonth')?.value || '';
+            const year = document.getElementById('reportYear')?.value || document.getElementById('coachReportYear')?.value || '';
+            const params = new URLSearchParams({ type, format });
+            if (month) params.append('month', month);
+            if (year) params.append('year', year);
+            window.open(`api/reports.php?action=export&${params.toString()}`, '_blank');
+        }
+
+        // Mobile sidebar toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+                sidebarOverlay.classList.toggle('show');
+            });
+        }
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        }
+
+        initDarkMode();
+    </script>
+</body>
+</html>

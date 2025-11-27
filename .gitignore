@@ -1,0 +1,131 @@
+# ===========================================
+# Khorasan Club - Sports Camp Management System
+# Git Ignore Configuration
+# ===========================================
+
+# ===========================================
+# IDE and Editor Files
+# ===========================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.project
+.settings/
+*.swp
+*.swo
+*~
+
+# ===========================================
+# Kiro IDE
+# ===========================================
+.kiro/
+
+# ===========================================
+# Operating System Files
+# ===========================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.directory
+
+# ===========================================
+# PHP & Composer
+# ===========================================
+/vendor/
+composer.lock
+*.phar
+
+# ===========================================
+# Environment & Configuration
+# ===========================================
+.env
+.env.local
+.env.*.local
+*.env
+config.local.php
+
+# ===========================================
+# Logs
+# ===========================================
+*.log
+logs/
+error_log
+php_errors.log
+
+# ===========================================
+# User Uploads (keep folder structure)
+# ===========================================
+public/assets/uploads/*
+!public/assets/uploads/.gitkeep
+
+public/assets/invoices/*
+!public/assets/invoices/.gitkeep
+
+# ===========================================
+# Cache & Temporary Files
+# ===========================================
+*.cache
+*.tmp
+*.temp
+/tmp/
+/cache/
+
+# ===========================================
+# Database Files (sensitive)
+# ===========================================
+*.sql.gz
+*.sql.bak
+db_backup/
+backups/
+
+# ===========================================
+# Docker (optional local overrides)
+# ===========================================
+docker-compose.override.yml
+docker-compose.local.yml
+
+# ===========================================
+# Node.js (if used for build tools)
+# ===========================================
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# ===========================================
+# Test Coverage
+# ===========================================
+coverage/
+.phpunit.result.cache
+phpunit.xml
+
+# ===========================================
+# Build Artifacts
+# ===========================================
+/build/
+/dist/
+
+# ===========================================
+# Sensitive Files - NEVER COMMIT
+# ===========================================
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+credentials/

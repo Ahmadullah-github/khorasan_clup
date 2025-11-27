@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جزئیات مربی - کمپ خراسان</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <style>
+        .coach-header {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            color: white;
+            margin-bottom: var(--space-6);
+        }
+        .coach-avatar {
+            width: 80px; height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: var(--radius-xl);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px;
+        }
+        .coach-name { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+        @media (max-width: 767px) { .stats-grid { grid-template-columns: 1fr; } }
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            padding: var(--space-5);
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .stat-card-icon { font-size: 32px; margin-bottom: var(--space-3); }
+        .stat-card-value { font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); }
+        .stat-card-label { font-size: var(--font-size-sm); color: var(--text-secondary); }
+        .stat-card--students .stat-card-value { color: var(--color-primary-600); }
+        .stat-card--registrations .stat-card-value { color: var(--color-success-600); }
+        .stat-card--revenue .stat-card-value { color: #6366f1; }
+        .time-slot-tags { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+        .time-slot-tag { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: var(--radius-full); font-size: var(--font-size-sm); }
+    </style>
+</head>
+<body>
+    <nav class="navbar-app">
+        <a class="navbar-brand" href="index.html"><span class="navbar-brand-icon">🤸‍♂️</span>کمپ خراسان</a>
+        <div class="navbar-actions">
+            <a href="coaches.html" class="btn-app btn-app--secondary btn-app--sm"><i class="bi bi-arrow-right"></i> بازگشت</a>
+            <button type="button" class="theme-switch" id="themeSwitch" title="تغییر تم">
+                <span class="theme-switch-icons"><span class="theme-switch-icon theme-switch-icon--sun">☀️</span><span class="theme-switch-icon theme-switch-icon--moon">🌙</span></span>
+                <span class="theme-switch-slider"></span>
+            </button>
+        </div>
+    </nav>
+    <main class="app-main" style="margin-right: 0;">
+        <div class="container-app" id="coachDetail">
+            <div class="text-center py-5"><div class="spinner-app mx-auto"></div></div>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/jalali.js"></script>
+    <script>
+        if (!checkAuth()) window.location.href = 'login.html';
+        const coachId = new URLSearchParams(window.location.search).get('id');
+
+        const contractTypeLabels = {
+            'percentage': '📊 درصدی',
+            'salary': '💰 حقوق ثابت',
+            'hybrid': '⚖️ ترکیبی'
+        };
+
+        const statusLabels = {
+            'active': { label: 'فعال', class: 'badge-app--success' },
+            'inactive': { label: 'غیرفعال', class: 'badge-app--danger' },
+            'on_leave': { label: 'مرخصی', class: 'badge-app--warning' }
+        };
+
+        async function loadCoachDetail() {
+            try {
+                const data = await APIClient.get(`coaches.php?id=${coachId}`);
+                if (data.success) {
+                    const c = data.data;
+                    const statusInfo = statusLabels[c.status] || statusLabels['active'];
+                    const photoHtml = c.photo_path 
+                        ? `<img src="${c.photo_path}" class="coach-avatar" style="object-fit:cover;">`
+                        : `<div class="coach-avatar">🏅</div>`;
+                    
+                    document.getElementById('coachDetail').innerHTML = `
+                        <div class="coach-header animate-slideUp">
+                            <div class="d-flex align-items-center gap-4 flex-wrap">
+                                ${photoHtml}
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="coach-name">${c.first_name} ${c.last_name}</span>
+                                        <span class="badge-app ${statusInfo.class}">${statusInfo.label}</span>
+                                    </div>
+                                    ${c.phone ? `<div class="mb-2"><i class="bi bi-telephone"></i> ${c.phone}</div>` : ''}
+                                    <div class="time-slot-tags">${c.time_slots.map(ts => `<span class="time-slot-tag">${ts.name}</span>`).join('')}</div>
+                                </div>
+                                <div>
+                                    <a href="coach-form.html?id=${c.id}" class="btn-app btn-app--secondary">
+                                        <i class="bi bi-pencil"></i> ویرایش
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stats-grid animate-slideUp" style="animation-delay: 100ms;">
+                            <div class="stat-card stat-card--students">
+                                <div class="stat-card-icon">👥</div>
+                                <div class="stat-card-value">${c.statistics?.student_count || 0}</div>
+                                <div class="stat-card-label">تعداد دانش‌آموزان</div>
+                            </div>
+                            <div class="stat-card stat-card--registrations">
+                                <div class="stat-card-icon">📝</div>
+                                <div class="stat-card-value">${c.statistics?.registration_count || 0}</div>
+                                <div class="stat-card-label">تعداد ثبت‌نام</div>
+                            </div>
+                            <div class="stat-card stat-card--revenue">
+                                <div class="stat-card-icon">💰</div>
+                                <div class="stat-card-value">${formatCurrency(c.statistics?.total_fees || 0)}</div>
+                                <div class="stat-card-label">کل درآمد</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Contract Info Card -->
+                        <div class="card-app mt-4 animate-slideUp" style="animation-delay: 150ms;">
+                            <div class="card-app-header">
+                                <h2 class="card-app-title"><i class="bi bi-file-earmark-text"></i> جزئیات قرارداد</h2>
+                            </div>
+                            <div class="card-app-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="text-muted small">نوع قرارداد</div>
+                                        <div class="fw-semibold">${contractTypeLabels[c.contract_type] || c.contract_type}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-muted small">درصد</div>
+                                        <div class="fw-semibold text-primary">${c.percentage_rate || 0}%</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-muted small">حقوق ماهانه</div>
+                                        <div class="fw-semibold text-success">${formatCurrency(c.monthly_salary || 0)}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-muted small">شروع قرارداد</div>
+                                        <div class="fw-semibold">${c.contract_start_jalali ? formatJalaliDate(c.contract_start_jalali) : '-'}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-muted small">پایان قرارداد</div>
+                                        <div class="fw-semibold">${c.contract_end_jalali ? formatJalaliDate(c.contract_end_jalali) : 'بدون پایان'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- General Info Card -->
+                        <div class="card-app mt-4 animate-slideUp" style="animation-delay: 200ms;">
+                            <div class="card-app-header"><h2 class="card-app-title"><i class="bi bi-info-circle"></i> اطلاعات عمومی</h2></div>
+                            <div class="card-app-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="text-muted small">تاریخ ثبت</div>
+                                        <div class="fw-semibold">${formatJalaliDate(c.created_at_jalali)}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-muted small">یادداشت</div>
+                                        <div class="fw-semibold">${c.notes || '-'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Contract History Card -->
+                        <div class="card-app mt-4 animate-slideUp" style="animation-delay: 250ms;">
+                            <div class="card-app-header">
+                                <h2 class="card-app-title"><i class="bi bi-clock-history"></i> تاریخچه قرارداد</h2>
+                            </div>
+                            <div class="card-app-body p-0">
+                                <div id="contractHistoryContainer">
+                                    <div class="text-center py-4"><div class="spinner-app mx-auto"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Load contract history
+                    loadContractHistory();
+                }
+            } catch (error) { 
+                showAlert('خطا در بارگذاری اطلاعات', 'danger'); 
+                console.error(error);
+            }
+        }
+
+        async function loadContractHistory() {
+            try {
+                const data = await APIClient.get('coaches.php', { id: coachId, action: 'contract-history' });
+                const container = document.getElementById('contractHistoryContainer');
+                
+                if (data.success && data.data.history && data.data.history.length > 0) {
+                    container.innerHTML = `
+                        <table class="table-app">
+                            <thead>
+                                <tr>
+                                    <th>تاریخ</th>
+                                    <th>نوع قرارداد</th>
+                                    <th>درصد</th>
+                                    <th>حقوق</th>
+                                    <th>دوره</th>
+                                    <th>یادداشت</th>
+                                    <th>ثبت توسط</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.data.history.map(h => `
+                                    <tr>
+                                        <td>${formatJalaliDate(h.created_at_jalali)}</td>
+                                        <td>${contractTypeLabels[h.contract_type] || h.contract_type}</td>
+                                        <td><span class="text-primary">${h.percentage_rate || 0}%</span></td>
+                                        <td><span class="text-success">${formatCurrency(h.monthly_salary || 0)}</span></td>
+                                        <td>
+                                            ${h.start_date_jalali ? formatJalaliDate(h.start_date_jalali) : '-'}
+                                            ${h.end_date_jalali ? ` تا ${formatJalaliDate(h.end_date_jalali)}` : ''}
+                                        </td>
+                                        <td>${h.notes || '-'}</td>
+                                        <td>${h.created_by_name || '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="table-empty">
+                            <div class="table-empty-icon">📋</div>
+                            <div class="table-empty-text">تاریخچه‌ای یافت نشد</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading contract history:', error);
+                document.getElementById('contractHistoryContainer').innerHTML = `
+                    <div class="alert-app alert-app--danger m-3">خطا در بارگذاری تاریخچه</div>
+                `;
+            }
+        }
+
+        loadCoachDetail();
+        initDarkMode();
+    </script>
+</body>
+</html>

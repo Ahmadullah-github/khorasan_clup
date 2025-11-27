@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مربیان - کمپ خراسان</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar-app">
+        <a class="navbar-brand" href="index.html">
+            <span class="navbar-brand-icon">🤸‍♂️</span>
+            کمپ خراسان
+        </a>
+        
+        <ul class="navbar-nav-app">
+            <li><a class="nav-link-app" href="index.html">داشبورد</a></li>
+            <li><a class="nav-link-app" href="students.html">دانش‌آموزان</a></li>
+            <li><a class="nav-link-app active" href="coaches.html">مربیان</a></li>
+            <li><a class="nav-link-app" href="expenses.html">هزینه‌ها</a></li>
+            <li><a class="nav-link-app" href="rent.html">اجاره</a></li>
+            <li><a class="nav-link-app" href="accounting.html">درآمد خالص</a></li>
+            <li><a class="nav-link-app" href="reports.html">گزارش‌ها</a></li>
+            <li id="adminNavItem" style="display: none;">
+                <a class="nav-link-app" href="admin.html">مدیر</a>
+            </li>
+        </ul>
+        
+        <div class="navbar-actions">
+            <button type="button" class="theme-switch" id="themeSwitch" title="تغییر تم">
+                <span class="theme-switch-icons">
+                    <span class="theme-switch-icon theme-switch-icon--sun">☀️</span>
+                    <span class="theme-switch-icon theme-switch-icon--moon">🌙</span>
+                </span>
+                <span class="theme-switch-slider"></span>
+            </button>
+            <div class="navbar-user">
+                <span class="navbar-user-icon"><i class="bi bi-person"></i></span>
+                <span id="userName"></span>
+            </div>
+            <button class="navbar-logout" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>خروج</span>
+            </button>
+        </div>
+        
+        <button class="navbar-mobile-toggle" id="mobileMenuToggle">
+            <i class="bi bi-list"></i>
+        </button>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar-app" id="sidebar">
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-item">
+                <a href="index.html" class="sidebar-nav-link">
+                    <i class="bi bi-grid-1x2 sidebar-nav-icon"></i>
+                    داشبورد
+                </a>
+            </div>
+            
+            <div class="sidebar-section-title">مدیریت</div>
+            
+            <div class="sidebar-nav-item">
+                <a href="students.html" class="sidebar-nav-link">
+                    <i class="bi bi-people sidebar-nav-icon"></i>
+                    دانش‌آموزان
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="coaches.html" class="sidebar-nav-link active">
+                    <i class="bi bi-person-badge sidebar-nav-icon"></i>
+                    مربیان
+                </a>
+            </div>
+            
+            <div class="sidebar-section-title">مالی</div>
+            
+            <div class="sidebar-nav-item">
+                <a href="expenses.html" class="sidebar-nav-link">
+                    <i class="bi bi-cash-stack sidebar-nav-icon"></i>
+                    هزینه‌ها
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="rent.html" class="sidebar-nav-link">
+                    <i class="bi bi-house sidebar-nav-icon"></i>
+                    اجاره
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="accounting.html" class="sidebar-nav-link">
+                    <i class="bi bi-calculator sidebar-nav-icon"></i>
+                    درآمد خالص
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="reports.html" class="sidebar-nav-link">
+                    <i class="bi bi-bar-chart sidebar-nav-icon"></i>
+                    گزارش‌ها
+                </a>
+            </div>
+            
+            <div class="sidebar-section-title">سیستم</div>
+            
+            <div class="sidebar-nav-item" id="adminSidebarItem" style="display: none;">
+                <a href="admin.html" class="sidebar-nav-link">
+                    <i class="bi bi-gear sidebar-nav-icon"></i>
+                    مدیر
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="#" class="sidebar-nav-link" onclick="logout()">
+                    <i class="bi bi-box-arrow-right sidebar-nav-icon"></i>
+                    خروج
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="container-app">
+            <!-- Page Header -->
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="page-title mb-0">
+                    <i class="bi bi-person-badge me-2"></i>
+                    مدیریت مربیان
+                </h1>
+                <a href="coach-form.html" class="btn-app btn-app--primary">
+                    <i class="bi bi-plus-lg"></i>
+                    افزودن مربی
+                </a>
+            </div>
+
+            <!-- Coaches List -->
+            <div class="card-app animate-slideUp">
+                <div class="card-app-header">
+                    <h2 class="card-app-title">
+                        <i class="bi bi-list-ul"></i>
+                        لیست مربیان
+                    </h2>
+                    <div class="d-flex gap-2 align-items-center">
+                        <select class="form-select form-select-sm" id="statusFilter" style="width: auto;">
+                            <option value="active">فعال</option>
+                            <option value="on_leave">مرخصی</option>
+                            <option value="all">همه</option>
+                        </select>
+                        <div class="search-box-app">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" class="search-input" id="searchInput" placeholder="جستجو در مربیان...">
+                        </div>
+                    </div>
+                </div>
+                <div class="card-app-body p-0">
+                    <div class="table-responsive">
+                        <table class="table-app">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;"></th>
+                                    <th>نام کامل</th>
+                                    <th>نوع قرارداد</th>
+                                    <th>زمان‌های کلاس</th>
+                                    <th>دانش‌آموزان</th>
+                                    <th>درآمد</th>
+                                    <th>وضعیت</th>
+                                    <th style="width: 180px;">عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coachesTableBody">
+                                <tr>
+                                    <td colspan="8">
+                                        <div class="text-center py-4">
+                                            <div class="spinner-app mx-auto mb-3"></div>
+                                            <div class="text-muted">در حال بارگذاری...</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-app-footer" id="paginationContainer"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade modal-app" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        تأیید حذف
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>آیا مطمئن هستید که می‌خواهید <strong id="deleteCoachName"></strong> را حذف کنید؟</p>
+                    <div class="alert-app alert-app--warning">
+                        <i class="bi bi-info-circle"></i>
+                        اطلاعات مربی به مدت 60 روز نگهداری می‌شود و سپس به طور کامل حذف خواهد شد.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-app btn-app--secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="button" class="btn-app btn-app--danger" id="confirmDeleteBtn">
+                        <i class="bi bi-trash"></i>
+                        حذف
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/jalali.js"></script>
+    <script>
+        let currentPage = 1;
+        let currentSearch = '';
+        let currentStatus = 'active';
+        let coachToDelete = null;
+
+        // Check auth
+        const user = checkAuth();
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = user.username;
+            if (user.role === 'admin') {
+                document.getElementById('adminNavItem').style.display = 'block';
+                document.getElementById('adminSidebarItem').style.display = 'block';
+            }
+        }
+
+        // Contract type labels
+        const contractTypeLabels = {
+            'percentage': '📊 درصدی',
+            'salary': '💰 حقوق ثابت',
+            'hybrid': '⚖️ ترکیبی'
+        };
+
+        // Status labels and badges
+        const statusConfig = {
+            'active': { label: 'فعال', badge: 'badge-app--success' },
+            'inactive': { label: 'حذف شده', badge: 'badge-app--danger' },
+            'on_leave': { label: 'مرخصی', badge: 'badge-app--warning' }
+        };
+
+        async function loadCoaches(page = 1, search = '', status = 'active') {
+            try {
+                const params = { page, per_page: 20, status };
+                if (search) params.q = search;
+                
+                const data = await APIClient.get('coaches.php', params);
+                if (data.success) {
+                    const tbody = document.getElementById('coachesTableBody');
+                    if (data.data.coaches.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="8">
+                                    <div class="table-empty">
+                                        <div class="table-empty-icon">👤</div>
+                                        <div class="table-empty-text">مربی یافت نشد</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        tbody.innerHTML = data.data.coaches.map(coach => renderCoachRow(coach)).join('');
+                    }
+
+                    const paginationContainer = document.getElementById('paginationContainer');
+                    if (data.data.pagination && data.data.pagination.total_pages > 1) {
+                        new Pagination('paginationContainer', page, data.data.pagination.total_pages, (newPage) => {
+                            currentPage = newPage;
+                            loadCoaches(newPage, currentSearch, currentStatus);
+                        });
+                        paginationContainer.style.display = 'block';
+                    } else {
+                        paginationContainer.innerHTML = '';
+                        paginationContainer.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading coaches:', error);
+                showAlert('خطا در بارگذاری لیست مربیان', 'danger');
+            }
+        }
+
+        function renderCoachRow(coach) {
+            const photoHtml = coach.photo_path 
+                ? `<img src="${coach.photo_path}" class="rounded-circle" style="width:40px;height:40px;object-fit:cover;">`
+                : `<div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:40px;height:40px;"><i class="bi bi-person text-white"></i></div>`;
+            
+            const statusInfo = statusConfig[coach.status] || statusConfig['active'];
+            
+            const contractInfo = getContractInfo(coach);
+            
+            return `
+                <tr>
+                    <td>${photoHtml}</td>
+                    <td>
+                        <strong>${coach.first_name} ${coach.last_name}</strong>
+                        ${coach.phone ? `<br><small class="text-muted"><i class="bi bi-telephone"></i> ${coach.phone}</small>` : ''}
+                    </td>
+                    <td>
+                        <small>${contractInfo}</small>
+                    </td>
+                    <td>
+                        ${coach.time_slots && coach.time_slots.length > 0 
+                            ? coach.time_slots.map(ts => `<span class="badge-app badge-app--primary me-1 mb-1">${ts.name}</span>`).join('') 
+                            : '<span class="badge-app badge-app--gray">-</span>'}
+                    </td>
+                    <td><span class="badge-app badge-app--info">${coach.statistics?.student_count || 0}</span></td>
+                    <td><strong class="text-success">${formatCurrency(coach.statistics?.total_fees || 0)}</strong></td>
+                    <td><span class="badge-app ${statusInfo.badge}">${statusInfo.label}</span></td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn-app btn-app--primary btn-app--sm" onclick="viewCoach(${coach.id})" title="مشاهده">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn-app btn-app--secondary btn-app--sm" onclick="editCoach(${coach.id})" title="ویرایش">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn-app btn-app--danger btn-app--sm" onclick="confirmDelete(${coach.id}, '${coach.first_name} ${coach.last_name}')" title="حذف">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function getContractInfo(coach) {
+            const type = coach.contract_type || 'percentage';
+            let info = contractTypeLabels[type] || type;
+            
+            if (type === 'percentage') {
+                info += `<br><span class="text-primary">${coach.percentage_rate || 50}%</span>`;
+            } else if (type === 'salary') {
+                info += `<br><span class="text-success">${formatNumber(coach.monthly_salary || 0)}</span>`;
+            } else if (type === 'hybrid') {
+                info += `<br><span class="text-success">${formatNumber(coach.monthly_salary || 0)}</span> + <span class="text-primary">${coach.percentage_rate || 0}%</span>`;
+            }
+            
+            return info;
+        }
+
+        // Search with debounce
+        const searchDebounced = debounce((value) => {
+            currentSearch = value;
+            currentPage = 1;
+            loadCoaches(1, value, currentStatus);
+        }, 500);
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchDebounced(e.target.value);
+        });
+
+        // Status filter
+        document.getElementById('statusFilter').addEventListener('change', (e) => {
+            currentStatus = e.target.value;
+            currentPage = 1;
+            loadCoaches(1, currentSearch, currentStatus);
+        });
+
+        // Navigation functions
+        function viewCoach(id) {
+            window.location.href = `coach-detail.html?id=${id}`;
+        }
+
+        function editCoach(id) {
+            window.location.href = `coach-form.html?id=${id}`;
+        }
+
+        // Delete functionality
+        function confirmDelete(id, name) {
+            coachToDelete = id;
+            document.getElementById('deleteCoachName').textContent = name;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+            if (!coachToDelete) return;
+            
+            try {
+                const result = await APIClient.delete(`coaches.php?id=${coachToDelete}`);
+                if (result.success) {
+                    showAlert(result.message || 'مربی با موفقیت حذف شد', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                    loadCoaches(currentPage, currentSearch, currentStatus);
+                }
+            } catch (error) {
+                showAlert(error.message || 'خطا در حذف مربی', 'danger');
+            }
+            coachToDelete = null;
+        });
+
+        // Mobile sidebar toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+                sidebarOverlay.classList.toggle('show');
+            });
+        }
+
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        }
+
+        // Initialize
+        loadCoaches();
+        initDarkMode();
+    </script>
+</body>
+</html>

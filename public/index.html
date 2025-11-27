@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد - کمپ خراسان</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar-app">
+        <a class="navbar-brand" href="index.html">
+            <span class="navbar-brand-icon">🤸‍♂️</span>
+            کمپ خراسان
+        </a>
+        
+        <ul class="navbar-nav-app">
+            <li><a class="nav-link-app active" href="index.html">داشبورد</a></li>
+            <li><a class="nav-link-app" href="students.html">دانش‌آموزان</a></li>
+            <li><a class="nav-link-app" href="coaches.html">مربیان</a></li>
+            <li><a class="nav-link-app" href="expenses.html">هزینه‌ها</a></li>
+            <li><a class="nav-link-app" href="rent.html">اجاره</a></li>
+            <li><a class="nav-link-app" href="accounting.html">درآمد خالص</a></li>
+            <li><a class="nav-link-app" href="reports.html">گزارش‌ها</a></li>
+            <li id="adminNavItem" style="display: none;">
+                <a class="nav-link-app" href="admin.html">مدیر</a>
+            </li>
+        </ul>
+        
+        <div class="navbar-actions">
+            <!-- Theme Toggle Switch -->
+            <button type="button" class="theme-switch" id="themeSwitch" title="تغییر تم">
+                <span class="theme-switch-icons">
+                    <span class="theme-switch-icon theme-switch-icon--sun">☀️</span>
+                    <span class="theme-switch-icon theme-switch-icon--moon">🌙</span>
+                </span>
+                <span class="theme-switch-slider"></span>
+            </button>
+            
+            <!-- User Info -->
+            <div class="navbar-user">
+                <span class="navbar-user-icon"><i class="bi bi-person"></i></span>
+                <span id="userName"></span>
+            </div>
+            
+            <!-- Logout -->
+            <button class="navbar-logout" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>خروج</span>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu Toggle -->
+        <button class="navbar-mobile-toggle" id="mobileMenuToggle">
+            <i class="bi bi-list"></i>
+        </button>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar-app" id="sidebar">
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-item">
+                <a href="index.html" class="sidebar-nav-link active">
+                    <i class="bi bi-grid-1x2 sidebar-nav-icon"></i>
+                    داشبورد
+                </a>
+            </div>
+            
+            <div class="sidebar-section-title">مدیریت</div>
+            
+            <div class="sidebar-nav-item">
+                <a href="students.html" class="sidebar-nav-link">
+                    <i class="bi bi-people sidebar-nav-icon"></i>
+                    دانش‌آموزان
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="students.html?tab=new" class="sidebar-nav-link">
+                    <i class="bi bi-person-plus sidebar-nav-icon"></i>
+                    ثبت جدید
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="coaches.html" class="sidebar-nav-link">
+                    <i class="bi bi-person-badge sidebar-nav-icon"></i>
+                    مربیان
+                </a>
+            </div>
+            
+            <div class="sidebar-section-title">مالی</div>
+            
+            <div class="sidebar-nav-item">
+                <a href="expenses.html" class="sidebar-nav-link">
+                    <i class="bi bi-cash-stack sidebar-nav-icon"></i>
+                    هزینه‌ها
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="rent.html" class="sidebar-nav-link">
+                    <i class="bi bi-house sidebar-nav-icon"></i>
+                    اجاره
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="accounting.html" class="sidebar-nav-link">
+                    <i class="bi bi-calculator sidebar-nav-icon"></i>
+                    درآمد خالص
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="reports.html" class="sidebar-nav-link">
+                    <i class="bi bi-bar-chart sidebar-nav-icon"></i>
+                    گزارش‌ها
+                </a>
+            </div>
+            
+            <div class="sidebar-section-title">سیستم</div>
+            
+            <div class="sidebar-nav-item" id="adminSidebarItem" style="display: none;">
+                <a href="admin.html" class="sidebar-nav-link">
+                    <i class="bi bi-gear sidebar-nav-icon"></i>
+                    مدیر
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="#" class="sidebar-nav-link" onclick="logout()">
+                    <i class="bi bi-box-arrow-right sidebar-nav-icon"></i>
+                    خروج
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="container-app">
+            <!-- Page Header -->
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="page-title mb-0">داشبورد</h1>
+                <div class="text-secondary" id="currentDate"></div>
+            </div>
+
+            <!-- KPI Cards Row 1 -->
+            <div class="row g-4 mb-4">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card kpi-card--primary animate-slideUp">
+                        <div class="kpi-card-icon">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="kpi-card-value" id="totalStudents">
+                            <div class="skeleton skeleton-title" style="width: 80px; height: 36px;"></div>
+                        </div>
+                        <div class="kpi-card-label">کل دانش‌آموزان</div>
+                        <a href="students.html" class="kpi-card-link">
+                            مشاهده همه
+                            <i class="bi bi-arrow-left"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card kpi-card--success animate-slideUp" style="animation-delay: 50ms;">
+                        <div class="kpi-card-icon">
+                            <i class="bi bi-person-check"></i>
+                        </div>
+                        <div class="kpi-card-value" id="activeStudents">
+                            <div class="skeleton skeleton-title" style="width: 80px; height: 36px;"></div>
+                        </div>
+                        <div class="kpi-card-label">دانش‌آموزان فعال این ماه</div>
+                    </div>
+                </div>
+                
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card kpi-card--info animate-slideUp" style="animation-delay: 100ms;">
+                        <div class="kpi-card-icon">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                        <div class="kpi-card-value" id="totalRevenue">
+                            <div class="skeleton skeleton-title" style="width: 100px; height: 36px;"></div>
+                        </div>
+                        <div class="kpi-card-label">درآمد کل (افغانی)</div>
+                    </div>
+                </div>
+                
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card kpi-card--warning animate-slideUp" style="animation-delay: 150ms;">
+                        <div class="kpi-card-icon">
+                            <i class="bi bi-receipt"></i>
+                        </div>
+                        <div class="kpi-card-value" id="totalExpenses">
+                            <div class="skeleton skeleton-title" style="width: 100px; height: 36px;"></div>
+                        </div>
+                        <div class="kpi-card-label">کل هزینه‌ها (افغانی)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Cards Row 2 -->
+            <div class="row g-4 mb-6">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card kpi-card--dark animate-slideUp" style="animation-delay: 200ms;">
+                        <div class="kpi-card-icon">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <div class="kpi-card-value" id="netIncome">
+                            <div class="skeleton skeleton-title" style="width: 100px; height: 36px;"></div>
+                        </div>
+                        <div class="kpi-card-label">درآمد خالص (افغانی)</div>
+                    </div>
+                </div>
+                
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card kpi-card--danger animate-slideUp" style="animation-delay: 250ms;">
+                        <div class="kpi-card-icon">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="kpi-card-value" id="expiringCount">
+                            <div class="skeleton skeleton-title" style="width: 60px; height: 36px;"></div>
+                        </div>
+                        <div class="kpi-card-label">نیازمند تمدید</div>
+                        <a href="students.html?tab=expiring" class="kpi-card-link">
+                            مشاهده
+                            <i class="bi bi-arrow-left"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card-app mb-6 animate-slideUp" style="animation-delay: 300ms;">
+                <div class="card-app-header">
+                    <h2 class="card-app-title">
+                        <i class="bi bi-lightning-charge"></i>
+                        دسترسی سریع
+                    </h2>
+                </div>
+                <div class="card-app-body">
+                    <div class="quick-actions">
+                        <a href="students.html?tab=new" class="quick-action-card">
+                            <div class="quick-action-icon" style="background: var(--color-primary-50); color: var(--color-primary-600);">
+                                <i class="bi bi-person-plus"></i>
+                            </div>
+                            <span class="quick-action-label">ثبت دانش‌آموز جدید</span>
+                        </a>
+                        
+                        <a href="coaches.html" class="quick-action-card">
+                            <div class="quick-action-icon" style="background: var(--color-success-50); color: var(--color-success-600);">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            <span class="quick-action-label">مدیریت مربیان</span>
+                        </a>
+                        
+                        <a href="expenses.html" class="quick-action-card">
+                            <div class="quick-action-icon" style="background: var(--color-warning-50); color: var(--color-warning-600);">
+                                <i class="bi bi-cash-stack"></i>
+                            </div>
+                            <span class="quick-action-label">ثبت هزینه</span>
+                        </a>
+                        
+                        <a href="accounting.html" class="quick-action-card">
+                            <div class="quick-action-icon" style="background: #ecfeff; color: #0891b2;">
+                                <i class="bi bi-calculator"></i>
+                            </div>
+                            <span class="quick-action-label">محاسبه درآمد</span>
+                        </a>
+                    </div>
+                </div>
+            </div>  
+
+            <!-- Alerts Section -->
+            <div class="card-app animate-slideUp" style="animation-delay: 350ms;">
+                <div class="card-app-header" style="background: linear-gradient(135deg, var(--color-warning-500) 0%, var(--color-warning-600) 100%);">
+                    <h2 class="card-app-title text-dark">
+                        <i class="bi bi-bell"></i>
+                        هشدارها
+                    </h2>
+                </div>
+                <div class="card-app-body" id="alertsContainer">
+                    <!-- Loading skeleton -->
+                    <div class="skeleton skeleton-text" style="width: 100%;"></div>
+                    <div class="skeleton skeleton-text" style="width: 80%;"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/jalali.js?v=2"></script>
+    <script>
+        // Check authentication
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = user.username;
+            // Show Admin tab if user is admin
+            if (user.role === 'admin') {
+                document.getElementById('adminNavItem').style.display = 'block';
+                document.getElementById('adminSidebarItem').style.display = 'block';
+            }
+        }
+
+        // Display current Jalali date
+        function displayCurrentDate() {
+            const now = new Date();
+            const jalali = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+            const monthNames = ['حمل', 'ثور', 'جوزا', 'سرطان', 'اسد', 'سنبله', 'میزان', 'عقرب', 'قوس', 'جدی', 'دلو', 'حوت'];
+            const monthName = monthNames[jalali.month - 1];
+            document.getElementById('currentDate').textContent = `${jalali.day} ${monthName} ${jalali.year}`;
+        }
+        displayCurrentDate();
+
+        // Load dashboard data
+        async function loadDashboard() {
+            console.log('Loading dashboard, API_BASE:', API_BASE);
+            
+            // Get current Jalali month/year
+            const now = new Date();
+            const jalali = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+            const month = jalali.month;
+            const year = jalali.year;
+            console.log('Current Jalali date:', year, month);
+
+            // Total students
+            try {
+                const studentsRes = await fetch(API_BASE + 'students.php');
+                const studentsData = await studentsRes.json();
+                console.log('Students response:', studentsData);
+                if (studentsData.success) {
+                    document.getElementById('totalStudents').textContent = formatNumber(studentsData.data.pagination.total);
+                } else {
+                    document.getElementById('totalStudents').textContent = '۰';
+                }
+            } catch (error) {
+                console.error('Error loading total students:', error);
+                document.getElementById('totalStudents').textContent = 'خطا';
+            }
+
+            // Active students this month
+            try {
+                const activeRes = await fetch(API_BASE + 'students.php?status=active');
+                const activeData = await activeRes.json();
+                console.log('Active students response:', activeData);
+                if (activeData.success) {
+                    document.getElementById('activeStudents').textContent = formatNumber(activeData.data.pagination.total);
+                } else {
+                    document.getElementById('activeStudents').textContent = '۰';
+                }
+            } catch (error) {
+                console.error('Error loading active students:', error);
+                document.getElementById('activeStudents').textContent = 'خطا';
+            }
+
+            // Net income
+            try {
+                const netIncomeRes = await fetch(API_BASE + `accounting.php?action=net-income&month=${month}&year=${year}`);
+                const netIncomeData = await netIncomeRes.json();
+                console.log('Net income response:', netIncomeData);
+                if (netIncomeData.success) {
+                    document.getElementById('totalRevenue').textContent = formatNumber(netIncomeData.data.total_income);
+                    document.getElementById('totalExpenses').textContent = formatNumber(netIncomeData.data.total_expenses);
+                    document.getElementById('netIncome').textContent = formatNumber(netIncomeData.data.net_income);
+                } else {
+                    document.getElementById('totalRevenue').textContent = '۰';
+                    document.getElementById('totalExpenses').textContent = '۰';
+                    document.getElementById('netIncome').textContent = '۰';
+                }
+            } catch (error) {
+                console.error('Error loading net income:', error);
+                document.getElementById('totalRevenue').textContent = 'خطا';
+                document.getElementById('totalExpenses').textContent = 'خطا';
+                document.getElementById('netIncome').textContent = 'خطا';
+            }
+
+            // Expiring students
+            try {
+                const expiringRes = await fetch(API_BASE + 'students.php?action=expiring');
+                const expiringData = await expiringRes.json();
+                console.log('Expiring students response:', expiringData);
+                if (expiringData.success) {
+                    document.getElementById('expiringCount').textContent = formatNumber(expiringData.data.length);
+                    
+                    const alertsContainer = document.getElementById('alertsContainer');
+                    if (expiringData.data.length > 0) {
+                        alertsContainer.innerHTML = expiringData.data.slice(0, 5).map(s => `
+                            <div class="alert-app alert-app--warning mb-3">
+                                <i class="bi bi-exclamation-circle alert-app-icon"></i>
+                                <div class="alert-app-content">
+                                    <div class="alert-app-title">${s.first_name} ${s.last_name}</div>
+                                    <div>تمدید تا ${formatJalaliDate(s.end_date_jalali)}</div>
+                                </div>
+                                <a href="student-detail.html?id=${s.id}" class="btn-app btn-app--warning btn-app--sm">
+                                    تمدید
+                                </a>
+                            </div>
+                        `).join('');
+                    } else {
+                        alertsContainer.innerHTML = `
+                            <div class="alert-app alert-app--success">
+                                <i class="bi bi-check-circle alert-app-icon"></i>
+                                <div class="alert-app-content">
+                                    هیچ دانش‌آموزی نیازمند تمدید نیست
+                                </div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    document.getElementById('expiringCount').textContent = '۰';
+                }
+            } catch (error) {
+                console.error('Error loading expiring students:', error);
+                document.getElementById('expiringCount').textContent = 'خطا';
+                document.getElementById('alertsContainer').innerHTML = `
+                    <div class="alert-app alert-app--danger">
+                        <i class="bi bi-x-circle alert-app-icon"></i>
+                        <div class="alert-app-content">
+                            خطا در بارگذاری اطلاعات. لطفاً صفحه را رفرش کنید.
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('fa-IR').format(num);
+        }
+
+        function logout() {
+            fetch(API_BASE + 'auth.php?action=logout', { method: 'POST' })
+                .then(() => {
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                });
+        }
+
+        // Mobile sidebar toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+                sidebarOverlay.classList.toggle('show');
+            });
+        }
+
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        }
+
+        // Initialize
+        loadDashboard();
+        initDarkMode();
+    </script>
+</body>
+</html>

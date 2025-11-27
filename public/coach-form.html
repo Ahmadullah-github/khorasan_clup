@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فرم مربی - کمپ خراسان</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <style>
+        .photo-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-secondary);
+        }
+        .photo-upload-area:hover { border-color: var(--color-primary-500); background: var(--bg-tertiary); }
+        .photo-upload-area.has-photo { padding: var(--space-2); }
+        .photo-preview { max-width: 200px; max-height: 200px; border-radius: var(--radius-lg); object-fit: cover; }
+        .photo-upload-icon { font-size: 48px; color: var(--text-tertiary); margin-bottom: var(--space-2); }
+        .contract-type-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+        @media (max-width: 767px) { .contract-type-cards { grid-template-columns: 1fr; } }
+        .contract-type-card {
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .contract-type-card:hover { border-color: var(--color-primary-400); }
+        .contract-type-card.selected { border-color: var(--color-primary-500); background: var(--color-primary-50); }
+        [data-theme="dark"] .contract-type-card.selected { background: var(--color-primary-900); }
+        .contract-type-card input[type="radio"] { display: none; }
+        .contract-type-icon { font-size: 32px; margin-bottom: var(--space-2); }
+        .contract-type-title { font-weight: var(--font-weight-semibold); margin-bottom: var(--space-1); }
+        .contract-type-desc { font-size: var(--font-size-sm); color: var(--text-secondary); }
+        .contract-fields { display: none; animation: fadeIn 0.3s ease; }
+        .contract-fields.show { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .form-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: var(--space-5);
+            margin-bottom: var(--space-5);
+        }
+        .form-section-title {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--space-4);
+            padding-bottom: var(--space-3);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        .time-slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-3); }
+        .time-slot-card {
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--space-3);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .time-slot-card:hover { border-color: var(--color-primary-400); }
+        .time-slot-card.selected { border-color: var(--color-primary-500); background: var(--color-primary-50); }
+        [data-theme="dark"] .time-slot-card.selected { background: var(--color-primary-900); }
+        .time-slot-card input[type="checkbox"] { display: none; }
+        .form-error { display: none; color: var(--color-danger-600); font-size: var(--font-size-sm); margin-top: var(--space-1); }
+        .form-error.show, .form-error[style*="flex"] { display: flex; align-items: center; gap: var(--space-1); }
+        .is-invalid { border-color: var(--color-danger-500) !important; }
+        .alert-container { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 300px; }
+    </style>
+</head>
+<body>
+    <!-- Alert Container -->
+    <div id="alertContainer" class="alert-container"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar-app">
+        <a class="navbar-brand" href="index.html">
+            <span class="navbar-brand-icon">🤸‍♂️</span>
+            کمپ خراسان
+        </a>
+        <div class="navbar-actions">
+            <a href="coaches.html" class="btn-app btn-app--secondary btn-app--sm">
+                <i class="bi bi-arrow-right"></i> بازگشت به لیست
+            </a>
+            <button type="button" class="theme-switch" id="themeSwitch" title="تغییر تم">
+                <span class="theme-switch-icons">
+                    <span class="theme-switch-icon theme-switch-icon--sun">☀️</span>
+                    <span class="theme-switch-icon theme-switch-icon--moon">🌙</span>
+                </span>
+                <span class="theme-switch-slider"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="app-main" style="margin-right: 0;">
+        <div class="container-app" style="max-width: 900px;">
+            <div class="flex items-center justify-between mb-5">
+                <h1 class="page-title mb-0" id="pageTitle">
+                    <i class="bi bi-person-plus me-2"></i>
+                    افزودن مربی جدید
+                </h1>
+            </div>
+
+            <form id="coachForm" novalidate>
+                <!-- Basic Info Section -->
+                <div class="form-section animate-slideUp">
+                    <div class="form-section-title">
+                        <i class="bi bi-person"></i>
+                        اطلاعات شخصی
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <label class="form-label-app">عکس مربی</label>
+                            <div class="photo-upload-area" id="photoUploadArea">
+                                <div id="photoPlaceholder">
+                                    <div class="photo-upload-icon"><i class="bi bi-camera"></i></div>
+                                    <div class="text-muted">کلیک کنید یا عکس را بکشید</div>
+                                    <div class="text-muted small">حداکثر 5MB</div>
+                                </div>
+                                <img id="photoPreview" class="photo-preview d-none" alt="Preview">
+                            </div>
+                            <input type="file" id="photoInput" accept="image/*" class="d-none">
+                            <input type="hidden" id="photoPath" name="photo_path">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label-app required"><i class="bi bi-person"></i> نام</label>
+                                    <input type="text" class="form-control-app" id="firstName" placeholder="نام مربی" required>
+                                    <div class="form-error" id="firstNameError"><i class="bi bi-exclamation-circle"></i> لطفاً نام مربی را وارد کنید</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-app required"><i class="bi bi-person"></i> نام خانوادگی</label>
+                                    <input type="text" class="form-control-app" id="lastName" placeholder="نام خانوادگی" required>
+                                    <div class="form-error" id="lastNameError"><i class="bi bi-exclamation-circle"></i> لطفاً نام خانوادگی را وارد کنید</div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label-app"><i class="bi bi-telephone"></i> شماره تماس</label>
+                                    <input type="tel" class="form-control-app" id="phone" placeholder="0700000000">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label-app"><i class="bi bi-sticky"></i> یادداشت</label>
+                                    <textarea class="form-control-app" id="notes" rows="2" placeholder="یادداشت اختیاری..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Time Slots Section -->
+                <div class="form-section animate-slideUp" style="animation-delay: 100ms;">
+                    <div class="form-section-title">
+                        <i class="bi bi-clock"></i>
+                        زمان‌های کلاس
+                        <span class="text-danger">*</span>
+                    </div>
+                    <div id="timeSlotsLoading" class="text-center py-4">
+                        <div class="spinner-app mx-auto mb-2"></div>
+                        <div class="text-muted">در حال بارگذاری...</div>
+                    </div>
+                    <div id="timeSlotsContainer" class="time-slots-grid"></div>
+                    <div class="form-error" id="timeSlotsError"><i class="bi bi-exclamation-circle"></i> حداقل یک زمان کلاس را انتخاب کنید</div>
+                </div>
+
+                <!-- Contract Section -->
+                <div class="form-section animate-slideUp" style="animation-delay: 200ms;">
+                    <div class="form-section-title">
+                        <i class="bi bi-file-earmark-text"></i>
+                        جزئیات قرارداد
+                    </div>
+                    <label class="form-label-app mb-3">نوع قرارداد</label>
+                    <div class="contract-type-cards mb-4">
+                        <label class="contract-type-card selected" data-type="percentage">
+                            <input type="radio" name="contract_type" value="percentage" checked>
+                            <div class="contract-type-icon">📊</div>
+                            <div class="contract-type-title">درصدی</div>
+                            <div class="contract-type-desc">درصدی از هر دانش‌آموز</div>
+                        </label>
+                        <label class="contract-type-card" data-type="salary">
+                            <input type="radio" name="contract_type" value="salary">
+                            <div class="contract-type-icon">💰</div>
+                            <div class="contract-type-title">حقوق ثابت</div>
+                            <div class="contract-type-desc">مبلغ ماهانه ثابت</div>
+                        </label>
+                        <label class="contract-type-card" data-type="hybrid">
+                            <input type="radio" name="contract_type" value="hybrid">
+                            <div class="contract-type-icon">⚖️</div>
+                            <div class="contract-type-title">ترکیبی</div>
+                            <div class="contract-type-desc">حقوق ثابت + درصد</div>
+                        </label>
+                    </div>
+                    
+                    <div id="percentageFields" class="contract-fields show">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label-app"><i class="bi bi-percent"></i> درصد از هر دانش‌آموز</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control-app" id="percentageRate" value="50" min="0" max="100" step="0.5">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div class="form-text">پیش‌فرض: 50%</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="salaryFields" class="contract-fields">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label-app"><i class="bi bi-cash"></i> حقوق ماهانه</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control-app" id="monthlySalary" value="0" min="0" step="100">
+                                    <span class="input-group-text">افغانی</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="hybridFields" class="contract-fields">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label-app"><i class="bi bi-cash"></i> حقوق پایه ماهانه</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control-app" id="hybridSalary" value="0" min="0" step="100">
+                                    <span class="input-group-text">افغانی</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-app"><i class="bi bi-percent"></i> درصد اضافی</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control-app" id="hybridPercentage" value="25" min="0" max="100" step="0.5">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fee Calculation Slots - only for percentage/hybrid -->
+                    <div id="feeCalcSlotsSection" class="mt-4">
+                        <label class="form-label-app"><i class="bi bi-clock-history"></i> محاسبه درصد از کدام زمان‌ها</label>
+                        <div class="form-text mb-2">مشخص کنید درصد مربی از دانش‌آموزان کدام زمان‌ها محاسبه شود</div>
+                        <div class="d-flex gap-3 flex-wrap">
+                            <label class="contract-type-card" data-calc="all" style="flex: 1; min-width: 140px; padding: var(--space-3);">
+                                <input type="radio" name="fee_calculation_slots" value="all" checked>
+                                <div class="contract-type-icon" style="font-size: 24px;">📊</div>
+                                <div class="contract-type-title" style="font-size: 14px;">همه زمان‌ها</div>
+                                <div class="contract-type-desc" style="font-size: 11px;">از تمام دانش‌آموزان</div>
+                            </label>
+                            <label class="contract-type-card" data-calc="morning_evening" style="flex: 1; min-width: 140px; padding: var(--space-3);">
+                                <input type="radio" name="fee_calculation_slots" value="morning_evening">
+                                <div class="contract-type-icon" style="font-size: 24px;">🌅</div>
+                                <div class="contract-type-title" style="font-size: 14px;">صبح و شام</div>
+                                <div class="contract-type-desc" style="font-size: 11px;">فقط Morning/Evening</div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label-app"><i class="bi bi-calendar-event"></i> تاریخ شروع قرارداد</label>
+                            <input type="text" class="form-control-app" id="contractStart" data-jdp data-jdp-only-date placeholder="انتخاب تاریخ">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-app"><i class="bi bi-calendar-x"></i> تاریخ پایان قرارداد</label>
+                            <input type="text" class="form-control-app" id="contractEnd" data-jdp data-jdp-only-date placeholder="اختیاری">
+                            <div class="form-text">خالی بگذارید برای قرارداد بدون پایان</div>
+                        </div>
+                    </div>
+                    
+                    <div id="contractChangeNotesSection" class="mt-3 d-none">
+                        <label class="form-label-app"><i class="bi bi-journal-text"></i> دلیل تغییر قرارداد</label>
+                        <textarea class="form-control-app" id="contractChangeNotes" rows="2" placeholder="توضیح تغییرات قرارداد..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex gap-3 justify-content-end mb-5">
+                    <a href="coaches.html" class="btn-app btn-app--secondary">
+                        <i class="bi bi-x-lg"></i> انصراف
+                    </a>
+                    <button type="submit" class="btn-app btn-app--primary" id="submitBtn">
+                        <span class="spinner-app spinner-app--sm d-none" id="btnSpinner"></span>
+                        <i class="bi bi-check-lg" id="btnIcon"></i>
+                        <span id="btnText">ذخیره مربی</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/jalali.js"></script>
+    <script>
+        // Auth check
+        const user = checkAuth();
+        if (!user) window.location.href = 'login.html';
+
+        // URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const coachId = urlParams.get('id');
+        const isEditMode = !!coachId;
+
+        // State
+        let timeSlots = [];
+        let originalCoach = null;
+        let uploadedPhotoPath = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            initDarkMode();
+            initDatePickers();
+            initContractTypeCards();
+            initPhotoUpload();
+            initRealTimeValidation();
+            await loadTimeSlots();
+            
+            if (isEditMode) {
+                document.getElementById('pageTitle').innerHTML = '<i class="bi bi-pencil me-2"></i> ویرایش مربی';
+                document.getElementById('btnText').textContent = 'بروزرسانی';
+                document.getElementById('contractChangeNotesSection').classList.remove('d-none');
+                await loadCoachData();
+            } else {
+                setTodayAsDefault();
+            }
+        });
+
+        // Real-time validation
+        function initRealTimeValidation() {
+            const firstName = document.getElementById('firstName');
+            const lastName = document.getElementById('lastName');
+            
+            firstName.addEventListener('blur', () => validateField(firstName, 'firstNameError'));
+            firstName.addEventListener('input', () => clearFieldError(firstName, 'firstNameError'));
+            
+            lastName.addEventListener('blur', () => validateField(lastName, 'lastNameError'));
+            lastName.addEventListener('input', () => clearFieldError(lastName, 'lastNameError'));
+        }
+
+        function validateField(field, errorId) {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                document.getElementById(errorId).style.display = 'flex';
+                return false;
+            }
+            return true;
+        }
+
+        function clearFieldError(field, errorId) {
+            if (field.value.trim()) {
+                field.classList.remove('is-invalid');
+                document.getElementById(errorId).style.display = 'none';
+            }
+        }
+
+        // Date pickers
+        function initDatePickers() {
+            if (typeof jalaliDatepicker !== 'undefined') {
+                jalaliDatepicker.startWatch({ minDate: "attr", maxDate: "attr", time: false });
+            }
+        }
+
+        function setTodayAsDefault() {
+            const today = new Date();
+            const jDate = gregorianToJalali(today.getFullYear(), today.getMonth() + 1, today.getDate());
+            document.getElementById('contractStart').value = `${jDate.year}/${String(jDate.month).padStart(2,'0')}/${String(jDate.day).padStart(2,'0')}`;
+        }
+
+        // Contract type cards
+        function initContractTypeCards() {
+            // Contract type selection
+            document.querySelectorAll('.contract-type-card[data-type]').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('.contract-type-card[data-type]').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    card.querySelector('input[type="radio"]').checked = true;
+                    updateContractFields(card.dataset.type);
+                });
+            });
+            
+            // Fee calculation slots selection
+            document.querySelectorAll('.contract-type-card[data-calc]').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('.contract-type-card[data-calc]').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    card.querySelector('input[type="radio"]').checked = true;
+                });
+            });
+            
+            // Set default selection for fee calc
+            document.querySelector('.contract-type-card[data-calc="all"]')?.classList.add('selected');
+        }
+
+        function updateContractFields(type) {
+            document.getElementById('percentageFields').classList.remove('show');
+            document.getElementById('salaryFields').classList.remove('show');
+            document.getElementById('hybridFields').classList.remove('show');
+            document.getElementById(type + 'Fields')?.classList.add('show');
+            
+            // Show/hide fee calculation slots section (only for percentage/hybrid)
+            const feeCalcSection = document.getElementById('feeCalcSlotsSection');
+            if (feeCalcSection) {
+                feeCalcSection.style.display = (type === 'percentage' || type === 'hybrid') ? 'block' : 'none';
+            }
+        }
+
+        // Photo upload
+        function initPhotoUpload() {
+            const photoInput = document.getElementById('photoInput');
+            const uploadArea = document.getElementById('photoUploadArea');
+            const preview = document.getElementById('photoPreview');
+            const placeholder = document.getElementById('photoPlaceholder');
+
+            uploadArea.addEventListener('click', () => photoInput.click());
+
+            photoInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (file.size > 5 * 1024 * 1024) {
+                    showAlert('حجم فایل نباید بیشتر از 5MB باشد', 'danger');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    preview.src = ev.target.result;
+                    preview.classList.remove('d-none');
+                    placeholder.classList.add('d-none');
+                    uploadArea.classList.add('has-photo');
+                };
+                reader.readAsDataURL(file);
+                await uploadPhoto(file);
+            });
+
+            uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor = 'var(--color-primary-500)'; });
+            uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = ''; });
+            uploadArea.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '';
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    photoInput.files = dt.files;
+                    photoInput.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+
+        async function uploadPhoto(file) {
+            const formData = new FormData();
+            formData.append('photo', file);
+            formData.append('coach_id', coachId || 'new');
+
+            try {
+                const response = await fetch(API_BASE + 'coaches.php?action=upload-photo', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    uploadedPhotoPath = data.data.file_path;
+                    document.getElementById('photoPath').value = uploadedPhotoPath;
+                    showAlert('عکس با موفقیت آپلود شد', 'success');
+                } else {
+                    throw new Error(data.error || 'Upload failed');
+                }
+            } catch (error) {
+                showAlert('خطا در آپلود عکس: ' + error.message, 'danger');
+            }
+        }
+
+        // Load time slots
+        async function loadTimeSlots() {
+            const loading = document.getElementById('timeSlotsLoading');
+            const container = document.getElementById('timeSlotsContainer');
+            
+            try {
+                const data = await APIClient.get('coaches.php', { action: 'time-slots' });
+                if (data.success && Array.isArray(data.data)) {
+                    timeSlots = data.data;
+                    loading.style.display = 'none';
+                    
+                    if (timeSlots.length === 0) {
+                        container.innerHTML = '<div class="alert-app alert-app--warning">هیچ زمان کلاسی تعریف نشده است</div>';
+                    } else {
+                        container.innerHTML = timeSlots.map(slot => `
+                            <div class="time-slot-card" data-slot-id="${slot.id}">
+                                <input type="checkbox" name="time_slots" value="${slot.id}" style="display:none;">
+                                <div><i class="bi bi-clock"></i></div>
+                                <div class="fw-semibold">${slot.name}</div>
+                                ${slot.description ? `<div class="small text-muted">${slot.description}</div>` : ''}
+                            </div>
+                        `).join('');
+                        
+                        // Click handlers for time slot cards
+                        container.querySelectorAll('.time-slot-card').forEach(card => {
+                            card.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                this.classList.toggle('selected');
+                                const checkbox = this.querySelector('input[type="checkbox"]');
+                                checkbox.checked = this.classList.contains('selected');
+                                // Clear error when at least one selected
+                                if (document.querySelectorAll('.time-slot-card.selected').length > 0) {
+                                    document.getElementById('timeSlotsError').style.display = 'none';
+                                }
+                            });
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading time slots:', error);
+                loading.innerHTML = '<div class="alert-app alert-app--danger">خطا در بارگذاری زمان‌ها</div>';
+            }
+        }
+
+        // Load coach data for editing
+        async function loadCoachData() {
+            try {
+                const data = await APIClient.get('coaches.php', { id: coachId });
+                if (data.success) {
+                    originalCoach = data.data;
+                    populateForm(originalCoach);
+                }
+            } catch (error) {
+                showAlert('خطا در بارگذاری اطلاعات مربی', 'danger');
+                console.error(error);
+            }
+        }
+
+        // Populate form
+        function populateForm(coach) {
+            document.getElementById('firstName').value = coach.first_name || '';
+            document.getElementById('lastName').value = coach.last_name || '';
+            document.getElementById('phone').value = coach.phone || '';
+            document.getElementById('notes').value = coach.notes || '';
+            
+            // Photo
+            if (coach.photo_path) {
+                const preview = document.getElementById('photoPreview');
+                const placeholder = document.getElementById('photoPlaceholder');
+                const uploadArea = document.getElementById('photoUploadArea');
+                preview.src = coach.photo_path;
+                preview.classList.remove('d-none');
+                placeholder.classList.add('d-none');
+                uploadArea.classList.add('has-photo');
+                document.getElementById('photoPath').value = coach.photo_path;
+            }
+            
+            // Contract type
+            const contractType = coach.contract_type || 'percentage';
+            document.querySelectorAll('.contract-type-card').forEach(card => {
+                card.classList.remove('selected');
+                if (card.dataset.type === contractType) {
+                    card.classList.add('selected');
+                    card.querySelector('input').checked = true;
+                }
+            });
+            updateContractFields(contractType);
+            
+            // Contract values
+            document.getElementById('percentageRate').value = coach.percentage_rate || 50;
+            document.getElementById('monthlySalary').value = coach.monthly_salary || 0;
+            document.getElementById('hybridSalary').value = coach.monthly_salary || 0;
+            document.getElementById('hybridPercentage').value = coach.percentage_rate || 25;
+            
+            // Fee calculation slots
+            const feeCalcSlots = coach.fee_calculation_slots || 'all';
+            document.querySelectorAll('.contract-type-card[data-calc]').forEach(card => {
+                card.classList.remove('selected');
+                if (card.dataset.calc === feeCalcSlots) {
+                    card.classList.add('selected');
+                    card.querySelector('input').checked = true;
+                }
+            });
+            
+            // Contract dates
+            if (coach.contract_start_jalali) {
+                document.getElementById('contractStart').value = coach.contract_start_jalali.replace(/-/g, '/');
+            }
+            if (coach.contract_end_jalali) {
+                document.getElementById('contractEnd').value = coach.contract_end_jalali.replace(/-/g, '/');
+            }
+            
+            // Time slots - wait for them to load
+            const checkAndSelectSlots = () => {
+                const container = document.getElementById('timeSlotsContainer');
+                if (container.children.length > 0 && coach.time_slots && coach.time_slots.length > 0) {
+                    coach.time_slots.forEach(ts => {
+                        const card = container.querySelector(`.time-slot-card[data-slot-id="${ts.id}"]`);
+                        if (card) {
+                            card.classList.add('selected');
+                            const checkbox = card.querySelector('input[type="checkbox"]');
+                            if (checkbox) checkbox.checked = true;
+                        }
+                    });
+                } else {
+                    setTimeout(checkAndSelectSlots, 100);
+                }
+            };
+            setTimeout(checkAndSelectSlots, 200);
+        }
+
+        // Form submission
+        document.getElementById('coachForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const firstName = document.getElementById('firstName');
+            const lastName = document.getElementById('lastName');
+            const selectedSlots = document.querySelectorAll('.time-slot-card.selected');
+            
+            // Clear all errors
+            document.querySelectorAll('.form-error').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            
+            let isValid = true;
+            
+            if (!firstName.value.trim()) {
+                firstName.classList.add('is-invalid');
+                document.getElementById('firstNameError').style.display = 'flex';
+                isValid = false;
+            }
+            
+            if (!lastName.value.trim()) {
+                lastName.classList.add('is-invalid');
+                document.getElementById('lastNameError').style.display = 'flex';
+                isValid = false;
+            }
+            
+            if (selectedSlots.length === 0) {
+                document.getElementById('timeSlotsError').style.display = 'flex';
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                showAlert('لطفاً فیلدهای الزامی را پر کنید', 'warning');
+                return;
+            }
+            
+            // Get contract values
+            const contractType = document.querySelector('input[name="contract_type"]:checked').value;
+            let percentageRate = 0, monthlySalary = 0;
+            
+            if (contractType === 'percentage') {
+                percentageRate = parseFloat(document.getElementById('percentageRate').value) || 0;
+                if (percentageRate <= 0 || percentageRate > 100) {
+                    showAlert('درصد باید بین 1 تا 100 باشد', 'warning');
+                    document.getElementById('percentageRate').classList.add('is-invalid');
+                    return;
+                }
+            } else if (contractType === 'salary') {
+                monthlySalary = parseFloat(document.getElementById('monthlySalary').value) || 0;
+                if (monthlySalary <= 0) {
+                    showAlert('حقوق ماهانه باید بیشتر از صفر باشد', 'warning');
+                    document.getElementById('monthlySalary').classList.add('is-invalid');
+                    return;
+                }
+            } else if (contractType === 'hybrid') {
+                monthlySalary = parseFloat(document.getElementById('hybridSalary').value) || 0;
+                percentageRate = parseFloat(document.getElementById('hybridPercentage').value) || 0;
+                if (monthlySalary <= 0) {
+                    showAlert('حقوق پایه باید بیشتر از صفر باشد', 'warning');
+                    document.getElementById('hybridSalary').classList.add('is-invalid');
+                    return;
+                }
+                if (percentageRate <= 0 || percentageRate > 100) {
+                    showAlert('درصد اضافی باید بین 1 تا 100 باشد', 'warning');
+                    document.getElementById('hybridPercentage').classList.add('is-invalid');
+                    return;
+                }
+            }
+            
+            // Get fee calculation slots (only relevant for percentage/hybrid)
+            const feeCalcSlots = document.querySelector('input[name="fee_calculation_slots"]:checked')?.value || 'all';
+            
+            // Build form data
+            const formData = {
+                first_name: firstName.value.trim(),
+                last_name: lastName.value.trim(),
+                phone: document.getElementById('phone').value.trim() || null,
+                notes: document.getElementById('notes').value.trim() || null,
+                photo_path: uploadedPhotoPath || document.getElementById('photoPath').value || null,
+                contract_type: contractType,
+                percentage_rate: percentageRate,
+                monthly_salary: monthlySalary,
+                fee_calculation_slots: (contractType === 'percentage' || contractType === 'hybrid') ? feeCalcSlots : 'all',
+                contract_start_jalali: document.getElementById('contractStart').value.replace(/\//g, '-') || null,
+                contract_end_jalali: document.getElementById('contractEnd').value.replace(/\//g, '-') || null,
+                time_slot_ids: Array.from(selectedSlots).map(card => parseInt(card.dataset.slotId))
+            };
+            
+            if (isEditMode) {
+                formData.contract_change_notes = document.getElementById('contractChangeNotes').value.trim() || null;
+            }
+            
+            // Submit
+            const submitBtn = document.getElementById('submitBtn');
+            const btnSpinner = document.getElementById('btnSpinner');
+            const btnIcon = document.getElementById('btnIcon');
+            const btnText = document.getElementById('btnText');
+            
+            submitBtn.disabled = true;
+            btnSpinner.classList.remove('d-none');
+            btnIcon.classList.add('d-none');
+            btnText.textContent = 'در حال ذخیره...';
+            
+            try {
+                let result;
+                if (isEditMode) {
+                    result = await APIClient.put(`coaches.php?id=${coachId}`, formData);
+                } else {
+                    result = await APIClient.post('coaches.php', formData);
+                }
+                
+                if (result.success) {
+                    showAlert(isEditMode ? 'مربی با موفقیت بروزرسانی شد' : 'مربی با موفقیت افزوده شد', 'success');
+                    // Redirect after success
+                    setTimeout(() => {
+                        window.location.href = 'coaches.html';
+                    }, 1500);
+                } else {
+                    throw new Error(result.error || 'خطای نامشخص');
+                }
+            } catch (error) {
+                console.error('Submit error:', error);
+                showAlert(error.message || 'خطا در ذخیره اطلاعات', 'danger');
+                submitBtn.disabled = false;
+                btnSpinner.classList.add('d-none');
+                btnIcon.classList.remove('d-none');
+                btnText.textContent = isEditMode ? 'بروزرسانی' : 'ذخیره مربی';
+            }
+        });
+    </script>
+</body>
+</html>
