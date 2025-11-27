@@ -362,7 +362,7 @@ C:\xampp\htdocs\sports-camp\
 3. Click **Start** next to **MySQL**
 4. Both should show green "Running" status
 
-![XAMPP Control Panel](https://i.imgur.com/XAMPP-example.png)
+![alt text](image-1.png)
 
 > **Tip:** If Apache won't start, port 80 might be in use. Click "Config" → "Apache (httpd.conf)" and change `Listen 80` to `Listen 8080`.
 
