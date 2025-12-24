@@ -517,6 +517,15 @@
                     document.getElementById('totalIncome').textContent = formatCurrency(netIncomeData.data.total_income);
                     document.getElementById('totalExpenses').textContent = formatCurrency(netIncomeData.data.total_expenses);
                     document.getElementById('netIncome').textContent = formatCurrency(netIncomeData.data.net_income);
+                    
+                    // Check for discrepancy between registrations and payments
+                    if (netIncomeData.data.has_discrepancy) {
+                        const discrepancy = netIncomeData.data.income_discrepancy;
+                        showAlert(
+                            `<strong>اخطار:</strong> اختلاف بین درآمد ثبت‌نام (${formatCurrency(netIncomeData.data.total_income)}) و پرداخت‌ها (${formatCurrency(netIncomeData.data.total_payments)}): ${formatCurrency(Math.abs(discrepancy))}`,
+                            'warning'
+                        );
+                    }
                 } else {
                     // Show error state in summary cards
                     const errorMsg = netIncomeData.message || 'خطا در محاسبه درآمد';

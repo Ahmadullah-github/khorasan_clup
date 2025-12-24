@@ -215,21 +215,9 @@ function handleCreateStudent() {
         $regParts = explode('-', $regDate);
         $regYear = (int)$regParts[0];
         $regMonth = (int)$regParts[1];
-        $regDay = (int)$regParts[2];
         
-        // End date is last day of current month
-        $daysInMonth = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
-        $endDay = $daysInMonth[$regMonth - 1];
-        
-        // Handle leap year for month 12 (Hoot)
-        if ($regMonth == 12) {
-            $isLeapYear = (($regYear + 2346) % 128) < 30;
-            if ($isLeapYear) {
-                $endDay = 30;
-            }
-        }
-        
-        $endDate = sprintf('%04d-%02d-%02d', $regYear, $regMonth, $endDay);
+        // End date is last day of current month using centralized date logic
+        $endDate = JalaliDate::getMonthEndDate($regYear, $regMonth);
         
         // Create registration
         $stmt = $db->prepare("
@@ -525,35 +513,28 @@ function handleRenewRegistration($studentId) {
         Response::error('No previous registration found');
     }
     
-    // Calculate new dates (next month)
+    // Calculate new dates (next month) using centralized date logic
     $endDate = $lastReg['end_date_jalali'];
     $endParts = explode('-', $endDate);
     $endYear = (int)$endParts[0];
     $endMonth = (int)$endParts[1];
     
-    // Next month
-    $newMonth = $endMonth + 1;
-    $newYear = $endYear;
-    if ($newMonth > 12) {
-        $newMonth = 1;
-        $newYear++;
-    }
+    // Get next month using centralized function
+    $nextMonth = JalaliDate::getNextMonth($endYear, $endMonth);
+    $newYear = $nextMonth['year'];
+    $newMonth = $nextMonth['month'];
     
-    $newStartDate = sprintf('%04d-%02d-%02d', $newYear, $newMonth, 1);
-    $daysInMonth = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
-    $endDay = $daysInMonth[$newMonth - 1];
-    
-    // Handle leap year for month 12 (Hoot)
-    if ($newMonth == 12) {
-        $isLeapYear = (($newYear + 2346) % 128) < 30;
-        if ($isLeapYear) {
-            $endDay = 30;
-        }
-    }
-    
-    $newEndDate = sprintf('%04d-%02d-%02d', $newYear, $newMonth, $endDay);
+    // Get date range for the new month
+    $newStartDate = JalaliDate::getMonthStartDate($newYear, $newMonth);
+    $newEndDate = JalaliDate::getMonthEndDate($newYear, $newMonth);
     
     $feeAmount = $data['fee_amount'] ?? $lastReg['fee_amount'];
+    
+    // Validate fee amount
+    if (!Sanitizer::validateAmount($feeAmount)) {
+        Response::error('مبلغ حق‌الاشتراک نامعتبر است. لطفاً یک عدد معتبر وارد کنید.');
+    }
+    
     $jalaliDate = JalaliDate::now();
     
     try {

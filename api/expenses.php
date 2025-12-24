@@ -71,7 +71,8 @@ function handleListExpenses() {
     }
     
     if ($category) {
-        $where[] = "category = ?";
+        // Use case-insensitive comparison for category filtering
+        $where[] = "LOWER(category) = LOWER(?)";
         $params[] = Sanitizer::sanitizeInput($category);
     }
     

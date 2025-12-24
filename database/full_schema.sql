@@ -314,4 +314,4 @@ INSERT INTO `time_slots` (`name`, `start_time`, `end_time`, `description`) VALUE
 -- =====================================================
 
 INSERT INTO `users` (`username`, `password_hash`, `role`, `created_at_jalali`) VALUES
-('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', '1404-09-08');
+('admin', '$2y$10$nPRP6T6fLjwoWUAt/Nv0FOiQ/u57hZzXXjVQFzU7YJv5M20.8uUvm', 'admin', '1404-09-08');

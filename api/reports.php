@@ -46,9 +46,9 @@ function handleMonthlyReport() {
         Response::error('Month and year required');
     }
     
-    $startDate = sprintf('%04d-%02d-01', $year, $month);
-    $daysInMonth = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
-    $endDate = sprintf('%04d-%02d-%02d', $year, $month, $daysInMonth[$month - 1]);
+    $dateRange = JalaliDate::getMonthDateRange($year, $month);
+    $startDate = $dateRange['start'];
+    $endDate = $dateRange['end'];
     
     // Revenue
     $stmt = $db->prepare("
@@ -62,22 +62,22 @@ function handleMonthlyReport() {
     $stmt->execute([$startDate, $endDate]);
     $revenue = $stmt->fetch();
     
-    // Expenses
+    // Expenses (use LOWER for case-insensitive category matching and grouping)
     $stmt = $db->prepare("
         SELECT SUM(amount) as total_expenses,
                COUNT(*) as expense_count,
-               category,
-               SUM(CASE WHEN category = 'Rent' THEN amount ELSE 0 END) as rent_amount
+               LOWER(category) as category,
+               SUM(CASE WHEN LOWER(category) = 'rent' THEN amount ELSE 0 END) as rent_amount
         FROM expenses
         WHERE expense_date_jalali >= ? 
           AND expense_date_jalali <= ?
-        GROUP BY category
+        GROUP BY LOWER(category)
     ");
     $stmt->execute([$startDate, $endDate]);
     $expensesByCategory = $stmt->fetchAll();
     
-    $totalExpenses = array_sum(array_column($expensesByCategory, 'total_expenses'));
-    $netIncome = (float)($revenue['total_revenue'] ?? 0) - $totalExpenses;
+    $totalExpenses = Money::round(array_sum(array_column($expensesByCategory, 'total_expenses')));
+    $netIncome = Money::subtract((float)($revenue['total_revenue'] ?? 0), $totalExpenses);
     
     Response::success([
         'month' => $month,
@@ -108,9 +108,9 @@ function handleStudentReport() {
     $params = [];
     
     if ($month && $year) {
-        $startDate = sprintf('%04d-%02d-01', $year, $month);
-        $daysInMonth = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
-        $endDate = sprintf('%04d-%02d-%02d', $year, $month, $daysInMonth[$month - 1]);
+        $dateRange = JalaliDate::getMonthDateRange($year, $month);
+        $startDate = $dateRange['start'];
+        $endDate = $dateRange['end'];
         $where[] = "r.registration_date_jalali >= ? AND r.registration_date_jalali <= ?";
         $params = [$startDate, $endDate];
     }
@@ -131,18 +131,23 @@ function handleStudentReport() {
     $stmt->execute($params);
     $activity = $stmt->fetch();
     
-    // Expiring students
+    // Expiring students (within next 7 days from today)
+    // Note: Jalali dates are stored as strings (YYYY-MM-DD), so string comparison works correctly
     $today = JalaliDate::now();
+    
+    // For "next 7 days" we need to look at registrations ending between today and 7 days from now
+    // Since we can't use DATE_SUB on Jalali strings, we do a simple comparison:
+    // - end_date <= today means already expired or expiring today
+    // - We want students whose registration is about to expire, so end_date is close to today
     $stmt = $db->prepare("
         SELECT s.*, r.end_date_jalali
         FROM students s
         INNER JOIN registrations r ON s.id = r.student_id
         WHERE r.status = 'active' 
           AND r.end_date_jalali <= ?
-          AND r.end_date_jalali >= DATE_SUB(?, INTERVAL 7 DAY)
         ORDER BY r.end_date_jalali ASC
     ");
-    $stmt->execute([$today, $today]);
+    $stmt->execute([$today]);
     $expiring = $stmt->fetchAll();
     
     Response::success([
@@ -164,9 +169,9 @@ function handleCoachReport() {
     $params = [];
     
     if ($month && $year) {
-        $startDate = sprintf('%04d-%02d-01', $year, $month);
-        $daysInMonth = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
-        $endDate = sprintf('%04d-%02d-%02d', $year, $month, $daysInMonth[$month - 1]);
+        $dateRange = JalaliDate::getMonthDateRange($year, $month);
+        $startDate = $dateRange['start'];
+        $endDate = $dateRange['end'];
         $where[] = "r.registration_date_jalali >= ? AND r.registration_date_jalali <= ?";
         $params = [$startDate, $endDate];
     }
@@ -250,9 +255,9 @@ function exportCSV($type, $month, $year) {
             $where = '';
             $params = [];
             if ($month && $year) {
-                $startDate = sprintf('%04d-%02d-01', $year, $month);
-                $daysInMonth = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
-                $endDate = sprintf('%04d-%02d-%02d', $year, $month, $daysInMonth[$month - 1]);
+                $dateRange = JalaliDate::getMonthDateRange($year, $month);
+                $startDate = $dateRange['start'];
+                $endDate = $dateRange['end'];
                 $where = "WHERE expense_date_jalali >= ? AND expense_date_jalali <= ?";
                 $params = [$startDate, $endDate];
             }
@@ -273,9 +278,9 @@ function exportCSV($type, $month, $year) {
                 Response::error('Month and year required for monthly export');
             }
             // Export monthly summary
-            $startDate = sprintf('%04d-%02d-01', $year, $month);
-            $daysInMonth = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
-            $endDate = sprintf('%04d-%02d-%02d', $year, $month, $daysInMonth[$month - 1]);
+            $dateRange = JalaliDate::getMonthDateRange($year, $month);
+            $startDate = $dateRange['start'];
+            $endDate = $dateRange['end'];
             
             $stmt = $db->prepare("
                 SELECT 'Revenue' as type, SUM(fee_amount) as amount, COUNT(*) as count

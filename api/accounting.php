@@ -35,6 +35,14 @@ switch ($method) {
 
 /**
  * Calculate net income for a given month/year
+ * 
+ * BUSINESS DECISION: Income is calculated based on registration_date, not payment_date.
+ * This is because:
+ * 1. Registrations and payments are created together in the current workflow
+ * 2. Registration date represents when the student became active
+ * 3. For accrual-based accounting, revenue is recognized when service is provided
+ * 
+ * The payments table is still queried for verification and audit purposes.
  */
 function handleGetNetIncome() {
     global $db;
@@ -46,10 +54,11 @@ function handleGetNetIncome() {
         Response::error('Month and year required');
     }
     
-    // Calculate total income (fees from registrations in this month)
-    $startDate = sprintf('%04d-%02d-01', $year, $month);
-    $endDate = sprintf('%04d-%02d-%02d', $year, $month, getJalaliDaysInMonth($month, $year));
+    $dateRange = JalaliDate::getMonthDateRange($year, $month);
+    $startDate = $dateRange['start'];
+    $endDate = $dateRange['end'];
     
+    // Calculate total income based on registrations (primary method)
     $stmt = $db->prepare("
         SELECT SUM(r.fee_amount) as total_income,
                COUNT(r.id) as registration_count
@@ -61,6 +70,18 @@ function handleGetNetIncome() {
     $stmt->execute([$startDate, $endDate]);
     $income = $stmt->fetch();
     $totalIncome = (float)($income['total_income'] ?? 0);
+    
+    // Also query payments table for verification (secondary/audit)
+    $stmt = $db->prepare("
+        SELECT COALESCE(SUM(p.amount), 0) as total_payments,
+               COUNT(p.id) as payment_count
+        FROM payments p
+        WHERE p.payment_date_jalali >= ? 
+          AND p.payment_date_jalali <= ?
+    ");
+    $stmt->execute([$startDate, $endDate]);
+    $payments = $stmt->fetch();
+    $totalPayments = (float)($payments['total_payments'] ?? 0);
     
     // Calculate total expenses (including rent)
     $stmt = $db->prepare("
@@ -74,7 +95,11 @@ function handleGetNetIncome() {
     $expenses = $stmt->fetch();
     $totalExpenses = (float)($expenses['total_expenses'] ?? 0);
     
-    $netIncome = $totalIncome - $totalExpenses;
+    // Calculate net income with proper rounding
+    $netIncome = Money::subtract($totalIncome, $totalExpenses);
+    
+    // Check for discrepancy between registrations and payments
+    $incomeDiscrepancy = Money::subtract($totalIncome, $totalPayments);
     
     Response::success([
         'month' => $month,
@@ -84,86 +109,30 @@ function handleGetNetIncome() {
         'total_expenses' => $totalExpenses,
         'net_income' => $netIncome,
         'income_count' => (int)$income['registration_count'],
-        'expense_count' => (int)$expenses['expense_count']
+        'expense_count' => (int)$expenses['expense_count'],
+        // Payment verification data
+        'total_payments' => $totalPayments,
+        'payment_count' => (int)$payments['payment_count'],
+        'income_discrepancy' => $incomeDiscrepancy,
+        'has_discrepancy' => !Money::equals($totalIncome, $totalPayments)
     ]);
 }
 
-/**
- * Check if a time slot name indicates morning or evening
- * Supports both English and Dari/Persian keywords
- * 
- * @param string $slotName The time slot name to check
- * @return bool True if the slot is morning or evening
- */
-function isMorningEveningSlot($slotName) {
-    // Use mb_strtolower for proper Unicode handling
-    $slotLower = mb_strtolower($slotName, 'UTF-8');
-    
-    // English keywords
-    $englishKeywords = ['morning', 'evening'];
-    
-    // Dari/Persian keywords for morning: صبح (morning), صبحانه (morning time)
-    // Dari/Persian keywords for evening: شب (night), شام (evening), عصر (afternoon/evening)
-    $dariKeywords = ['صبح', 'صبحانه', 'شب', 'شام', 'عصر'];
-    
-    // Check English keywords
-    foreach ($englishKeywords as $keyword) {
-        if (strpos($slotLower, $keyword) !== false) {
-            return true;
-        }
-    }
-    
-    // Check Dari/Persian keywords (no need for lowercase conversion for these)
-    foreach ($dariKeywords as $keyword) {
-        if (mb_strpos($slotName, $keyword) !== false) {
-            return true;
-        }
-    }
-    
-    return false;
-}
+// Time slot detection is now centralized in TimeSlotDetector class (utils.php)
+// Use TimeSlotDetector::isMorningEvening($slotName) for PHP-side checks
+// Use TimeSlotDetector::getSqlCaseExpression() for SQL queries
 
-/**
- * Check if a Jalali year is a leap year
- * Uses the 33-year cycle approximation
- * 
- * @param int $year The Jalali year to check
- * @return bool True if the year is a leap year
- */
-function isJalaliLeapYear($year) {
-    $leapYearsInCycle = [1, 5, 9, 13, 17, 22, 26, 30];
-    $yearInCycle = $year % 33;
-    return in_array($yearInCycle, $leapYearsInCycle);
-}
-
-/**
- * Get the number of days in a Jalali month
- * 
- * @param int $month The month (1-12)
- * @param int $year The Jalali year
- * @return int Number of days in the month
- */
-function getJalaliDaysInMonth($month, $year) {
-    // Months 1-6 have 31 days
-    if ($month >= 1 && $month <= 6) {
-        return 31;
-    }
-    // Months 7-11 have 30 days
-    if ($month >= 7 && $month <= 11) {
-        return 30;
-    }
-    // Month 12 (Esfand/حوت) has 29 days, or 30 in leap years
-    if ($month == 12) {
-        return isJalaliLeapYear($year) ? 30 : 29;
-    }
-    return 30; // fallback
-}
+// Date calculation functions are now centralized in JalaliDate class (utils.php)
+// - JalaliDate::isLeapYear($year)
+// - JalaliDate::getDaysInMonth($month, $year)
+// - JalaliDate::getMonthDateRange($year, $month)
 
 /**
  * Calculate coach payment based on contract type
+ * Uses Money class for proper rounding to avoid floating-point precision issues
  * 
  * @param array $coach Coach data with contract settings and fees
- * @return float Calculated payment amount
+ * @return float Calculated payment amount (rounded to 2 decimal places)
  */
 function calculateCoachPayment($coach) {
     $contractType = $coach['contract_type'] ?? 'percentage';
@@ -173,17 +142,17 @@ function calculateCoachPayment($coach) {
     
     switch ($contractType) {
         case 'salary':
-            return $monthlySalary;
+            return Money::round($monthlySalary);
             
         case 'percentage':
-            return $eligibleFees * ($percentageRate / 100);
+            return Money::percentage($eligibleFees, $percentageRate);
             
         case 'hybrid':
-            $percentagePart = $eligibleFees * ($percentageRate / 100);
-            return $monthlySalary + $percentagePart;
+            $percentagePart = Money::percentage($eligibleFees, $percentageRate);
+            return Money::add($monthlySalary, $percentagePart);
             
         default:
-            return 0;
+            return 0.0;
     }
 }
 
@@ -256,8 +225,9 @@ function handleGetPayouts() {
         Response::error('Month and year required');
     }
     
-    $startDate = sprintf('%04d-%02d-01', $year, $month);
-    $endDate = sprintf('%04d-%02d-%02d', $year, $month, getJalaliDaysInMonth($month, $year));
+    $dateRange = JalaliDate::getMonthDateRange($year, $month);
+    $startDate = $dateRange['start'];
+    $endDate = $dateRange['end'];
     
     // Get total student fees for the period
     $stmt = $db->prepare("
@@ -292,11 +262,13 @@ function handleGetPayouts() {
             c.fee_calculation_slots,
             -- Total fees from this coach's students (all slots)
             COALESCE(SUM(r.fee_amount), 0) as total_fees_collected,
-            -- Fees from morning/evening students only
+            -- Fees from morning/evening students only (consistent with TimeSlotDetector)
             COALESCE(SUM(
-                CASE WHEN ts.name LIKE '%morning%' 
-                       OR ts.name LIKE '%evening%' 
+                CASE WHEN LOWER(ts.name) LIKE '%morning%' 
+                       OR LOWER(ts.name) LIKE '%evening%' 
                        OR ts.name LIKE '%صبح%' 
+                       OR ts.name LIKE '%صبحانه%'
+                       OR ts.name LIKE '%شب%'
                        OR ts.name LIKE '%شام%' 
                        OR ts.name LIKE '%عصر%'
                 THEN r.fee_amount ELSE 0 END
@@ -372,8 +344,8 @@ function handleGetPayouts() {
         return $b['calculated_payment'] <=> $a['calculated_payment'];
     });
     
-    // Calculate camp net income
-    $campNetIncome = $totalStudentFees - $totalCoachPayments - $totalExpenses;
+    // Calculate camp net income with proper rounding
+    $campNetIncome = Money::subtract($totalStudentFees, $totalCoachPayments, $totalExpenses);
     
     Response::success([
         'month' => $month,
@@ -402,8 +374,9 @@ function handleGetBreakdown() {
         Response::error('Month and year required');
     }
     
-    $startDate = sprintf('%04d-%02d-01', $year, $month);
-    $endDate = sprintf('%04d-%02d-%02d', $year, $month, getJalaliDaysInMonth($month, $year));
+    $dateRange = JalaliDate::getMonthDateRange($year, $month);
+    $startDate = $dateRange['start'];
+    $endDate = $dateRange['end'];
     
     $breakdown = [];
     

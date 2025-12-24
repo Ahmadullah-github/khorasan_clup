@@ -3,18 +3,9 @@
  * API client, form validation, pagination, dark mode, utilities
  */
 
-// Dynamically determine API base path
-// Works for both /sports-camp/public/ and /khorasan/public/ or direct access
-const API_BASE = (() => {
-    const path = window.location.pathname;
-    // Extract base path (e.g., /sports-camp/ or /khorasan/)
-    const match = path.match(/^(\/[^\/]+\/)/);
-    if (match) {
-        return match[1] + 'api/';
-    }
-    // Fallback to relative path
-    return '../api/';
-})();
+// API base path - uses relative path from public/ folder to api/ folder
+// Works universally: just clone the repo anywhere in htdocs and it works!
+const API_BASE = '../api/';
 
 // API Client
 class APIClient {

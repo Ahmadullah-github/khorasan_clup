@@ -1076,7 +1076,7 @@ body {
 
 /* Secondary Button */
 .btn-app--secondary {
-    background: var(--secondary-color);
+    background: var(--color-success-600);
     color: white;
     border: none;
 }

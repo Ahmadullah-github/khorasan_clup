@@ -165,38 +165,29 @@ class JalaliDate {
             return false;
         }
         
-        $parts = explode('-', $date);
-        if (count($parts) !== 3) {
+        // Validate format with regex for better strictness
+        if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $matches)) {
             return false;
         }
         
-        $year = (int)$parts[0];
-        $month = (int)$parts[1];
-        $day = (int)$parts[2];
+        $year = (int)$matches[1];
+        $month = (int)$matches[2];
+        $day = (int)$matches[3];
         
+        // Validate year range
         if ($year < 1300 || $year > 1500) {
             return false;
         }
+        
+        // Validate month
         if ($month < 1 || $month > 12) {
             return false;
         }
-        if ($day < 1 || $day > 31) {
-            return false;
-        }
         
-        // Basic day validation per month
-        $daysInMonth = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
-        if ($day > $daysInMonth[$month - 1]) {
-            // Check for leap year in last month
-            if ($month === 12 && $day === 30) {
-                // Simple leap year check (not perfect but good enough)
-                $leap = (($year + 2346) % 128) < 30;
-                if (!$leap) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+        // Validate day using centralized getDaysInMonth (handles leap years correctly)
+        $maxDays = self::getDaysInMonth($month, $year);
+        if ($day < 1 || $day > $maxDays) {
+            return false;
         }
         
         return true;
@@ -207,6 +198,141 @@ class JalaliDate {
      */
     public static function getMonthName($month) {
         return isset(self::$monthNames[$month]) ? self::$monthNames[$month] : '';
+    }
+
+    /**
+     * Check if a Jalali year is a leap year
+     * Uses the 33-year cycle algorithm (most accurate for Jalali calendar)
+     * 
+     * @param int $year The Jalali year to check
+     * @return bool True if the year is a leap year
+     */
+    public static function isLeapYear($year) {
+        // The 33-year cycle has 8 leap years at positions: 1, 5, 9, 13, 17, 22, 26, 30
+        $leapYearsInCycle = [1, 5, 9, 13, 17, 22, 26, 30];
+        $yearInCycle = $year % 33;
+        return in_array($yearInCycle, $leapYearsInCycle);
+    }
+
+    /**
+     * Get the number of days in a Jalali month
+     * 
+     * @param int $month The month (1-12)
+     * @param int $year The Jalali year (required for month 12 leap year check)
+     * @return int Number of days in the month
+     */
+    public static function getDaysInMonth($month, $year) {
+        // Months 1-6 (Hamal to Sonbola) have 31 days
+        if ($month >= 1 && $month <= 6) {
+            return 31;
+        }
+        // Months 7-11 (Mizan to Dalv) have 30 days
+        if ($month >= 7 && $month <= 11) {
+            return 30;
+        }
+        // Month 12 (Hoot/Esfand) has 29 days, or 30 in leap years
+        if ($month == 12) {
+            return self::isLeapYear($year) ? 30 : 29;
+        }
+        // Fallback for invalid month
+        return 30;
+    }
+
+    /**
+     * Get the last day of a Jalali month as a formatted date string
+     * 
+     * @param int $year The Jalali year
+     * @param int $month The month (1-12)
+     * @return string Date in YYYY-MM-DD format
+     */
+    public static function getMonthEndDate($year, $month) {
+        $lastDay = self::getDaysInMonth($month, $year);
+        return sprintf('%04d-%02d-%02d', $year, $month, $lastDay);
+    }
+
+    /**
+     * Get the first day of a Jalali month as a formatted date string
+     * 
+     * @param int $year The Jalali year
+     * @param int $month The month (1-12)
+     * @return string Date in YYYY-MM-DD format
+     */
+    public static function getMonthStartDate($year, $month) {
+        return sprintf('%04d-%02d-01', $year, $month);
+    }
+
+    /**
+     * Get the date range for a Jalali month
+     * 
+     * @param int $year The Jalali year
+     * @param int $month The month (1-12)
+     * @return array ['start' => 'YYYY-MM-DD', 'end' => 'YYYY-MM-DD']
+     */
+    public static function getMonthDateRange($year, $month) {
+        return [
+            'start' => self::getMonthStartDate($year, $month),
+            'end' => self::getMonthEndDate($year, $month)
+        ];
+    }
+
+    /**
+     * Calculate the next month and year
+     * 
+     * @param int $year Current Jalali year
+     * @param int $month Current month (1-12)
+     * @return array ['year' => int, 'month' => int]
+     */
+    public static function getNextMonth($year, $month) {
+        $nextMonth = $month + 1;
+        $nextYear = $year;
+        if ($nextMonth > 12) {
+            $nextMonth = 1;
+            $nextYear++;
+        }
+        return ['year' => $nextYear, 'month' => $nextMonth];
+    }
+    
+    /**
+     * Parse a Jalali date string
+     * 
+     * @param string $dateString Date in format YYYY-MM-DD
+     * @return array|null ['year' => int, 'month' => int, 'day' => int] or null if invalid
+     */
+    public static function parse($dateString) {
+        if (!self::validate($dateString)) {
+            return null;
+        }
+        
+        $parts = explode('-', $dateString);
+        return [
+            'year' => (int)$parts[0],
+            'month' => (int)$parts[1],
+            'day' => (int)$parts[2]
+        ];
+    }
+    
+    /**
+     * Compare two Jalali dates
+     * 
+     * @param string $date1 First date (YYYY-MM-DD)
+     * @param string $date2 Second date (YYYY-MM-DD)
+     * @return int -1 if date1 < date2, 0 if equal, 1 if date1 > date2
+     */
+    public static function compare($date1, $date2) {
+        // Simple string comparison works for YYYY-MM-DD format
+        return strcmp($date1, $date2) <=> 0;
+    }
+    
+    /**
+     * Check if a date is within a range
+     * 
+     * @param string $date Date to check (YYYY-MM-DD)
+     * @param string $startDate Range start (YYYY-MM-DD)
+     * @param string $endDate Range end (YYYY-MM-DD)
+     * @return bool True if date is within range (inclusive)
+     */
+    public static function isInRange($date, $startDate, $endDate) {
+        return $date >= $startDate && $date <= $endDate;
     }
 }
 
@@ -337,6 +463,162 @@ class Response {
             $response['data'] = $data;
         }
         self::json($response);
+    }
+}
+
+// Money/Currency Calculation Helper
+class Money {
+    /**
+     * Round a monetary amount to avoid floating-point precision issues
+     * Uses banker's rounding (round half to even) for financial accuracy
+     * 
+     * @param float $amount The amount to round
+     * @param int $precision Number of decimal places (default 2 for currency)
+     * @return float Rounded amount
+     */
+    public static function round($amount, $precision = 2) {
+        // Use PHP_ROUND_HALF_EVEN (banker's rounding) for financial calculations
+        return round($amount, $precision, PHP_ROUND_HALF_EVEN);
+    }
+    
+    /**
+     * Calculate percentage of an amount with proper rounding
+     * 
+     * @param float $amount Base amount
+     * @param float $percentage Percentage rate (0-100)
+     * @return float Calculated amount, rounded to 2 decimal places
+     */
+    public static function percentage($amount, $percentage) {
+        $result = (float)$amount * ((float)$percentage / 100);
+        return self::round($result);
+    }
+    
+    /**
+     * Safely add monetary amounts
+     * 
+     * @param float ...$amounts Variable number of amounts to add
+     * @return float Sum, rounded to 2 decimal places
+     */
+    public static function add(...$amounts) {
+        $sum = array_reduce($amounts, function($carry, $amount) {
+            return $carry + (float)$amount;
+        }, 0.0);
+        return self::round($sum);
+    }
+    
+    /**
+     * Safely subtract monetary amounts
+     * 
+     * @param float $from Base amount
+     * @param float ...$amounts Amounts to subtract
+     * @return float Difference, rounded to 2 decimal places
+     */
+    public static function subtract($from, ...$amounts) {
+        $result = (float)$from;
+        foreach ($amounts as $amount) {
+            $result -= (float)$amount;
+        }
+        return self::round($result);
+    }
+    
+    /**
+     * Compare two monetary amounts for equality (within tolerance)
+     * 
+     * @param float $a First amount
+     * @param float $b Second amount
+     * @param float $tolerance Tolerance for comparison (default 0.01)
+     * @return bool True if amounts are equal within tolerance
+     */
+    public static function equals($a, $b, $tolerance = 0.01) {
+        return abs((float)$a - (float)$b) < $tolerance;
+    }
+    
+    /**
+     * Format amount for display (no currency symbol)
+     * 
+     * @param float $amount Amount to format
+     * @param int $decimals Number of decimal places
+     * @return string Formatted number
+     */
+    public static function format($amount, $decimals = 0) {
+        return number_format(self::round($amount), $decimals);
+    }
+}
+
+// Time Slot Detection Helper
+class TimeSlotDetector {
+    // English keywords for morning/evening slots
+    private static $englishKeywords = ['morning', 'evening'];
+    
+    // Dari/Persian keywords for morning/evening slots
+    // صبح (morning), صبحانه (breakfast/morning time)
+    // شب (night), شام (evening), عصر (afternoon/evening)
+    private static $dariKeywords = ['صبح', 'صبحانه', 'شب', 'شام', 'عصر'];
+    
+    /**
+     * Check if a time slot name indicates morning or evening
+     * Supports both English and Dari/Persian keywords
+     * 
+     * @param string $slotName The time slot name to check
+     * @return bool True if the slot is morning or evening
+     */
+    public static function isMorningEvening($slotName) {
+        // Use mb_strtolower for proper Unicode handling
+        $slotLower = mb_strtolower($slotName, 'UTF-8');
+        
+        // Check English keywords
+        foreach (self::$englishKeywords as $keyword) {
+            if (strpos($slotLower, $keyword) !== false) {
+                return true;
+            }
+        }
+        
+        // Check Dari/Persian keywords (no need for lowercase conversion for these)
+        foreach (self::$dariKeywords as $keyword) {
+            if (mb_strpos($slotName, $keyword) !== false) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Get the SQL CASE expression for morning/evening detection
+     * This ensures SQL and PHP logic are consistent
+     * 
+     * @param string $columnName The column name to check (e.g., 'ts.name')
+     * @param string $valueColumn The column to return when matched (e.g., 'r.fee_amount')
+     * @return string SQL CASE expression
+     */
+    public static function getSqlCaseExpression($columnName, $valueColumn) {
+        // Combine all keywords for SQL LIKE patterns
+        $patterns = [];
+        
+        // English keywords (case-insensitive with LOWER)
+        foreach (self::$englishKeywords as $keyword) {
+            $patterns[] = "LOWER({$columnName}) LIKE '%" . strtolower($keyword) . "%'";
+        }
+        
+        // Dari/Persian keywords (direct matching for Unicode)
+        foreach (self::$dariKeywords as $keyword) {
+            $patterns[] = "{$columnName} LIKE '%{$keyword}%'";
+        }
+        
+        $condition = implode(' OR ', $patterns);
+        return "CASE WHEN {$condition} THEN {$valueColumn} ELSE 0 END";
+    }
+    
+    /**
+     * Get all keywords used for detection
+     * 
+     * @return array ['english' => [...], 'dari' => [...]]
+     */
+    public static function getKeywords() {
+        return [
+            'english' => self::$englishKeywords,
+            'dari' => self::$dariKeywords
+        ];
     }
 }
 
