@@ -293,7 +293,7 @@
                 }
             } catch (error) {
                 console.error('Error loading coaches:', error);
-                showAlert('خطا در بارگذاری لیست مربیان', 'danger');
+                notify.error('خطا در بارگذاری لیست مربیان');
             }
         }
 
@@ -393,15 +393,18 @@
         document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
             if (!coachToDelete) return;
             
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            
             try {
                 const result = await APIClient.delete(`coaches.php?id=${coachToDelete}`);
                 if (result.success) {
-                    showAlert(result.message || 'مربی با موفقیت حذف شد', 'success');
-                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                    modal.hide();
+                    notify.success(result.message || 'مربی با موفقیت حذف شد');
                     loadCoaches(currentPage, currentSearch, currentStatus);
                 }
             } catch (error) {
-                showAlert(error.message || 'خطا در حذف مربی', 'danger');
+                modal.hide();
+                notify.error(error.message || 'خطا در حذف مربی');
             }
             coachToDelete = null;
         });

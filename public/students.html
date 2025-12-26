@@ -552,7 +552,7 @@
                     });
                 }
             } catch (error) {
-                showAlert('خطا در بارگذاری اطلاعات', 'danger');
+                notify.error('خطا در بارگذاری اطلاعات');
             }
         }
 
@@ -596,7 +596,7 @@
                     }
                 } catch (error) {
                     console.error('Photo upload error:', error);
-                    showAlert('خطا در آپلود عکس: ' + (error.message || 'خطای ارتباط با سرور'), 'danger');
+                    notify.error('خطا در آپلود عکس: ' + (error.message || 'خطای ارتباط با سرور'));
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalHTML;
                     return;
@@ -631,7 +631,7 @@
                 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
                 if (!datePattern.test(registrationDate)) {
                     console.error('Invalid date format after conversion:', registrationDate, 'Original:', dateInput.value);
-                    showAlert('فرمت تاریخ نامعتبر است. لطفاً تاریخ را از تقویم انتخاب کنید.', 'danger');
+                    notify.validation('فرمت تاریخ نامعتبر است. لطفاً تاریخ را از تقویم انتخاب کنید.', dateInput);
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalHTML;
                     return;
@@ -640,7 +640,7 @@
                 // Validate actual date validity using jalali validation function
                 if (!validateJalaliDate(registrationDate)) {
                     console.error('Invalid Jalali date:', registrationDate);
-                    showAlert('تاریخ وارد شده نامعتبر است. لطفاً یک تاریخ معتبر جلالی وارد کنید.', 'danger');
+                    notify.validation('تاریخ وارد شده نامعتبر است. لطفاً یک تاریخ معتبر جلالی وارد کنید.', dateInput);
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalHTML;
                     return;
@@ -665,7 +665,7 @@
             
             // Validate required fields
             if (!firstName || !lastName) {
-                showAlert('نام و نام خانوادگی الزامی است', 'danger');
+                notify.validation('نام و نام خانوادگی الزامی است', document.getElementById('firstName'));
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
                 return;
@@ -673,7 +673,7 @@
             
             // Validate contact number format if provided
             if (contactNumber && !/^0[0-9]{9}$/.test(contactNumber)) {
-                showAlert('شماره تماس باید با 0 شروع شود و 10 رقم باشد', 'danger');
+                notify.validation('شماره تماس باید با 0 شروع شود و 10 رقم باشد', document.getElementById('contactNumber'));
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
                 return;
@@ -681,7 +681,7 @@
             
             // Validate fee amount
             if (isNaN(feeAmount) || feeAmount < 0) {
-                showAlert('مبلغ حق‌الاشتراک باید یک عدد معتبر و مثبت باشد', 'danger');
+                notify.validation('مبلغ حق‌الاشتراک باید یک عدد معتبر و مثبت باشد', document.getElementById('feeAmount'));
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
                 return;
@@ -689,14 +689,14 @@
             
             // Validate coach and time slot
             if (!coachId || isNaN(coachId)) {
-                showAlert('لطفاً مربی را انتخاب کنید', 'danger');
+                notify.validation('لطفاً مربی را انتخاب کنید', document.getElementById('coachId'));
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
                 return;
             }
             
             if (!timeSlotId || isNaN(timeSlotId)) {
-                showAlert('لطفاً زمان کلاس را انتخاب کنید', 'danger');
+                notify.validation('لطفاً زمان کلاس را انتخاب کنید', document.getElementById('timeSlotId'));
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
                 return;
@@ -718,7 +718,7 @@
             try {
                 const result = await APIClient.post('students.php', formData);
                 if (result.success) {
-                    showAlert('دانش‌آموز با موفقیت ثبت شد', 'success');
+                    notify.success('دانش‌آموز با موفقیت ثبت شد');
                     document.getElementById('newStudentForm').reset();
                     showInvoiceModal(result.data.invoice_id, result.data.invoice_number);
                     loadStudents();
@@ -726,7 +726,7 @@
             } catch (error) {
                 // Show detailed error message from server
                 const errorMsg = error.message || 'خطا در ثبت دانش‌آموز';
-                showAlert(errorMsg, 'danger');
+                notify.error(errorMsg);
                 console.error('Student creation error:', error);
             } finally {
                 submitBtn.disabled = false;
@@ -810,7 +810,7 @@
                     }
                 }
             } catch (error) {
-                showAlert('خطا در بارگذاری لیست', 'danger');
+                notify.error('خطا در بارگذاری لیست');
             }
         }
 
@@ -847,7 +847,7 @@
                         window.open(result.data.whatsapp_link, '_blank');
                     }
                 } catch (error) {
-                    showAlert('خطا در ایجاد لینک واتساپ', 'danger');
+                    notify.error('خطا در ایجاد لینک واتساپ');
                 }
             }
         });
@@ -862,11 +862,11 @@
                 try {
                     const result = await APIClient.post(`students.php?id=${id}&action=renew`, { fee_amount: parseFloat(feeAmount) });
                     if (result.success) {
-                        showAlert('تمدید با موفقیت انجام شد', 'success');
+                        notify.success('تمدید با موفقیت انجام شد');
                         showInvoiceModal(result.data.invoice_id, result.data.invoice_number);
                     }
                 } catch (error) {
-                    showAlert(error.message || 'خطا در تمدید', 'danger');
+                    notify.error(error.message || 'خطا در تمدید');
                 }
             }
         }
@@ -889,7 +889,7 @@
                     modal.show();
                 }
             } catch (error) {
-                showAlert('خطا در بارگذاری اطلاعات دانش‌آموز', 'danger');
+                notify.error('خطا در بارگذاری اطلاعات دانش‌آموز');
             }
         }
 
@@ -936,12 +936,12 @@
                 });
                 
                 if (result.success) {
-                    showAlert('اطلاعات با موفقیت ذخیره شد', 'success');
+                    notify.success('اطلاعات با موفقیت ذخیره شد');
                     bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
                     loadStudents(currentPage, currentSearch);
                 }
             } catch (error) {
-                showAlert(error.message || 'خطا در ذخیره اطلاعات', 'danger');
+                notify.error(error.message || 'خطا در ذخیره اطلاعات');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="bi bi-check-lg"></i> ذخیره تغییرات';
@@ -957,11 +957,11 @@
                     try {
                         const result = await APIClient.delete(`students.php?id=${id}`);
                         if (result.success) {
-                            showAlert('دانش‌آموز با موفقیت حذف شد', 'success');
+                            notify.success('دانش‌آموز با موفقیت حذف شد');
                             loadStudents(currentPage, currentSearch);
                         }
                     } catch (error) {
-                        showAlert(error.message || 'خطا در حذف دانش‌آموز', 'danger');
+                        notify.error(error.message || 'خطا در حذف دانش‌آموز');
                     }
                 }
             );
@@ -973,11 +973,11 @@
             try {
                 const result = await APIClient.put(`students.php?id=${id}`, { status: newStatus });
                 if (result.success) {
-                    showAlert(`وضعیت به "${newStatus === 'active' ? 'فعال' : 'غیرفعال'}" تغییر کرد`, 'success');
+                    notify.success(`وضعیت به "${newStatus === 'active' ? 'فعال' : 'غیرفعال'}" تغییر کرد`);
                     loadStudents(currentPage, currentSearch);
                 }
             } catch (error) {
-                showAlert(error.message || 'خطا در تغییر وضعیت', 'danger');
+                notify.error(error.message || 'خطا در تغییر وضعیت');
             }
         }
 
@@ -1039,7 +1039,7 @@
                             successCount++;
                         } catch (e) { /* continue */ }
                     }
-                    showAlert(`${successCount} دانش‌آموز حذف شد`, 'success');
+                    notify.success(`${successCount} دانش‌آموز حذف شد`);
                     loadStudents(currentPage, currentSearch);
                 }
             );
@@ -1110,22 +1110,22 @@
                             if (data.success) {
                                 resolve(data.data.file_path);
                             } else {
-                                showAlert('خطا در آپلود: ' + (data.error || 'خطای ناشناخته'), 'danger');
+                                notify.error('خطا در آپلود: ' + (data.error || 'خطای ناشناخته'));
                                 resolve(null);
                             }
                         } catch (e) {
-                            showAlert('خطا در پردازش پاسخ سرور', 'danger');
+                            notify.error('خطا در پردازش پاسخ سرور');
                             resolve(null);
                         }
                     } else {
-                        showAlert('خطا در آپلود عکس', 'danger');
+                        notify.error('خطا در آپلود عکس');
                         resolve(null);
                     }
                 });
                 
                 xhr.addEventListener('error', () => {
                     progressContainer.style.display = 'none';
-                    showAlert('خطا در ارتباط با سرور', 'danger');
+                    notify.error('خطا در ارتباط با سرور');
                     resolve(null);
                 });
                 
@@ -1179,13 +1179,13 @@
         function handlePhotoSelect(file) {
             // Validate file type
             if (!file.type.startsWith('image/')) {
-                showAlert('لطفاً یک فایل تصویری انتخاب کنید', 'danger');
+                notify.validation('لطفاً یک فایل تصویری انتخاب کنید', document.getElementById('photoUpload'));
                 return;
             }
             
             // Validate file size (5MB)
             if (file.size > 5 * 1024 * 1024) {
-                showAlert('حجم فایل نباید بیشتر از 5 مگابایت باشد', 'danger');
+                notify.validation('حجم فایل نباید بیشتر از 5 مگابایت باشد', document.getElementById('photoUpload'));
                 return;
             }
             
@@ -1216,6 +1216,15 @@
         loadFormData();
         loadStudents();
         initDarkMode();
+        
+        // Set current Jalali date as placeholder
+        document.addEventListener('DOMContentLoaded', function() {
+            const registrationDate = document.getElementById('registrationDate');
+            if (registrationDate && typeof getCurrentJalaliDate === 'function') {
+                const currentDate = getCurrentJalaliDate();
+                registrationDate.placeholder = currentDate.replace(/-/g, '/');
+            }
+        });
     </script>
 </body>
 </html>

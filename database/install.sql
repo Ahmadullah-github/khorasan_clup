@@ -1,32 +1,43 @@
 -- =====================================================
--- Sports Camp Management System - Complete Database Schema
--- Consolidated from all migrations
--- Generated: 1404-09-08 (2025-11-28)
+-- سیستم مدیریت باشگاه ورزشی خراسان
+-- Khorasan Sports Club Management System
 -- =====================================================
--- This file creates the complete database from scratch.
--- For existing databases, use individual migration files.
+-- 
+-- نصب آسان برای XAMPP / phpMyAdmin
+-- Easy Installation for XAMPP / phpMyAdmin
+--
+-- دستورالعمل / Instructions:
+-- 1. XAMPP را باز کنید و Apache + MySQL را روشن کنید
+--    Open XAMPP and start Apache + MySQL
+-- 2. به phpMyAdmin بروید: http://localhost/phpmyadmin
+--    Go to phpMyAdmin: http://localhost/phpmyadmin
+-- 3. روی تب "Import" کلیک کنید
+--    Click on "Import" tab
+-- 4. این فایل را انتخاب و اجرا کنید
+--    Select this file and run it
+--
+-- یوزر پیش‌فرض / Default Login:
+--   Username: admin
+--   Password: admin123
+--   (بعد از ورود رمز را عوض کنید!)
+--   (Change password after first login!)
+--
 -- =====================================================
 
--- Create database with UTF-8 support
+-- ایجاد دیتابیس / Create Database
 CREATE DATABASE IF NOT EXISTS `khorasan_club` 
   CHARACTER SET utf8mb4 
   COLLATE utf8mb4_unicode_ci;
 
 USE `khorasan_club`;
 
+-- تنظیمات اولیه / Initial Settings
 SET FOREIGN_KEY_CHECKS = 0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
-START TRANSACTION;
-SET time_zone = "+00:00";
-
--- Set character set for the session
 SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
-SET CHARACTER SET utf8mb4;
-SET character_set_connection=utf8mb4;
 
 -- =====================================================
--- USERS TABLE
+-- جدول کاربران / USERS TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -44,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- STUDENTS TABLE
+-- جدول شاگردان / STUDENTS TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS `students` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -63,9 +74,8 @@ CREATE TABLE IF NOT EXISTS `students` (
   FULLTEXT KEY `idx_search` (`first_name`,`last_name`,`father_name`,`contact_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 -- =====================================================
--- COACHES TABLE (with contract management)
+-- جدول مربیان / COACHES TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS `coaches` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -94,7 +104,7 @@ CREATE TABLE IF NOT EXISTS `coaches` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- TIME SLOTS TABLE
+-- جدول وقت‌ها / TIME SLOTS TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS `time_slots` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -108,7 +118,7 @@ CREATE TABLE IF NOT EXISTS `time_slots` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- COACH-TIME SLOT RELATIONSHIP
+-- جدول ارتباط مربی-وقت / COACH-TIME SLOT TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS `coach_time_slot` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -120,13 +130,12 @@ CREATE TABLE IF NOT EXISTS `coach_time_slot` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_coach_slot` (`coach_id`,`time_slot_id`),
   KEY `fk_coach` (`coach_id`),
-  KEY `fk_time_slot` (`time_slot_id`),
-  CONSTRAINT `fk_coach_time_slot_coach` FOREIGN KEY (`coach_id`) REFERENCES `coaches` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_coach_time_slot_slot` FOREIGN KEY (`time_slot_id`) REFERENCES `time_slots` (`id`) ON DELETE CASCADE
+  KEY `fk_time_slot` (`time_slot_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
 -- =====================================================
--- REGISTRATIONS TABLE
+-- جدول ثبت‌نام‌ها / REGISTRATIONS TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS `registrations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -146,14 +155,11 @@ CREATE TABLE IF NOT EXISTS `registrations` (
   KEY `fk_reg_coach` (`coach_id`),
   KEY `fk_reg_time_slot` (`time_slot_id`),
   KEY `idx_status` (`status`),
-  KEY `idx_dates` (`start_date_jalali`,`end_date_jalali`),
-  CONSTRAINT `fk_registrations_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_registrations_coach` FOREIGN KEY (`coach_id`) REFERENCES `coaches` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_registrations_time_slot` FOREIGN KEY (`time_slot_id`) REFERENCES `time_slots` (`id`) ON DELETE CASCADE
+  KEY `idx_dates` (`start_date_jalali`,`end_date_jalali`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- PAYMENTS TABLE
+-- جدول پرداخت‌ها / PAYMENTS TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS `payments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -165,12 +171,11 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `notes` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `fk_payment_registration` (`registration_id`),
-  CONSTRAINT `fk_payments_registration` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
+  KEY `fk_payment_registration` (`registration_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- EXPENSES TABLE
+-- جدول مصارف / EXPENSES TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS `expenses` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -187,13 +192,11 @@ CREATE TABLE IF NOT EXISTS `expenses` (
   KEY `fk_expense_user` (`created_by`),
   KEY `idx_category` (`category`),
   KEY `idx_date` (`expense_date_jalali`),
-  FULLTEXT KEY `idx_search` (`title`,`details`),
-  CONSTRAINT `fk_expenses_user` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT
+  FULLTEXT KEY `idx_search` (`title`,`details`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 -- =====================================================
--- RENTS TABLE
+-- جدول کرایه / RENTS TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS `rents` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -205,12 +208,11 @@ CREATE TABLE IF NOT EXISTS `rents` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_month_year` (`month_jalali`,`year_jalali`),
-  KEY `fk_rent_expense` (`expense_id`),
-  CONSTRAINT `fk_rents_expense` FOREIGN KEY (`expense_id`) REFERENCES `expenses` (`id`) ON DELETE CASCADE
+  KEY `fk_rent_expense` (`expense_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- INVOICES TABLE
+-- جدول فاکتورها / INVOICES TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS `invoices` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -222,12 +224,11 @@ CREATE TABLE IF NOT EXISTS `invoices` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `invoice_number` (`invoice_number`),
-  KEY `fk_invoice_registration` (`registration_id`),
-  CONSTRAINT `fk_invoices_registration` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
+  KEY `fk_invoice_registration` (`registration_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- AUDIT LOGS TABLE
+-- جدول لاگ‌ها / AUDIT LOGS TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS `audit_logs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -243,12 +244,11 @@ CREATE TABLE IF NOT EXISTS `audit_logs` (
   KEY `fk_audit_user` (`user_id`),
   KEY `idx_action` (`action`),
   KEY `idx_table_record` (`table_name`,`record_id`),
-  KEY `idx_timestamp` (`timestamp_jalali`),
-  CONSTRAINT `fk_audit_logs_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT
+  KEY `idx_timestamp` (`timestamp_jalali`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- COACH CONTRACT HISTORY TABLE
+-- جدول تاریخچه قرارداد مربیان / COACH CONTRACT HISTORY
 -- =====================================================
 CREATE TABLE IF NOT EXISTS `coach_contract_history` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -265,53 +265,83 @@ CREATE TABLE IF NOT EXISTS `coach_contract_history` (
   PRIMARY KEY (`id`),
   KEY `fk_contract_history_coach` (`coach_id`),
   KEY `fk_contract_history_user` (`created_by`),
-  KEY `idx_coach_dates` (`coach_id`, `start_date_jalali`),
-  CONSTRAINT `fk_coach_contract_history_coach` FOREIGN KEY (`coach_id`) REFERENCES `coaches` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_coach_contract_history_user` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT
+  KEY `idx_coach_dates` (`coach_id`, `start_date_jalali`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
 -- =====================================================
--- ADD FOREIGN KEY FOR INVOICE_ID IN REGISTRATIONS
+-- اضافه کردن کلیدهای خارجی / ADD FOREIGN KEYS
 -- =====================================================
+
+-- Coach Time Slot
+ALTER TABLE `coach_time_slot`
+  ADD CONSTRAINT `fk_coach_time_slot_coach` FOREIGN KEY (`coach_id`) REFERENCES `coaches` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_coach_time_slot_slot` FOREIGN KEY (`time_slot_id`) REFERENCES `time_slots` (`id`) ON DELETE CASCADE;
+
+-- Registrations
+ALTER TABLE `registrations`
+  ADD CONSTRAINT `fk_registrations_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_registrations_coach` FOREIGN KEY (`coach_id`) REFERENCES `coaches` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_registrations_time_slot` FOREIGN KEY (`time_slot_id`) REFERENCES `time_slots` (`id`) ON DELETE CASCADE;
+
+-- Payments
+ALTER TABLE `payments`
+  ADD CONSTRAINT `fk_payments_registration` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE;
+
+-- Expenses
+ALTER TABLE `expenses`
+  ADD CONSTRAINT `fk_expenses_user` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT;
+
+-- Rents
+ALTER TABLE `rents`
+  ADD CONSTRAINT `fk_rents_expense` FOREIGN KEY (`expense_id`) REFERENCES `expenses` (`id`) ON DELETE CASCADE;
+
+-- Invoices
+ALTER TABLE `invoices`
+  ADD CONSTRAINT `fk_invoices_registration` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE;
+
+-- Registrations -> Invoice (after invoices table exists)
 ALTER TABLE `registrations`
   ADD CONSTRAINT `fk_registrations_invoice` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE SET NULL;
 
--- =====================================================
--- SCHEDULED EVENT: AUTO-CLEANUP DELETED COACHES
--- Deletes coaches inactive for more than 60 days
--- =====================================================
-DROP EVENT IF EXISTS `cleanup_deleted_coaches`;
+-- Audit Logs
+ALTER TABLE `audit_logs`
+  ADD CONSTRAINT `fk_audit_logs_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT;
 
-DELIMITER //
-CREATE EVENT IF NOT EXISTS `cleanup_deleted_coaches`
-ON SCHEDULE EVERY 1 DAY
-STARTS (TIMESTAMP(CURRENT_DATE) + INTERVAL 2 HOUR)
-DO
-BEGIN
-    DELETE FROM coaches 
-    WHERE status = 'inactive' 
-    AND deleted_at IS NOT NULL 
-    AND deleted_at < DATE_SUB(NOW(), INTERVAL 60 DAY);
-END//
-DELIMITER ;
+-- Coach Contract History
+ALTER TABLE `coach_contract_history`
+  ADD CONSTRAINT `fk_coach_contract_history_coach` FOREIGN KEY (`coach_id`) REFERENCES `coaches` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_coach_contract_history_user` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT;
 
+-- فعال کردن کلیدهای خارجی / Enable Foreign Keys
 SET FOREIGN_KEY_CHECKS = 1;
-COMMIT;
 
 -- =====================================================
--- DEFAULT TIME SLOTS (Optional - uncomment to use)
+-- داده‌های پیش‌فرض / DEFAULT DATA
 -- =====================================================
 
+-- وقت‌های پیش‌فرض / Default Time Slots
 INSERT INTO `time_slots` (`name`, `start_time`, `end_time`, `description`) VALUES
 ('صبح', '06:00:00', '09:00:00', 'وقت صبح'),
 ('چاشت', '09:00:00', '12:00:00', 'وقت چاشت'),
 ('عصر', '15:00:00', '18:00:00', 'وقت عصر');
 
-
--- =====================================================
--- DEFAULT ADMIN USER (Optional - uncomment to use)
--- Password: admin123 (change immediately after setup!)
--- =====================================================
-
+-- کاربر ادمین پیش‌فرض / Default Admin User
+-- Username: admin | Password: admin123
+-- Note: created_at_jalali should be updated to current Jalali date when installing
 INSERT INTO `users` (`username`, `password_hash`, `role`, `created_at_jalali`) VALUES
-('admin', '$2y$10$nPRP6T6fLjwoWUAt/Nv0FOiQ/u57hZzXXjVQFzU7YJv5M20.8uUvm', 'admin', '1404-09-08');
+('admin', '$2y$10$nPRP6T6fLjwoWUAt/Nv0FOiQ/u57hZzXXjVQFzU7YJv5M20.8uUvm', 'admin', '1404-10-06');
+
+-- =====================================================
+-- نصب کامل شد! / INSTALLATION COMPLETE!
+-- =====================================================
+-- 
+-- حالا می‌توانید وارد سیستم شوید:
+-- You can now login with:
+--   Username: admin
+--   Password: admin123
+--
+-- مهم: رمز عبور را فوراً تغییر دهید!
+-- IMPORTANT: Change the password immediately!
+--
+-- =====================================================

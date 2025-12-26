@@ -7,7 +7,7 @@
 // Works universally: just clone the repo anywhere in htdocs and it works!
 const API_BASE = '../api/';
 
-// API Client
+// API Client with Offline Support
 class APIClient {
     static async request(endpoint, options = {}) {
         const url = API_BASE + endpoint;
@@ -28,7 +28,7 @@ class APIClient {
             
             // If response is empty, throw error
             if (!text || text.trim() === '') {
-                throw new Error('Empty response from server');
+                throw new Error('پاسخ خالی از سرور');
             }
             
             // Try to parse JSON
@@ -38,18 +38,34 @@ class APIClient {
             } catch (parseError) {
                 console.error('JSON Parse Error:', parseError);
                 console.error('Response text:', text);
-                throw new Error('Invalid response from server. Please check the console for details.');
+                throw new Error('پاسخ نامعتبر از سرور. لطفاً کنسول را بررسی کنید.');
             }
             
             if (!response.ok && !data.success) {
-                throw new Error(data.error || 'Request failed');
+                throw new Error(data.error || 'درخواست ناموفق');
             }
             
             return data;
         } catch (error) {
             console.error('API Error:', error);
+            
+            // If offline manager is available, try offline fallback
+            if (window.offlineManager && !navigator.onLine) {
+                return this.handleOfflineRequest(endpoint, options);
+            }
+            
             throw error;
         }
+    }
+    
+    static async handleOfflineRequest(endpoint, options) {
+        // Handle offline requests through offline manager
+        if (endpoint.includes('students.php') && options.method === 'GET') {
+            return await window.offlineManager.getStudents();
+        }
+        
+        // For other requests, show offline error
+        throw new Error('شبکه در دسترس نیست. برخی عملیات در حالت آفلاین امکان‌پذیر نیست.');
     }
 
     static get(endpoint, params = {}) {
@@ -212,33 +228,218 @@ function validateForm(formId) {
 
     const requiredFields = form.querySelectorAll('[required]');
     let isValid = true;
+    let firstInvalidField = null;
 
     requiredFields.forEach(field => {
         if (!field.value.trim()) {
             isValid = false;
             field.classList.add('is-invalid');
+            if (!firstInvalidField) {
+                firstInvalidField = field;
+            }
         } else {
             field.classList.remove('is-invalid');
         }
     });
 
+    // Scroll to first invalid field and focus it
+    if (firstInvalidField) {
+        firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => firstInvalidField.focus(), 300);
+    }
+
     return isValid;
 }
 
-// Show Alert/Notification
-function showAlert(message, type = 'info', containerId = 'alertContainer') {
-    const container = document.getElementById(containerId) || document.body;
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    container.insertBefore(alertDiv, container.firstChild);
-    
-    setTimeout(() => {
-        alertDiv.remove();
-    }, 5000);
+// ============================================
+// Notification System
+// ============================================
+
+const notify = {
+    /**
+     * Success Snackbar - Bottom center, auto-dismiss 3s
+     * Use for: successful operations (save, delete, update)
+     */
+    success(message) {
+        this._showSnackbar(message, 'success');
+    },
+
+    /**
+     * Validation Error - Inline near field or form
+     * Use for: form validation errors
+     * @param {string} message - Error message
+     * @param {HTMLElement|string} target - Field element or form ID
+     */
+    validation(message, target) {
+        const element = typeof target === 'string' ? document.getElementById(target) : target;
+        if (!element) {
+            // Fallback to snackbar if no target
+            this._showSnackbar(message, 'warning');
+            return;
+        }
+        
+        // Add invalid state to field
+        element.classList.add('is-invalid');
+        
+        // Find or create inline error element
+        let errorEl = element.parentElement.querySelector('.notify-inline-error');
+        if (!errorEl) {
+            errorEl = document.createElement('div');
+            errorEl.className = 'notify-inline-error';
+            element.parentElement.appendChild(errorEl);
+        }
+        
+        errorEl.innerHTML = `<i class="bi bi-exclamation-circle"></i> ${message}`;
+        errorEl.classList.add('notify-inline-show');
+        
+        // Scroll to field
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.focus();
+        
+        // Clear on input
+        const clearHandler = () => {
+            element.classList.remove('is-invalid');
+            errorEl.classList.remove('notify-inline-show');
+            element.removeEventListener('input', clearHandler);
+        };
+        element.addEventListener('input', clearHandler);
+    },
+
+    /**
+     * API/Server Error - Top banner, stays until dismissed
+     * Use for: network errors, server errors, loading failures
+     */
+    error(message) {
+        // Remove existing error banner
+        const existing = document.getElementById('notifyErrorBanner');
+        if (existing) existing.remove();
+        
+        const banner = document.createElement('div');
+        banner.id = 'notifyErrorBanner';
+        banner.className = 'notify-banner notify-banner--error';
+        banner.innerHTML = `
+            <div class="notify-banner-content">
+                <i class="bi bi-wifi-off notify-banner-icon"></i>
+                <span class="notify-banner-message">${message}</span>
+            </div>
+            <button class="notify-banner-close" onclick="this.parentElement.remove()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        `;
+        
+        // Insert at top of body (after navbar if exists)
+        const navbar = document.querySelector('.navbar-app');
+        if (navbar) {
+            navbar.insertAdjacentElement('afterend', banner);
+        } else {
+            document.body.insertBefore(banner, document.body.firstChild);
+        }
+        
+        // Animate in
+        requestAnimationFrame(() => banner.classList.add('notify-banner-show'));
+    },
+
+    /**
+     * Critical Error - Modal dialog, requires acknowledgment
+     * Use for: session expiry, critical failures, destructive confirmations
+     * @param {string} message - Error message
+     * @param {Function} onConfirm - Callback when user acknowledges
+     */
+    critical(message, onConfirm = null) {
+        // Remove existing modal
+        const existing = document.getElementById('notifyCriticalModal');
+        if (existing) existing.remove();
+        
+        const modal = document.createElement('div');
+        modal.id = 'notifyCriticalModal';
+        modal.className = 'notify-modal-overlay';
+        modal.innerHTML = `
+            <div class="notify-modal">
+                <div class="notify-modal-icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div class="notify-modal-title">خطای بحرانی</div>
+                <div class="notify-modal-message">${message}</div>
+                <button class="notify-modal-btn" id="notifyCriticalBtn">متوجه شدم</button>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Animate in
+        requestAnimationFrame(() => modal.classList.add('notify-modal-show'));
+        
+        // Handle confirm
+        document.getElementById('notifyCriticalBtn').addEventListener('click', () => {
+            modal.classList.remove('notify-modal-show');
+            setTimeout(() => {
+                modal.remove();
+                if (onConfirm) onConfirm();
+            }, 300);
+        });
+    },
+
+    /**
+     * Internal: Show snackbar notification
+     */
+    _showSnackbar(message, type) {
+        // Get or create snackbar container
+        let container = document.getElementById('notifySnackbar');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'notifySnackbar';
+            container.className = 'notify-snackbar-container';
+            document.body.appendChild(container);
+        }
+        
+        const icons = {
+            success: 'bi-check-circle-fill',
+            warning: 'bi-exclamation-triangle-fill',
+            error: 'bi-x-circle-fill',
+            info: 'bi-info-circle-fill'
+        };
+        
+        const snackbar = document.createElement('div');
+        snackbar.className = `notify-snackbar notify-snackbar--${type}`;
+        snackbar.innerHTML = `
+            <i class="bi ${icons[type] || icons.info} notify-snackbar-icon"></i>
+            <span class="notify-snackbar-message">${message}</span>
+        `;
+        
+        container.appendChild(snackbar);
+        
+        // Animate in
+        requestAnimationFrame(() => snackbar.classList.add('notify-snackbar-show'));
+        
+        // Auto-dismiss after 3s
+        setTimeout(() => {
+            snackbar.classList.remove('notify-snackbar-show');
+            snackbar.classList.add('notify-snackbar-hide');
+            setTimeout(() => snackbar.remove(), 300);
+        }, 3000);
+    },
+
+    /**
+     * Clear all inline validation errors in a form
+     */
+    clearValidation(formId) {
+        const form = document.getElementById(formId);
+        if (!form) return;
+        
+        form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        form.querySelectorAll('.notify-inline-error').forEach(el => el.remove());
+    }
+};
+
+// Legacy showAlert - maps to new system for backward compatibility
+function showAlert(message, type = 'info') {
+    if (type === 'success') {
+        notify.success(message);
+    } else if (type === 'danger') {
+        notify.error(message);
+    } else {
+        notify._showSnackbar(message, type);
+    }
 }
 
 // Format Number (Persian/Dari digits)
@@ -293,6 +494,7 @@ window.Pagination = Pagination;
 window.formatNumber = formatNumber;
 window.formatCurrency = formatCurrency;
 window.showAlert = showAlert;
+window.notify = notify;
 window.checkAuth = checkAuth;
 window.logout = logout;
 window.debounce = debounce;

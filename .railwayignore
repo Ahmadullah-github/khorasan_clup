@@ -1,0 +1,22 @@
+# Railway ignore file - exclude files from deployment
+.env
+.env.local
+.env.example
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.tmp
+*.temp
+test_*.html
+migrations/
+README.md
+FREE-DEPLOYMENT-GUIDE.md
+PWA-TESTING.md
+generate-icons.md
+image.png
+image-1.png
+Project.md
+apache-vhost-example.conf
+setup.php

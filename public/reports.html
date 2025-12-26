@@ -226,7 +226,7 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label-app"><i class="bi bi-calendar-range me-1"></i> سال</label>
-                            <input type="number" class="form-control-app" id="reportYear" value="1403">
+                            <input type="number" class="form-control-app" id="reportYear">
                         </div>
                         <button class="report-btn report-btn--primary mb-2" onclick="loadMonthlyReport()">
                             <i class="bi bi-eye"></i> مشاهده گزارش
@@ -281,7 +281,7 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label-app"><i class="bi bi-calendar-range me-1"></i> سال</label>
-                            <input type="number" class="form-control-app" id="coachReportYear" value="1403">
+                            <input type="number" class="form-control-app" id="coachReportYear">
                         </div>
                         <button class="report-btn report-btn--primary mb-2" onclick="loadCoachReport()">
                             <i class="bi bi-eye"></i> مشاهده گزارش
@@ -373,7 +373,7 @@
                     `;
                 }
             } catch (error) {
-                showAlert('خطا در بارگذاری گزارش', 'danger');
+                notify.error('خطا در بارگذاری گزارش');
                 document.getElementById('reportResults').style.display = 'none';
             }
         }
@@ -419,7 +419,7 @@
                     `;
                 }
             } catch (error) {
-                showAlert('خطا در بارگذاری گزارش', 'danger');
+                notify.error('خطا در بارگذاری گزارش');
                 document.getElementById('reportResults').style.display = 'none';
             }
         }
@@ -466,7 +466,7 @@
                     `;
                 }
             } catch (error) {
-                showAlert('خطا در بارگذاری گزارش', 'danger');
+                notify.error('خطا در بارگذاری گزارش');
                 document.getElementById('reportResults').style.display = 'none';
             }
         }
@@ -498,6 +498,18 @@
         }
 
         initDarkMode();
+        
+        // Set current Jalali year as default for both report year inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            const reportYear = document.getElementById('reportYear');
+            const coachReportYear = document.getElementById('coachReportYear');
+            
+            if (typeof getCurrentJalaliYear === 'function') {
+                const currentYear = getCurrentJalaliYear();
+                if (reportYear) reportYear.value = currentYear;
+                if (coachReportYear) coachReportYear.value = currentYear;
+            }
+        });
     </script>
 </body>
 </html>

@@ -3,8 +3,15 @@
  * Dari month names and date conversion functions
  */
 
-// Dari month names
+// Dari month names in Persian script
 const jalaliMonths = {
+    1: 'حمل', 2: 'ثور', 3: 'جوزا', 4: 'سرطان',
+    5: 'اسد', 6: 'سنبله', 7: 'میزان', 8: 'عقرب',
+    9: 'قوس', 10: 'جدی', 11: 'دلو', 12: 'حوت'
+};
+
+// English month names (for reference)
+const jalaliMonthsEn = {
     1: 'Hamal', 2: 'Saur', 3: 'Jawza', 4: 'Saratan',
     5: 'Asad', 6: 'Sonbola', 7: 'Mizan', 8: 'Aqrab',
     9: 'Qaws', 10: 'Jadi', 11: 'Dalv', 12: 'Hoot'
@@ -128,27 +135,43 @@ function getCurrentJalaliDate() {
 }
 
 /**
+ * Get current Jalali year
+ */
+function getCurrentJalaliYear() {
+    const now = new Date();
+    const jalali = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+    return jalali.year;
+}
+
+/**
  * Format Jalali date for display
  * @param {string} jalaliDate - YYYY-MM-DD format
- * @returns {string} Formatted date (e.g., "15 Hamal 1403")
+ * @returns {string} Formatted date (e.g., "15 حمل 1403")
  */
 function formatJalaliDate(jalaliDate) {
-    if (!jalaliDate || jalaliDate === '0000-00-00') {
-        return '';
+    if (!jalaliDate || jalaliDate === '0000-00-00' || jalaliDate === '') {
+        return '---';
     }
     
-    const parts = jalaliDate.split('-');
+    // Handle different possible formats
+    var parts = jalaliDate.toString().split('-');
     if (parts.length !== 3) {
         return jalaliDate;
     }
     
-    const year = parseInt(parts[0]);
-    const month = parseInt(parts[1]);
-    const day = parseInt(parts[2]);
+    var year = parseInt(parts[0], 10);
+    var month = parseInt(parts[1], 10);
+    var day = parseInt(parts[2], 10);
     
-    const monthName = jalaliMonths[month] || month;
+    // Validate
+    if (isNaN(year) || isNaN(month) || isNaN(day)) {
+        return jalaliDate;
+    }
     
-    return `${day} ${monthName} ${year}`;
+    var monthName = jalaliMonths[month] || month;
+    
+    // Return in format: "day monthName year" (e.g., "15 میزان 1404")
+    return day + ' ' + monthName + ' ' + year;
 }
 
 /**
@@ -210,6 +233,7 @@ function formatJalaliDateString(year, month, day) {
 window.gregorianToJalali = gregorianToJalali;
 window.jalaliToGregorian = jalaliToGregorian;
 window.getCurrentJalaliDate = getCurrentJalaliDate;
+window.getCurrentJalaliYear = getCurrentJalaliYear;
 window.formatJalaliDate = formatJalaliDate;
 window.validateJalaliDate = validateJalaliDate;
 window.getJalaliMonthName = getJalaliMonthName;

@@ -25,12 +25,12 @@ switch ($method) {
         } elseif ($action === 'export' && isset($_GET['type'])) {
             handleExport();
         } else {
-            Response::error('Invalid action');
+            Response::error('عملیات نامعتبر');
         }
         break;
         
     default:
-        Response::error('Method not allowed', 405);
+        Response::error('روش مجاز نیست', 405);
 }
 
 /**
@@ -43,7 +43,7 @@ function handleMonthlyReport() {
     $year = (int)($_GET['year'] ?? 0);
     
     if (!$month || !$year) {
-        Response::error('Month and year required');
+        Response::error('ماه و سال الزامی است');
     }
     
     $dateRange = JalaliDate::getMonthDateRange($year, $month);
@@ -212,7 +212,7 @@ function handleExport() {
     } elseif ($format === 'pdf') {
         exportPDF($type, $month, $year);
     } else {
-        Response::error('Invalid format');
+        Response::error('فرمت نامعتبر');
     }
 }
 
@@ -275,7 +275,7 @@ function exportCSV($type, $month, $year) {
             
         case 'monthly':
             if (!$month || !$year) {
-                Response::error('Month and year required for monthly export');
+                Response::error('ماه و سال برای خروجی ماهانه الزامی است');
             }
             // Export monthly summary
             $dateRange = JalaliDate::getMonthDateRange($year, $month);
@@ -312,7 +312,7 @@ function exportPDF($type, $month, $year) {
     // For now, return JSON with message
     // In production, this would generate a PDF using TCPDF
     Response::success([
-        'message' => 'PDF export functionality requires TCPDF library. Please use CSV export for now.',
+        'message' => 'عملکرد خروجی PDF نیاز به کتابخانه TCPDF دارد. لطفاً از خروجی CSV استفاده کنید.',
         'type' => $type,
         'month' => $month,
         'year' => $year

@@ -56,7 +56,7 @@ switch ($endpoint) {
         break;
     default:
         http_response_code(404);
-        echo json_encode(['error' => 'Endpoint not found']);
+        echo json_encode(['error' => 'نقطه پایانی یافت نشد']);
         break;
 }
 

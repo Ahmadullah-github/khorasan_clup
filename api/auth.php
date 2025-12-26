@@ -23,7 +23,7 @@ switch ($method) {
             Session::requireAdmin();
             handleCreateUser();
         } else {
-            Response::error('Invalid action', 400);
+            Response::error('عملیات نامعتبر', 400);
         }
         break;
         
@@ -34,7 +34,7 @@ switch ($method) {
             Session::requireAdmin();
             handleListUsers();
         } else {
-            Response::error('Invalid action', 400);
+            Response::error('عملیات نامعتبر', 400);
         }
         break;
         
@@ -43,12 +43,12 @@ switch ($method) {
             Session::requireAdmin();
             handleDeleteUser();
         } else {
-            Response::error('Invalid action', 400);
+            Response::error('عملیات نامعتبر', 400);
         }
         break;
         
     default:
-        Response::error('Method not allowed', 405);
+        Response::error('روش مجاز نیست', 405);
 }
 
 /**
@@ -60,7 +60,7 @@ function handleLogin() {
     $data = json_decode(file_get_contents('php://input'), true);
     
     if (!isset($data['username']) || !isset($data['password'])) {
-        Response::error('Username and password required');
+        Response::error('نام کاربری و رمز عبور الزامی است');
     }
     
     $username = Sanitizer::sanitizeInput($data['username']);
@@ -76,13 +76,13 @@ function handleLogin() {
     $user = $stmt->fetch();
     
     if (!$user) {
-        Response::error('Invalid username or password', 401);
+        Response::error('نام کاربری یا رمز عبور نادرست', 401);
     }
     
     // Check lockout
     if ($user['locked_until'] && strtotime($user['locked_until']) > time()) {
         $remaining = ceil((strtotime($user['locked_until']) - time()) / 60);
-        Response::error("Account locked. Try again in {$remaining} minutes.", 423);
+        Response::error("حساب قفل شده. {$remaining} دقیقه دیگر تلاش کنید.", 423);
     }
     
     // Verify password
@@ -104,10 +104,10 @@ function handleLogin() {
         
         $remaining = MAX_LOGIN_ATTEMPTS - $failedAttempts;
         if ($remaining <= 0) {
-            Response::error("Account locked for " . (LOCKOUT_DURATION / 60) . " minutes.", 423);
+            Response::error("حساب برای " . (LOCKOUT_DURATION / 60) . " دقیقه قفل شد.", 423);
         }
         
-        Response::error("Invalid username or password. {$remaining} attempts remaining.", 401);
+        Response::error("نام کاربری یا رمز عبور نادرست. {$remaining} تلاش باقی مانده.", 401);
     }
     
     // Successful login - reset failed attempts
@@ -126,7 +126,7 @@ function handleLogin() {
     $_SESSION['last_activity'] = time();
     
     // Log login
-    Audit::log($user['id'], 'login', 'users', $user['id'], 'User logged in');
+    Audit::log($user['id'], 'login', 'users', $user['id'], 'کاربر وارد شد');
     
     Response::success([
         'user' => [
@@ -143,10 +143,10 @@ function handleLogin() {
 function handleLogout() {
     $user = Session::getUser();
     if ($user) {
-        Audit::log($user['id'], 'logout', 'users', $user['id'], 'User logged out');
+        Audit::log($user['id'], 'logout', 'users', $user['id'], 'کاربر خارج شد');
     }
     Session::destroy();
-    Response::success(null, 'Logged out successfully');
+    Response::success(null, 'با موفقیت خارج شدید');
 }
 
 /**
@@ -154,7 +154,7 @@ function handleLogout() {
  */
 function handleCheckAuth() {
     if (!Session::isLoggedIn()) {
-        Response::error('Not authenticated', 401);
+        Response::error('احراز هویت نشده', 401);
     }
     
     $user = Session::getUser();
@@ -170,7 +170,7 @@ function handleCreateUser() {
     $data = json_decode(file_get_contents('php://input'), true);
     
     if (!isset($data['username']) || !isset($data['password']) || !isset($data['role'])) {
-        Response::error('Username, password, and role required');
+        Response::error('نام کاربری، رمز عبور و نقش الزامی است');
     }
     
     $username = Sanitizer::sanitizeInput($data['username']);
@@ -179,14 +179,14 @@ function handleCreateUser() {
     
     // Validate password strength
     if (strlen($password) < 6) {
-        Response::error('Password must be at least 6 characters');
+        Response::error('رمز عبور باید حداقل 6 کاراکتر باشد');
     }
     
     // Check if username exists
     $stmt = $db->prepare("SELECT id FROM users WHERE username = ?");
     $stmt->execute([$username]);
     if ($stmt->fetch()) {
-        Response::error('Username already exists');
+        Response::error('نام کاربری قبلاً وجود دارد');
     }
     
     // Create user
@@ -202,7 +202,7 @@ function handleCreateUser() {
     $userId = $db->lastInsertId();
     
     $user = Session::getUser();
-    Audit::log($user['id'], 'create', 'users', $userId, "Created user: {$username}");
+    Audit::log($user['id'], 'create', 'users', $userId, "ایجاد کاربر: {$username}");
     
     Response::success([
         'id' => $userId,
@@ -236,19 +236,19 @@ function handleDeleteUser() {
     try {
         $userId = $_GET['id'] ?? null;
         if (!$userId) {
-            Response::error('User ID required');
+            Response::error('شناسه کاربر الزامی است');
         }
         
         $userId = (int)$userId;
         $user = Session::getUser();
         
         if (!$user) {
-            Response::error('User session not found', 401);
+            Response::error('جلسه کاربر یافت نشد', 401);
         }
         
         // Prevent self-deletion
         if ($userId === $user['id']) {
-            Response::error('Cannot delete your own account');
+            Response::error('نمی‌توانید حساب خود را حذف کنید');
         }
         
         // Check if user exists
@@ -257,7 +257,7 @@ function handleDeleteUser() {
         $targetUser = $stmt->fetch();
         
         if (!$targetUser) {
-            Response::error('User not found');
+            Response::error('کاربر یافت نشد');
         }
         
         // Start transaction
@@ -290,13 +290,13 @@ function handleDeleteUser() {
             
             // Log the deletion (after successful deletion)
             try {
-                Audit::log($user['id'], 'delete', 'users', $userId, "Deleted user: {$targetUser['username']}");
+                Audit::log($user['id'], 'delete', 'users', $userId, "حذف کاربر: {$targetUser['username']}");
             } catch (Exception $e) {
                 // Log error but don't fail - user is already deleted
                 error_log("Audit log error: " . $e->getMessage());
             }
             
-            Response::success(null, 'User deleted successfully');
+            Response::success(null, 'کاربر با موفقیت حذف شد');
         } catch (Exception $e) {
             // Rollback transaction on error
             $db->rollBack();
@@ -304,7 +304,7 @@ function handleDeleteUser() {
         }
     } catch (Exception $e) {
         error_log("Delete user error: " . $e->getMessage());
-        Response::error('Failed to delete user: ' . $e->getMessage());
+        Response::error('خطا در حذف کاربر: ' . $e->getMessage());
     }
 }
 

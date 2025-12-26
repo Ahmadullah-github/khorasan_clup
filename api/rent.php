@@ -28,12 +28,12 @@ switch ($method) {
         if ($action === 'mark-paid') {
             handleMarkPaid();
         } else {
-            Response::error('Invalid action');
+            Response::error('عملیات نامعتبر');
         }
         break;
         
     default:
-        Response::error('Method not allowed', 405);
+        Response::error('روش مجاز نیست', 405);
 }
 
 /**
@@ -128,7 +128,7 @@ function handleMarkPaid() {
     $data = json_decode(file_get_contents('php://input'), true);
     
     if (!isset($data['month_jalali']) || !isset($data['year_jalali'])) {
-        Response::error('Month and year required');
+        Response::error('ماه و سال الزامی است');
     }
     
     $month = (int)$data['month_jalali'];
@@ -140,7 +140,7 @@ function handleMarkPaid() {
     $rent = $stmt->fetch();
     
     if (!$rent) {
-        Response::error('Rent record not found for this month/year');
+        Response::error('رکورد اجاره برای این ماه/سال یافت نشد');
     }
     
     $paid = isset($data['paid']) ? (int)(bool)$data['paid'] : 1;
@@ -148,9 +148,9 @@ function handleMarkPaid() {
     $stmt = $db->prepare("UPDATE rents SET paid = ? WHERE id = ?");
     $stmt->execute([$paid, $rent['id']]);
     
-    Audit::log($user['id'], 'update', 'rents', $rent['id'], "Marked rent as " . ($paid ? 'paid' : 'unpaid'));
+    Audit::log($user['id'], 'update', 'rents', $rent['id'], "علامت‌گذاری اجاره به عنوان " . ($paid ? 'پرداخت شده' : 'پرداخت نشده'));
     
-    Response::success(null, 'Rent status updated successfully');
+    Response::success(null, 'وضعیت اجاره با موفقیت به‌روزرسانی شد');
 }
 
 

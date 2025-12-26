@@ -15,16 +15,25 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Database configuration
-// XAMPP-friendly defaults (local MySQL on localhost with root user and no password)
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'khorasan_club');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-// Optional: allow overriding via environment variables (for advanced setups)
-if (getenv('DB_HOST')) define('DB_HOST', getenv('DB_HOST'));
-if (getenv('DB_NAME')) define('DB_NAME', getenv('DB_NAME'));
-if (getenv('DB_USER')) define('DB_USER', getenv('DB_USER'));
-if (getenv('DB_PASS') !== false) define('DB_PASS', getenv('DB_PASS'));
+// Support both local development and production deployment
+$db_host = getenv('DB_HOST') ?: 'localhost';
+$db_name = getenv('DB_NAME') ?: 'khorasan_club';
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+
+// Railway MySQL URL parsing (if DATABASE_URL is provided)
+if (getenv('DATABASE_URL')) {
+    $db_url = parse_url(getenv('DATABASE_URL'));
+    $db_host = $db_url['host'];
+    $db_name = ltrim($db_url['path'], '/');
+    $db_user = $db_url['user'];
+    $db_pass = $db_url['pass'];
+}
+
+define('DB_HOST', $db_host);
+define('DB_NAME', $db_name);
+define('DB_USER', $db_user);
+define('DB_PASS', $db_pass);
 define('DB_CHARSET', 'utf8mb4');
 
 // Application constants
@@ -60,7 +69,7 @@ class Database {
             $this->pdo->exec("SET character_set_connection=utf8mb4");
         } catch (PDOException $e) {
             error_log("Database connection failed: " . $e->getMessage());
-            die("Database connection failed. Please check configuration.");
+            die("اتصال به پایگاه داده ناموفق. لطفاً تنظیمات را بررسی کنید.");
         }
     }
 
@@ -127,7 +136,7 @@ class Session {
         self::requireAuth();
         if ($_SESSION['role'] !== 'admin') {
             http_response_code(403);
-            echo json_encode(['error' => 'Admin access required']);
+            echo json_encode(['error' => 'دسترسی مدیر مورد نیاز است']);
             exit;
         }
     }

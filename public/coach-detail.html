@@ -191,7 +191,7 @@
                     loadContractHistory();
                 }
             } catch (error) { 
-                showAlert('خطا در بارگذاری اطلاعات', 'danger'); 
+                notify.error('خطا در بارگذاری اطلاعات'); 
                 console.error(error);
             }
         }

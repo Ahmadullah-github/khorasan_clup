@@ -43,7 +43,7 @@ switch ($method) {
         if ($studentId) {
             handleUpdateStudent($studentId);
         } else {
-            Response::error('Student ID required');
+            Response::error('شناسه دانش‌آموز الزامی است');
         }
         break;
         
@@ -51,12 +51,12 @@ switch ($method) {
         if ($studentId) {
             handleDeleteStudent($studentId);
         } else {
-            Response::error('Student ID required');
+            Response::error('شناسه دانش‌آموز الزامی است');
         }
         break;
         
     default:
-        Response::error('Method not allowed', 405);
+        Response::error('روش مجاز نیست', 405);
 }
 
 /**
@@ -145,7 +145,7 @@ function handleCreateStudent() {
     $data = json_decode(file_get_contents('php://input'), true);
     
     if (json_last_error() !== JSON_ERROR_NONE) {
-        Response::error('Invalid JSON data: ' . json_last_error_msg());
+        Response::error('داده‌های JSON نامعتبر: ' . json_last_error_msg());
     }
     
     // Validate required fields
@@ -261,14 +261,14 @@ function handleCreateStudent() {
         
         $db->commit();
         
-        Audit::log($user['id'], 'create', 'students', $studentId, "Created student and registration");
+        Audit::log($user['id'], 'create', 'students', $studentId, "ایجاد دانش‌آموز و ثبت‌نام");
         
         Response::success([
             'student_id' => $studentId,
             'registration_id' => $registrationId,
             'invoice_id' => $invoiceId,
             'invoice_number' => $invoiceNumber
-        ], 'Student registered successfully');
+        ], 'دانش‌آموز با موفقیت ثبت شد');
         
     } catch (PDOException $e) {
         $db->rollBack();
@@ -314,7 +314,7 @@ function handleGetStudent($studentId) {
     $student = $stmt->fetch();
     
     if (!$student) {
-        Response::error('Student not found', 404);
+        Response::error('دانش‌آموز یافت نشد', 404);
     }
     
     Response::success($student);
@@ -385,7 +385,7 @@ function handleUpdateStudent($studentId) {
         $stmt->execute($params);
         
         $changesStr = implode(', ', $changes);
-        Audit::log($user['id'], 'update', 'students', $studentId, "Updated fields: {$changesStr}");
+        Audit::log($user['id'], 'update', 'students', $studentId, "به‌روزرسانی فیلدها: {$changesStr}");
         
         Response::success(null, 'اطلاعات دانش‌آموز با موفقیت به‌روزرسانی شد');
         
@@ -450,7 +450,7 @@ function handleDeleteStudent($studentId) {
         
         $db->commit();
         
-        Audit::log($user['id'], 'delete', 'students', $studentId, "Deleted student: {$student['first_name']} {$student['last_name']}");
+        Audit::log($user['id'], 'delete', 'students', $studentId, "حذف دانش‌آموز: {$student['first_name']} {$student['last_name']}");
         
         Response::success(null, 'دانش‌آموز با موفقیت حذف شد');
         
@@ -510,7 +510,7 @@ function handleRenewRegistration($studentId) {
     $lastReg = $stmt->fetch();
     
     if (!$lastReg) {
-        Response::error('No previous registration found');
+        Response::error('ثبت‌نام قبلی یافت نشد');
     }
     
     // Calculate new dates (next month) using centralized date logic
@@ -584,18 +584,18 @@ function handleRenewRegistration($studentId) {
         
         $db->commit();
         
-        Audit::log($user['id'], 'renew', 'registrations', $registrationId, "Renewed registration for student {$studentId}");
+        Audit::log($user['id'], 'renew', 'registrations', $registrationId, "تمدید ثبت‌نام برای دانش‌آموز {$studentId}");
         
         Response::success([
             'registration_id' => $registrationId,
             'invoice_id' => $invoiceId,
             'invoice_number' => $invoiceNumber
-        ], 'Registration renewed successfully');
+        ], 'ثبت‌نام با موفقیت تمدید شد');
         
     } catch (Exception $e) {
         $db->rollBack();
         error_log("Renewal error: " . $e->getMessage());
-        Response::error('Failed to renew registration: ' . $e->getMessage());
+        Response::error('خطا در تمدید ثبت‌نام: ' . $e->getMessage());
     }
 }
 

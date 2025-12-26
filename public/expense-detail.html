@@ -463,13 +463,13 @@
             try {
                 const result = await APIClient.delete(`expenses.php?id=${expenseId}`);
                 if (result.success) {
-                    showAlert('هزینه با موفقیت حذف شد', 'success');
+                    notify.success('هزینه با موفقیت حذف شد');
                     setTimeout(() => {
                         window.location.href = 'expenses.html';
                     }, 1000);
                 }
             } catch (error) {
-                showAlert(error.message || 'خطا در حذف هزینه', 'danger');
+                notify.error(error.message || 'خطا در حذف هزینه');
                 btn.disabled = false;
                 spinner.classList.add('d-none');
                 bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();

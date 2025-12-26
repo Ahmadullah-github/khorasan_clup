@@ -247,23 +247,25 @@ function handleWhatsAppShare($invoiceId) {
             Response::error('فاکتور یافت نشد', 404);
         }
         
-        // Format invoice message in Dari/Persian
-        $formattedAmount = number_format($invoice['total_amount'], 0) . ' افغانی';
-        $formattedDate = JalaliDate::format($invoice['issued_date_jalali']);
+        // Format invoice message in Dari/Persian - clean format without emojis
+        $formattedAmount = number_format($invoice['total_amount'], 0);
+        // Use registration date (when student actually registered/paid) instead of invoice issue date
+        $formattedDate = JalaliDate::format($invoice['registration_date_jalali']);
         
-        $message = "📋 *فاکتور کمپ خراسان*\n";
-        $message .= "━━━━━━━━━━━━━━━\n";
-        $message .= "🔢 شماره: {$invoice['invoice_number']}\n";
-        $message .= "📅 تاریخ: {$formattedDate}\n";
-        $message .= "━━━━━━━━━━━━━━━\n";
-        $message .= "👤 دانش‌آموز: {$invoice['first_name']} {$invoice['last_name']}\n";
-        $message .= "🏋️ مربی: {$invoice['coach_first_name']} {$invoice['coach_last_name']}\n";
-        $message .= "⏰ زمان: {$invoice['time_slot_name']}\n";
-        $message .= "━━━━━━━━━━━━━━━\n";
-        $message .= "💰 *مبلغ: {$formattedAmount}*\n";
-        $message .= "━━━━━━━━━━━━━━━\n";
-        $message .= "🙏 با تشکر از اعتماد شما\n";
-        $message .= "🤸‍♂️ کمپ خراسان";
+        // Build clean WhatsApp message
+        $message = "*فاکتور کمپ خراسان*\n\n";
+        
+        $message .= "شماره: {$invoice['invoice_number']}\n";
+        $message .= "تاریخ: {$formattedDate}\n\n";
+        
+        $message .= "دانش آموز: {$invoice['first_name']} {$invoice['last_name']}\n";
+        $message .= "مربی: {$invoice['coach_first_name']} {$invoice['coach_last_name']}\n";
+        $message .= "زمان: {$invoice['time_slot_name']}\n\n";
+        
+        $message .= "مبلغ: {$formattedAmount} افغانی\n\n";
+        
+        $message .= "با تشکر از اعتماد شما\n";
+        $message .= "کمپ خراسان";
         
         $encodedMessage = urlencode($message);
         
@@ -319,7 +321,7 @@ function handleMarkAsPaid($invoiceId) {
         $stmt = $db->prepare("UPDATE invoices SET status = 'paid', paid_date_jalali = ? WHERE id = ?");
         $stmt->execute([JalaliDate::now(), $invoiceId]);
         
-        Audit::log($user['id'], 'update', 'invoices', $invoiceId, "Marked invoice {$invoice['invoice_number']} as paid");
+        Audit::log($user['id'], 'update', 'invoices', $invoiceId, "علامت‌گذاری فاکتور {$invoice['invoice_number']} به عنوان پرداخت شده");
         
         Response::success(null, 'فاکتور با موفقیت به عنوان پرداخت شده علامت‌گذاری شد');
         

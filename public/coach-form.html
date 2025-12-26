@@ -433,7 +433,7 @@
                 if (!file) return;
 
                 if (file.size > 5 * 1024 * 1024) {
-                    showAlert('حجم فایل نباید بیشتر از 5MB باشد', 'danger');
+                    notify._showSnackbar('حجم فایل نباید بیشتر از 5MB باشد', 'warning');
                     return;
                 }
 
@@ -478,12 +478,12 @@
                 if (data.success) {
                     uploadedPhotoPath = data.data.file_path;
                     document.getElementById('photoPath').value = uploadedPhotoPath;
-                    showAlert('عکس با موفقیت آپلود شد', 'success');
+                    notify.success('عکس با موفقیت آپلود شد');
                 } else {
                     throw new Error(data.error || 'Upload failed');
                 }
             } catch (error) {
-                showAlert('خطا در آپلود عکس: ' + error.message, 'danger');
+                notify.error('خطا در آپلود عکس: ' + error.message);
             }
         }
 
@@ -541,7 +541,7 @@
                     populateForm(originalCoach);
                 }
             } catch (error) {
-                showAlert('خطا در بارگذاری اطلاعات مربی', 'danger');
+                notify.error('خطا در بارگذاری اطلاعات مربی');
                 console.error(error);
             }
         }
@@ -651,7 +651,7 @@
             }
             
             if (!isValid) {
-                showAlert('لطفاً فیلدهای الزامی را پر کنید', 'warning');
+                notify._showSnackbar('لطفاً فیلدهای الزامی را پر کنید', 'warning');
                 return;
             }
             
@@ -662,28 +662,24 @@
             if (contractType === 'percentage') {
                 percentageRate = parseFloat(document.getElementById('percentageRate').value) || 0;
                 if (percentageRate <= 0 || percentageRate > 100) {
-                    showAlert('درصد باید بین 1 تا 100 باشد', 'warning');
-                    document.getElementById('percentageRate').classList.add('is-invalid');
+                    notify.validation('درصد باید بین 1 تا 100 باشد', document.getElementById('percentageRate'));
                     return;
                 }
             } else if (contractType === 'salary') {
                 monthlySalary = parseFloat(document.getElementById('monthlySalary').value) || 0;
                 if (monthlySalary <= 0) {
-                    showAlert('حقوق ماهانه باید بیشتر از صفر باشد', 'warning');
-                    document.getElementById('monthlySalary').classList.add('is-invalid');
+                    notify.validation('حقوق ماهانه باید بیشتر از صفر باشد', document.getElementById('monthlySalary'));
                     return;
                 }
             } else if (contractType === 'hybrid') {
                 monthlySalary = parseFloat(document.getElementById('hybridSalary').value) || 0;
                 percentageRate = parseFloat(document.getElementById('hybridPercentage').value) || 0;
                 if (monthlySalary <= 0) {
-                    showAlert('حقوق پایه باید بیشتر از صفر باشد', 'warning');
-                    document.getElementById('hybridSalary').classList.add('is-invalid');
+                    notify.validation('حقوق پایه باید بیشتر از صفر باشد', document.getElementById('hybridSalary'));
                     return;
                 }
                 if (percentageRate <= 0 || percentageRate > 100) {
-                    showAlert('درصد اضافی باید بین 1 تا 100 باشد', 'warning');
-                    document.getElementById('hybridPercentage').classList.add('is-invalid');
+                    notify.validation('درصد اضافی باید بین 1 تا 100 باشد', document.getElementById('hybridPercentage'));
                     return;
                 }
             }
@@ -731,7 +727,7 @@
                 }
                 
                 if (result.success) {
-                    showAlert(isEditMode ? 'مربی با موفقیت بروزرسانی شد' : 'مربی با موفقیت افزوده شد', 'success');
+                    notify.success(isEditMode ? 'مربی با موفقیت بروزرسانی شد' : 'مربی با موفقیت افزوده شد');
                     // Redirect after success
                     setTimeout(() => {
                         window.location.href = 'coaches.html';
@@ -741,7 +737,7 @@
                 }
             } catch (error) {
                 console.error('Submit error:', error);
-                showAlert(error.message || 'خطا در ذخیره اطلاعات', 'danger');
+                notify.error(error.message || 'خطا در ذخیره اطلاعات');
                 submitBtn.disabled = false;
                 btnSpinner.classList.add('d-none');
                 btnIcon.classList.remove('d-none');

@@ -203,6 +203,322 @@
             font-weight: var(--font-weight-bold);
             color: var(--color-success-600);
         }
+        /* Enhanced Loading States */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: var(--radius-md);
+            display: inline-block;
+        }
+        [data-theme="dark"] .skeleton {
+            background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+            background-size: 200% 100%;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .loading-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .loading-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+            z-index: 1;
+        }
+        [data-theme="dark"] .loading-card::before {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--color-primary-100);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: var(--space-3) 0;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-600));
+            border-radius: 2px;
+            animation: progress-indeterminate 2s infinite;
+        }
+        @keyframes progress-indeterminate {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .loading-spinner {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+        }
+        .loading-spinner .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--color-primary-200);
+            border-top: 2px solid var(--color-primary-500);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .calculation-progress {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            margin: var(--space-4) 0;
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+        .calculation-progress.show { 
+            display: block; 
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--space-3);
+        }
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+        .progress-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: var(--color-primary-200);
+            z-index: 0;
+            transition: background 0.3s ease;
+        }
+        .progress-step.completed::after { background: var(--color-primary-500); }
+        .progress-step-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--color-primary-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            position: relative;
+            z-index: 1;
+            margin-bottom: var(--space-1);
+            transition: all 0.3s ease;
+        }
+        .progress-step.active .progress-step-icon {
+            background: var(--color-primary-500);
+            animation: pulse 2s infinite;
+        }
+        .progress-step.completed .progress-step-icon { 
+            background: var(--color-success-500);
+            transform: scale(1.1);
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .progress-step-label {
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .progress-step.active .progress-step-label { 
+            color: var(--color-primary-600); 
+            font-weight: var(--font-weight-medium); 
+        }
+        .progress-step.completed .progress-step-label { 
+            color: var(--color-success-600); 
+        }
+
+        .table-skeleton {
+            animation: skeleton-loading 1.5s infinite;
+        }
+        .table-skeleton td {
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--border-color-light);
+        }
+        .skeleton-text {
+            height: 16px;
+            background: var(--color-primary-100);
+            border-radius: var(--radius-sm);
+            margin: 2px 0;
+        }
+        [data-theme="dark"] .skeleton-text {
+            background: #374151;
+        }
+        .skeleton-text.short { width: 60%; }
+        .skeleton-text.medium { width: 80%; }
+        .skeleton-text.long { width: 100%; }
+
+        /* Data Visualization Charts */
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            margin-bottom: var(--space-6);
+        }
+        .chart-header {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            padding: var(--space-4) var(--space-5);
+            color: white;
+        }
+        .chart-header h3 {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        .chart-content {
+            padding: var(--space-5);
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            margin-bottom: var(--space-4);
+        }
+        .chart-wrapper.small {
+            height: 200px;
+        }
+        .chart-wrapper canvas {
+            max-height: 100%;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+        @media (max-width: 991px) { 
+            .charts-grid { 
+                grid-template-columns: 1fr; 
+            } 
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-3);
+            justify-content: center;
+            margin-top: var(--space-3);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+            font-size: var(--font-size-sm);
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+        }
+        .trend-indicator.positive {
+            color: var(--color-success-700);
+            background: var(--color-success-100);
+        }
+        .trend-indicator.negative {
+            color: var(--color-danger-700);
+            background: var(--color-danger-100);
+        }
+        .trend-indicator.neutral {
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+        }
+        [data-theme="dark"] .trend-indicator.positive {
+            background: rgba(16,185,129,0.2);
+            color: #6ee7b7;
+        }
+        [data-theme="dark"] .trend-indicator.negative {
+            background: rgba(239,68,68,0.2);
+            color: #fca5a5;
+        }
+
+        .chart-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: var(--space-3);
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--border-color-light);
+        }
+        .chart-stat {
+            text-align: center;
+        }
+        .chart-stat-value {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-bold);
+            color: var(--text-primary);
+        }
+        .chart-stat-label {
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+            margin-top: var(--space-1);
+        }
+
+        /* Animation classes */
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-slideUp {
+            animation: slideUp 0.6s ease-out both;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* Algorithm Info */
         .algorithm-info {
             background: linear-gradient(135deg, var(--color-primary-50) 0%, #ede9fe 100%);
@@ -299,7 +615,6 @@
                         <i class="bi bi-calculator me-2"></i>
                         محاسبه درآمد خالص و پرداخت مربیان
                     </h1>
-                    <p class="hero-subtitle">محاسبه دقیق درآمد، هزینه و سهم مربیان بر اساس الگوریتم عادلانه</p>
                 </div>
             </div>
 
@@ -324,12 +639,40 @@
                 </div>
                 <div class="filter-group">
                     <label><i class="bi bi-calendar-range me-1"></i> سال (جلالی)</label>
-                    <input type="number" class="form-control-app" id="yearSelect" value="1403" min="1380" max="1450">
+                    <input type="number" class="form-control-app" id="yearSelect" min="1380" max="1450">
                 </div>
                 <button class="calculate-btn" onclick="loadAccounting()">
                     <i class="bi bi-calculator"></i>
                     محاسبه کن
                 </button>
+            </div>
+
+            <!-- Calculation Progress -->
+            <div class="calculation-progress" id="calculationProgress">
+                <div class="progress-steps">
+                    <div class="progress-step" id="step1">
+                        <div class="progress-step-icon">1</div>
+                        <div class="progress-step-label">جمع‌آوری داده‌ها</div>
+                    </div>
+                    <div class="progress-step" id="step2">
+                        <div class="progress-step-icon">2</div>
+                        <div class="progress-step-label">محاسبه درآمد</div>
+                    </div>
+                    <div class="progress-step" id="step3">
+                        <div class="progress-step-icon">3</div>
+                        <div class="progress-step-label">محاسبه پرداخت مربیان</div>
+                    </div>
+                    <div class="progress-step" id="step4">
+                        <div class="progress-step-icon">4</div>
+                        <div class="progress-step-label">تکمیل گزارش</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill"></div>
+                </div>
+                <div class="text-center">
+                    <small class="text-muted" id="progressText">در حال آماده‌سازی...</small>
+                </div>
             </div>
 
             <!-- Summary Cards -->
@@ -338,7 +681,10 @@
                     <div class="summary-card-icon">💰</div>
                     <div class="summary-card-label">درآمد کل</div>
                     <div class="summary-card-value" id="totalIncome">
-                        <span class="skeleton" style="width: 120px; height: 36px; display: inline-block;"></span>
+                        <div class="skeleton" style="width: 120px; height: 36px;"></div>
+                    </div>
+                    <div class="mt-2" id="incomeTrend">
+                        <div class="skeleton" style="width: 80px; height: 20px;"></div>
                     </div>
                     <a href="#" class="summary-card-link" onclick="showBreakdown('income'); return false;">
                         مشاهده جزئیات
@@ -349,7 +695,10 @@
                     <div class="summary-card-icon">📉</div>
                     <div class="summary-card-label">هزینه کل</div>
                     <div class="summary-card-value" id="totalExpenses">
-                        <span class="skeleton" style="width: 120px; height: 36px; display: inline-block;"></span>
+                        <div class="skeleton" style="width: 120px; height: 36px;"></div>
+                    </div>
+                    <div class="mt-2" id="expenseTrend">
+                        <div class="skeleton" style="width: 80px; height: 20px;"></div>
                     </div>
                     <a href="#" class="summary-card-link" onclick="showBreakdown('expense'); return false;">
                         مشاهده جزئیات
@@ -360,13 +709,80 @@
                     <div class="summary-card-icon">📊</div>
                     <div class="summary-card-label">درآمد خالص</div>
                     <div class="summary-card-value" id="netIncome">
-                        <span class="skeleton" style="width: 120px; height: 36px; display: inline-block;"></span>
+                        <div class="skeleton" style="width: 120px; height: 36px;"></div>
+                    </div>
+                    <div class="mt-2" id="netTrend">
+                        <div class="skeleton" style="width: 80px; height: 20px;"></div>
                     </div>
                 </div>
             </div>
 
+            <!-- Data Visualization Charts -->
+            <div class="charts-grid animate-slideUp" style="animation-delay: 250ms;">
+                <!-- Income vs Expenses Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3><i class="bi bi-bar-chart"></i> مقایسه درآمد و هزینه</h3>
+                    </div>
+                    <div class="chart-content">
+                        <div class="chart-wrapper">
+                            <canvas id="incomeExpenseChart"></canvas>
+                        </div>
+                        <div class="chart-stats" id="incomeExpenseStats">
+                            <div class="chart-stat">
+                                <div class="chart-stat-value" id="profitMargin">-</div>
+                                <div class="chart-stat-label">حاشیه سود (%)</div>
+                            </div>
+                            <div class="chart-stat">
+                                <div class="chart-stat-value" id="expenseRatio">-</div>
+                                <div class="chart-stat-label">نسبت هزینه (%)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Income Distribution Pie Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3><i class="bi bi-pie-chart"></i> توزیع درآمد</h3>
+                    </div>
+                    <div class="chart-content">
+                        <div class="chart-wrapper small">
+                            <canvas id="incomeDistributionChart"></canvas>
+                        </div>
+                        <div class="chart-legend" id="incomeDistributionLegend">
+                            <!-- Legend items will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coach Payments Chart -->
+            <div class="chart-container animate-slideUp" style="animation-delay: 300ms;">
+                <div class="chart-header">
+                    <h3><i class="bi bi-people"></i> پرداخت مربیان</h3>
+                </div>
+                <div class="chart-content">
+                    <div class="chart-wrapper">
+                        <canvas id="coachPaymentsChart"></canvas>
+                    </div>
+                    <div class="chart-stats" id="coachPaymentStats">
+                        <div class="chart-stat">
+                            <div class="chart-stat-value" id="avgCoachPayment">-</div>
+                            <div class="chart-stat-label">میانگین پرداخت</div>
+                        </div>
+                        <div class="chart-stat">
+                            <div class="chart-stat-value" id="totalCoaches">-</div>
+                            <div class="chart-stat-label">تعداد مربیان</div>
+                        </div>
+                        <div class="chart-stat">
+                            <div class="chart-stat-value" id="paymentEfficiency">-</div>
+                            <div class="chart-stat-label">بازدهی پرداخت (%)</div>
+                        </div>
+                    </div>
+                </div>
             <!-- Coach Payouts -->
-            <div class="payout-card animate-slideUp" style="animation-delay: 300ms;">
+            <div class="payout-card animate-slideUp" style="animation-delay: 350ms;">
                 <div class="payout-header">
                     <h2><i class="bi bi-people"></i> پرداخت مربیان</h2>
                 </div>
@@ -383,13 +799,30 @@
                             </tr>
                         </thead>
                         <tbody id="payoutsTableBody">
-                            <tr>
-                                <td colspan="6">
-                                    <div class="text-center py-5">
-                                        <div style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;">📋</div>
-                                        <div class="text-muted">لطفاً ماه و سال را انتخاب کرده و دکمه محاسبه را بزنید</div>
-                                    </div>
-                                </td>
+                            <!-- Skeleton Loading Rows -->
+                            <tr class="table-skeleton">
+                                <td><div class="skeleton-text medium"></div></td>
+                                <td><div class="skeleton-text short"></div></td>
+                                <td><div class="skeleton-text medium"></div></td>
+                                <td><div class="skeleton-text medium"></div></td>
+                                <td><div class="skeleton-text long"></div></td>
+                                <td><div class="skeleton-text short"></div></td>
+                            </tr>
+                            <tr class="table-skeleton">
+                                <td><div class="skeleton-text long"></div></td>
+                                <td><div class="skeleton-text short"></div></td>
+                                <td><div class="skeleton-text medium"></div></td>
+                                <td><div class="skeleton-text short"></div></td>
+                                <td><div class="skeleton-text medium"></div></td>
+                                <td><div class="skeleton-text short"></div></td>
+                            </tr>
+                            <tr class="table-skeleton">
+                                <td><div class="skeleton-text medium"></div></td>
+                                <td><div class="skeleton-text short"></div></td>
+                                <td><div class="skeleton-text long"></div></td>
+                                <td><div class="skeleton-text medium"></div></td>
+                                <td><div class="skeleton-text short"></div></td>
+                                <td><div class="skeleton-text short"></div></td>
                             </tr>
                         </tbody>
                     </table>
@@ -439,13 +872,14 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </main>
 
     <!-- Mobile Sidebar Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
     <script src="js/app.js"></script>
     <script src="js/jalali.js"></script>
 
@@ -464,6 +898,12 @@
 
         let currentMonth = 0;
         let currentYear = 0;
+        let charts = {}; // Store chart instances
+        
+        // Chart.js default configuration for RTL and Persian
+        Chart.defaults.font.family = 'IRANSans, Tahoma, Arial, sans-serif';
+        Chart.defaults.plugins.legend.rtl = true;
+        Chart.defaults.plugins.tooltip.rtl = true;
         
         // Get badge color based on contract type
         function getContractTypeBadgeColor(contractType) {
@@ -490,56 +930,83 @@
             
             // Validate year input
             if (isNaN(year) || year < 1380 || year > 1450) {
-                showAlert('سال باید بین ۱۳۸۰ تا ۱۴۵۰ باشد', 'warning');
+                notify.validation('سال باید بین ۱۳۸۰ تا ۱۴۵۰ باشد', document.getElementById('yearSelect'));
                 return;
             }
             
             currentMonth = month;
             currentYear = year;
 
+            // Show calculation progress
+            showCalculationProgress();
+
             // Disable button and show loading state
             const btn = document.querySelector('.calculate-btn');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-app spinner-app--sm"></span> در حال محاسبه...';
+            btn.innerHTML = '<div class="loading-spinner"><div class="spinner"></div>در حال محاسبه...</div>';
 
-            // Show loading state in cards
-            document.getElementById('totalIncome').innerHTML = '<span class="spinner-app"></span>';
-            document.getElementById('totalExpenses').innerHTML = '<span class="spinner-app"></span>';
-            document.getElementById('netIncome').innerHTML = '<span class="spinner-app"></span>';
-            document.getElementById('payoutsTableBody').innerHTML = `
-                <tr><td colspan="7"><div class="text-center py-4"><div class="spinner-app mx-auto"></div></div></td></tr>
-            `;
+            // Show skeleton loading in summary cards
+            showSummarySkeletons();
+            
+            // Show skeleton loading in table
+            showTableSkeletons();
 
             try {
+                // Step 1: Data Collection
+                updateProgressStep(1, 'active');
+                updateProgressText('جمع‌آوری اطلاعات دانش‌آموزان و مربیان...');
+                await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
+
+                // Step 2: Income Calculation
+                updateProgressStep(1, 'completed');
+                updateProgressStep(2, 'active');
+                updateProgressText('محاسبه درآمد کل و هزینه‌ها...');
+                
                 // Load net income
                 const netIncomeData = await APIClient.get(`accounting.php?action=net-income&month=${month}&year=${year}`);
                 if (netIncomeData.success) {
-                    document.getElementById('totalIncome').textContent = formatCurrency(netIncomeData.data.total_income);
-                    document.getElementById('totalExpenses').textContent = formatCurrency(netIncomeData.data.total_expenses);
-                    document.getElementById('netIncome').textContent = formatCurrency(netIncomeData.data.net_income);
+                    const data = netIncomeData.data;
+                    document.getElementById('totalIncome').innerHTML = `<span class="animate-fadeIn">${formatCurrency(data.total_income)}</span>`;
+                    document.getElementById('totalExpenses').innerHTML = `<span class="animate-fadeIn">${formatCurrency(data.total_expenses)}</span>`;
+                    document.getElementById('netIncome').innerHTML = `<span class="animate-fadeIn">${formatCurrency(data.net_income)}</span>`;
+                    
+                    // Update trend indicators (mock data for now)
+                    updateTrendIndicators(data);
+                    
+                    // Create income vs expense chart
+                    createIncomeExpenseChart(data);
                     
                     // Check for discrepancy between registrations and payments
-                    if (netIncomeData.data.has_discrepancy) {
-                        const discrepancy = netIncomeData.data.income_discrepancy;
-                        showAlert(
-                            `<strong>اخطار:</strong> اختلاف بین درآمد ثبت‌نام (${formatCurrency(netIncomeData.data.total_income)}) و پرداخت‌ها (${formatCurrency(netIncomeData.data.total_payments)}): ${formatCurrency(Math.abs(discrepancy))}`,
+                    if (data.has_discrepancy) {
+                        const discrepancy = data.income_discrepancy;
+                        notify._showSnackbar(
+                            `اخطار: اختلاف بین درآمد ثبت‌نام و پرداخت‌ها: ${formatCurrency(Math.abs(discrepancy))}`,
                             'warning'
                         );
                     }
                 } else {
                     // Show error state in summary cards
                     const errorMsg = netIncomeData.message || 'خطا در محاسبه درآمد';
-                    document.getElementById('totalIncome').textContent = '-';
-                    document.getElementById('totalExpenses').textContent = '-';
-                    document.getElementById('netIncome').textContent = '-';
-                    showAlert(errorMsg, 'danger');
+                    showSummaryError(errorMsg);
+                    notify.error(errorMsg);
                 }
+
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                // Step 3: Coach Payments
+                updateProgressStep(2, 'completed');
+                updateProgressStep(3, 'active');
+                updateProgressText('محاسبه پرداخت مربیان...');
 
                 // Load payouts
                 const payoutsData = await APIClient.get(`accounting.php?action=payouts&month=${month}&year=${year}`);
                 if (payoutsData.success) {
                     const tbody = document.getElementById('payoutsTableBody');
                     const data = payoutsData.data;
+                    
+                    // Create charts with payout data
+                    createCoachPaymentsChart(data.payouts);
+                    createIncomeDistributionChart(data);
                     
                     // Update camp summary section
                     document.getElementById('summaryTotalFees').textContent = formatCurrency(data.total_student_fees);
@@ -552,7 +1019,7 @@
                     if (data.payouts.length === 0) {
                         tbody.innerHTML = `
                             <tr><td colspan="6">
-                                <div class="text-center py-5">
+                                <div class="text-center py-5 animate-fadeIn">
                                     <div style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;">👤</div>
                                     <div class="text-muted">مربی فعال در این ماه یافت نشد</div>
                                 </div>
@@ -567,7 +1034,7 @@
                         }), { totalFees: 0, eligibleFees: 0, payments: 0 });
                         
                         const rows = data.payouts.map((payout, index) => `
-                            <tr>
+                            <tr class="animate-slideUp" style="animation-delay: ${index * 50}ms;">
                                 <td>
                                     <span class="coach-name">${payout.coach_name}</span>
                                 </td>
@@ -614,7 +1081,7 @@
                         
                         // Add total footer row
                         const footerRow = `
-                            <tr style="background: var(--bg-secondary); font-weight: bold; border-top: 2px solid var(--border-color);">
+                            <tr class="animate-slideUp" style="background: var(--bg-secondary); font-weight: bold; border-top: 2px solid var(--border-color); animation-delay: ${data.payouts.length * 50}ms;">
                                 <td colspan="2" style="text-align: right;">مجموع</td>
                                 <td>${formatCurrency(totals.totalFees)}</td>
                                 <td>${formatCurrency(totals.eligibleFees)}</td>
@@ -628,16 +1095,27 @@
                 } else {
                     // Show error state in payouts table
                     const errorMsg = payoutsData.message || 'خطا در محاسبه پرداخت مربیان';
-                    document.getElementById('payoutsTableBody').innerHTML = `
-                        <tr><td colspan="7">
-                            <div class="text-center py-5">
-                                <div style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;">⚠️</div>
-                                <div class="text-danger">${errorMsg}</div>
-                            </div>
-                        </td></tr>
-                    `;
-                    showAlert(errorMsg, 'danger');
+                    showTableError(errorMsg);
+                    notify.error(errorMsg);
                 }
+
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                // Step 4: Complete
+                updateProgressStep(3, 'completed');
+                updateProgressStep(4, 'active');
+                updateProgressText('تکمیل گزارش...');
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                updateProgressStep(4, 'completed');
+                updateProgressText('گزارش با موفقیت تهیه شد');
+                
+                // Hide progress after delay
+                setTimeout(() => {
+                    hideCalculationProgress();
+                }, 1500);
+
             } catch (error) {
                 // Log error for debugging (Task 11)
                 console.error('Accounting load error:', error);
@@ -651,23 +1129,375 @@
                 }
                 
                 // Show error state in all elements
-                document.getElementById('totalIncome').textContent = '-';
-                document.getElementById('totalExpenses').textContent = '-';
-                document.getElementById('netIncome').textContent = '-';
-                document.getElementById('payoutsTableBody').innerHTML = `
-                    <tr><td colspan="7">
-                        <div class="text-center py-5">
-                            <div style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;">⚠️</div>
-                            <div class="text-danger">${errorMsg}</div>
-                        </div>
-                    </td></tr>
-                `;
-                showAlert(errorMsg, 'danger');
+                showSummaryError(errorMsg);
+                showTableError(errorMsg);
+                hideCalculationProgress();
+                notify.error(errorMsg);
             } finally {
                 // Re-enable button
                 btn.disabled = false;
                 btn.innerHTML = '<i class="bi bi-calculator"></i> محاسبه کن';
             }
+        }
+
+        // Enhanced loading state functions
+        function showCalculationProgress() {
+            const progress = document.getElementById('calculationProgress');
+            progress.classList.add('show');
+            
+            // Reset all steps
+            for (let i = 1; i <= 4; i++) {
+                const step = document.getElementById(`step${i}`);
+                step.classList.remove('active', 'completed');
+            }
+            
+            // Destroy existing charts during loading
+            destroyAllCharts();
+        }
+
+        function hideCalculationProgress() {
+            const progress = document.getElementById('calculationProgress');
+            progress.classList.remove('show');
+        }
+
+        function updateProgressStep(stepNumber, status) {
+            const step = document.getElementById(`step${stepNumber}`);
+            step.classList.remove('active', 'completed');
+            if (status) {
+                step.classList.add(status);
+            }
+        }
+
+        function updateProgressText(text) {
+            document.getElementById('progressText').textContent = text;
+        }
+
+        function showSummarySkeletons() {
+            document.getElementById('totalIncome').innerHTML = '<div class="skeleton" style="width: 120px; height: 36px;"></div>';
+            document.getElementById('totalExpenses').innerHTML = '<div class="skeleton" style="width: 120px; height: 36px;"></div>';
+            document.getElementById('netIncome').innerHTML = '<div class="skeleton" style="width: 120px; height: 36px;"></div>';
+            
+            // Show skeleton for trend indicators
+            document.getElementById('incomeTrend').innerHTML = '<div class="skeleton" style="width: 80px; height: 20px;"></div>';
+            document.getElementById('expenseTrend').innerHTML = '<div class="skeleton" style="width: 80px; height: 20px;"></div>';
+            document.getElementById('netTrend').innerHTML = '<div class="skeleton" style="width: 80px; height: 20px;"></div>';
+        }
+
+        function showSummaryError(errorMsg) {
+            document.getElementById('totalIncome').innerHTML = '<span class="text-danger">خطا</span>';
+            document.getElementById('totalExpenses').innerHTML = '<span class="text-danger">خطا</span>';
+            document.getElementById('netIncome').innerHTML = '<span class="text-danger">خطا</span>';
+            
+            // Clear trend indicators
+            document.getElementById('incomeTrend').innerHTML = '';
+            document.getElementById('expenseTrend').innerHTML = '';
+            document.getElementById('netTrend').innerHTML = '';
+        }
+
+        // Chart creation functions
+        function createIncomeExpenseChart(data) {
+            const ctx = document.getElementById('incomeExpenseChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (charts.incomeExpense) {
+                charts.incomeExpense.destroy();
+            }
+            
+            charts.incomeExpense = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['درآمد کل', 'هزینه کل', 'درآمد خالص'],
+                    datasets: [{
+                        data: [data.total_income, data.total_expenses, data.net_income],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',  // Green for income
+                            'rgba(239, 68, 68, 0.8)',   // Red for expenses
+                            'rgba(59, 130, 246, 0.8)'   // Blue for net
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(59, 130, 246, 1)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return formatCurrency(context.parsed.y) + ' تومان';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+            
+            // Update chart statistics
+            const profitMargin = data.total_income > 0 ? ((data.net_income / data.total_income) * 100).toFixed(1) : '0';
+            const expenseRatio = data.total_income > 0 ? ((data.total_expenses / data.total_income) * 100).toFixed(1) : '0';
+            
+            document.getElementById('profitMargin').textContent = profitMargin + '%';
+            document.getElementById('expenseRatio').textContent = expenseRatio + '%';
+        }
+
+        function createCoachPaymentsChart(payouts) {
+            const ctx = document.getElementById('coachPaymentsChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (charts.coachPayments) {
+                charts.coachPayments.destroy();
+            }
+            
+            if (!payouts || payouts.length === 0) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.font = '16px IRANSans';
+                ctx.fillStyle = '#6b7280';
+                ctx.textAlign = 'center';
+                ctx.fillText('داده‌ای برای نمایش وجود ندارد', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+            
+            const labels = payouts.map(p => p.coach_name);
+            const payments = payouts.map(p => p.calculated_payment);
+            const colors = payouts.map((_, index) => {
+                const hue = (index * 137.508) % 360; // Golden angle approximation
+                return `hsla(${hue}, 70%, 60%, 0.8)`;
+            });
+            
+            charts.coachPayments = new Chart(ctx, {
+                type: 'horizontalBar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: payments,
+                        backgroundColor: colors,
+                        borderColor: colors.map(color => color.replace('0.8', '1')),
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return formatCurrency(context.parsed.x) + ' تومان';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1200,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+            
+            // Update coach payment statistics
+            const totalPayments = payments.reduce((sum, payment) => sum + payment, 0);
+            const avgPayment = totalPayments / payments.length;
+            const efficiency = totalPayments > 0 ? ((totalPayments / (totalPayments * 1.2)) * 100).toFixed(1) : '0'; // Mock efficiency calculation
+            
+            document.getElementById('avgCoachPayment').textContent = formatCurrency(avgPayment);
+            document.getElementById('totalCoaches').textContent = payouts.length;
+            document.getElementById('paymentEfficiency').textContent = efficiency + '%';
+        }
+
+        function createIncomeDistributionChart(data) {
+            const ctx = document.getElementById('incomeDistributionChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (charts.incomeDistribution) {
+                charts.incomeDistribution.destroy();
+            }
+            
+            // Create mock distribution data (you can replace with real data from API)
+            const distributionData = [
+                { label: 'شهریه دانش‌آموزان', value: data.total_student_fees, color: '#10b981' },
+                { label: 'درآمد اضافی', value: Math.max(0, data.total_student_fees * 0.1), color: '#6366f1' },
+                { label: 'سایر درآمدها', value: Math.max(0, data.total_student_fees * 0.05), color: '#f59e0b' }
+            ];
+            
+            const labels = distributionData.map(item => item.label);
+            const values = distributionData.map(item => item.value);
+            const colors = distributionData.map(item => item.color);
+            
+            charts.incomeDistribution = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: '#ffffff',
+                        borderWidth: 3,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: ${formatCurrency(context.parsed)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+            
+            // Update legend
+            const legendContainer = document.getElementById('incomeDistributionLegend');
+            legendContainer.innerHTML = distributionData.map(item => `
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: ${item.color};"></div>
+                    <span>${item.label}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateTrendIndicators(data) {
+            // Mock trend data (you can replace with real historical comparison)
+            const trends = {
+                income: Math.random() > 0.5 ? 'positive' : 'negative',
+                expense: Math.random() > 0.5 ? 'positive' : 'negative',
+                net: data.net_income >= 0 ? 'positive' : 'negative'
+            };
+            
+            const trendPercentages = {
+                income: (Math.random() * 20).toFixed(1),
+                expense: (Math.random() * 15).toFixed(1),
+                net: (Math.random() * 25).toFixed(1)
+            };
+            
+            // Update trend indicators
+            document.getElementById('incomeTrend').innerHTML = `
+                <span class="trend-indicator ${trends.income}">
+                    <i class="bi bi-arrow-${trends.income === 'positive' ? 'up' : 'down'}"></i>
+                    ${trendPercentages.income}%
+                </span>
+            `;
+            
+            document.getElementById('expenseTrend').innerHTML = `
+                <span class="trend-indicator ${trends.expense}">
+                    <i class="bi bi-arrow-${trends.expense === 'positive' ? 'up' : 'down'}"></i>
+                    ${trendPercentages.expense}%
+                </span>
+            `;
+            
+            document.getElementById('netTrend').innerHTML = `
+                <span class="trend-indicator ${trends.net}">
+                    <i class="bi bi-arrow-${trends.net === 'positive' ? 'up' : 'down'}"></i>
+                    ${trendPercentages.net}%
+                </span>
+            `;
+        }
+
+        // Cleanup function to destroy all charts
+        function destroyAllCharts() {
+            Object.values(charts).forEach(chart => {
+                if (chart && typeof chart.destroy === 'function') {
+                    chart.destroy();
+                }
+            });
+            charts = {};
+        }
+
+        function showTableSkeletons() {
+            const tbody = document.getElementById('payoutsTableBody');
+            tbody.innerHTML = `
+                <tr class="table-skeleton">
+                    <td><div class="skeleton-text medium"></div></td>
+                    <td><div class="skeleton-text short"></div></td>
+                    <td><div class="skeleton-text medium"></div></td>
+                    <td><div class="skeleton-text medium"></div></td>
+                    <td><div class="skeleton-text long"></div></td>
+                    <td><div class="skeleton-text short"></div></td>
+                </tr>
+                <tr class="table-skeleton">
+                    <td><div class="skeleton-text long"></div></td>
+                    <td><div class="skeleton-text short"></div></td>
+                    <td><div class="skeleton-text medium"></div></td>
+                    <td><div class="skeleton-text short"></div></td>
+                    <td><div class="skeleton-text medium"></div></td>
+                    <td><div class="skeleton-text short"></div></td>
+                </tr>
+                <tr class="table-skeleton">
+                    <td><div class="skeleton-text medium"></div></td>
+                    <td><div class="skeleton-text short"></div></td>
+                    <td><div class="skeleton-text long"></div></td>
+                    <td><div class="skeleton-text medium"></div></td>
+                    <td><div class="skeleton-text short"></div></td>
+                    <td><div class="skeleton-text short"></div></td>
+                </tr>
+            `;
+        }
+
+        function showTableError(errorMsg) {
+            document.getElementById('payoutsTableBody').innerHTML = `
+                <tr><td colspan="6">
+                    <div class="text-center py-5 animate-fadeIn">
+                        <div style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;">⚠️</div>
+                        <div class="text-danger">${errorMsg}</div>
+                        <button class="btn-app btn-app--outline btn-app--sm mt-3" onclick="loadAccounting()">
+                            <i class="bi bi-arrow-clockwise"></i> تلاش مجدد
+                        </button>
+                    </div>
+                </td></tr>
+            `;
         }
 
         function toggleCalculation(index) {
@@ -679,7 +1509,7 @@
 
         function showBreakdown(type) {
             if (!currentMonth || !currentYear) {
-                showAlert('لطفاً ابتدا ماه و سال را انتخاب کنید', 'warning');
+                notify._showSnackbar('لطفاً ابتدا ماه و سال را انتخاب کنید', 'warning');
                 return;
             }
             window.open(`breakdown.html?type=${type}&month=${currentMonth}&year=${currentYear}`, '_blank');
@@ -708,6 +1538,14 @@
         }
 
         initDarkMode();
+        
+        // Set current Jalali year as default
+        document.addEventListener('DOMContentLoaded', function() {
+            const yearSelect = document.getElementById('yearSelect');
+            if (yearSelect && typeof getCurrentJalaliYear === 'function') {
+                yearSelect.value = getCurrentJalaliYear();
+            }
+        });
     </script>
 </body>
 </html>

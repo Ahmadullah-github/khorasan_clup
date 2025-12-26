@@ -25,12 +25,12 @@ switch ($method) {
         } elseif ($action === 'breakdown') {
             handleGetBreakdown();
         } else {
-            Response::error('Invalid action');
+            Response::error('عملیات نامعتبر');
         }
         break;
         
     default:
-        Response::error('Method not allowed', 405);
+        Response::error('روش مجاز نیست', 405);
 }
 
 /**
@@ -51,7 +51,7 @@ function handleGetNetIncome() {
     $year = (int)($_GET['year'] ?? 0);
     
     if (!$month || !$year) {
-        Response::error('Month and year required');
+        Response::error('ماه و سال الزامی است');
     }
     
     $dateRange = JalaliDate::getMonthDateRange($year, $month);
@@ -222,7 +222,7 @@ function handleGetPayouts() {
     $year = (int)($_GET['year'] ?? 0);
     
     if (!$month || !$year) {
-        Response::error('Month and year required');
+        Response::error('ماه و سال الزامی است');
     }
     
     $dateRange = JalaliDate::getMonthDateRange($year, $month);
@@ -371,7 +371,7 @@ function handleGetBreakdown() {
     $id = (int)($_GET['id'] ?? 0);
     
     if (!$month || !$year) {
-        Response::error('Month and year required');
+        Response::error('ماه و سال الزامی است');
     }
     
     $dateRange = JalaliDate::getMonthDateRange($year, $month);

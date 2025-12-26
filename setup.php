@@ -38,7 +38,7 @@ $config = [
     'db_user' => 'root',
     'db_pass' => '',
     'db_charset' => 'utf8mb4',
-    'schema_file' => __DIR__ . '/database/full_schema.sql',
+    'schema_file' => __DIR__ . '/database/install.sql',
     'public_folder' => 'public',
     'default_port' => 80,
     'app_name' => 'sports-camp',  // Default URL path name
@@ -47,6 +47,9 @@ $config = [
 // ═══════════════════════════════════════════════════════════════════════════
 // HELPER FUNCTIONS - Console Output
 // ═══════════════════════════════════════════════════════════════════════════
+
+// Include utilities for Jalali date functions
+require_once __DIR__ . '/api/utils.php';
 
 function println($message = '') {
     echo $message . PHP_EOL;
@@ -533,7 +536,7 @@ function createAdminUser($pdo) {
     try {
         // Password: admin123 (generated with password_hash('admin123', PASSWORD_DEFAULT))
         $passwordHash = '$2y$10$nPRP6T6fLjwoWUAt/Nv0FOiQ/u57hZzXXjVQFzU7YJv5M20.8uUvm';
-        $jalaliDate = date('Y-m-d');
+        $jalaliDate = JalaliDate::now();
         
         // Check if exists first
         $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE username = 'admin'");

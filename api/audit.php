@@ -27,12 +27,12 @@ switch ($method) {
         } elseif ($action === 'by-table') {
             handleLogsByTable();
         } else {
-            Response::error('Invalid action');
+            Response::error('عملیات نامعتبر');
         }
         break;
         
     default:
-        Response::error('Method not allowed', 405);
+        Response::error('روش مجاز نیست', 405);
 }
 
 /**
@@ -98,7 +98,7 @@ function handleLogsByUser() {
     
     $userId = (int)($_GET['user_id'] ?? 0);
     if (!$userId) {
-        Response::error('User ID required');
+        Response::error('شناسه کاربر الزامی است');
     }
     
     $stmt = $db->prepare("
@@ -123,7 +123,7 @@ function handleLogsByTable() {
     
     $tableName = $_GET['table'] ?? '';
     if (!$tableName) {
-        Response::error('Table name required');
+        Response::error('نام جدول الزامی است');
     }
     
     $stmt = $db->prepare("

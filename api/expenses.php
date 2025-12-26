@@ -32,7 +32,7 @@ switch ($method) {
         if ($expenseId) {
             handleUpdateExpense($expenseId);
         } else {
-            Response::error('Expense ID required');
+            Response::error('شناسه هزینه الزامی است');
         }
         break;
         
@@ -40,12 +40,12 @@ switch ($method) {
         if ($expenseId) {
             handleDeleteExpense($expenseId);
         } else {
-            Response::error('Expense ID required');
+            Response::error('شناسه هزینه الزامی است');
         }
         break;
         
     default:
-        Response::error('Method not allowed', 405);
+        Response::error('روش مجاز نیست', 405);
 }
 
 /**
@@ -78,7 +78,7 @@ function handleListExpenses() {
     
     if ($startDate) {
         if (!JalaliDate::validate($startDate)) {
-            Response::error('Invalid start date format');
+            Response::error('فرمت تاریخ شروع نامعتبر');
         }
         $where[] = "expense_date_jalali >= ?";
         $params[] = $startDate;
@@ -86,7 +86,7 @@ function handleListExpenses() {
     
     if ($endDate) {
         if (!JalaliDate::validate($endDate)) {
-            Response::error('Invalid end date format');
+            Response::error('فرمت تاریخ پایان نامعتبر');
         }
         $where[] = "expense_date_jalali <= ?";
         $params[] = $endDate;
@@ -137,7 +137,7 @@ function handleGetExpense($expenseId) {
     $expense = $stmt->fetch();
     
     if (!$expense) {
-        Response::error('Expense not found', 404);
+        Response::error('هزینه یافت نشد', 404);
     }
     
     // Check if it's a rent expense
@@ -160,7 +160,7 @@ function handleCreateExpense() {
     $data = json_decode(file_get_contents('php://input'), true);
     
     if (!isset($data['title']) || !isset($data['category']) || !isset($data['amount']) || !isset($data['expense_date_jalali'])) {
-        Response::error('Title, category, amount, and date are required');
+        Response::error('عنوان، دسته‌بندی، مبلغ و تاریخ الزامی است');
     }
     
     // Validate category (case-insensitive, matching frontend values)
@@ -177,7 +177,7 @@ function handleCreateExpense() {
     }
     
     if (!Sanitizer::validateAmount($data['amount'])) {
-        Response::error('Invalid amount');
+        Response::error('مبلغ نامعتبر');
     }
     
     try {
@@ -223,17 +223,17 @@ function handleCreateExpense() {
         
         $db->commit();
         
-        Audit::log($user['id'], 'create', 'expenses', $expenseId, "Created expense: {$data['title']}");
+        Audit::log($user['id'], 'create', 'expenses', $expenseId, "ایجاد هزینه: {$data['title']}");
         
         Response::success([
             'id' => $expenseId,
             'title' => $data['title']
-        ], 'Expense created successfully');
+        ], 'هزینه با موفقیت ایجاد شد');
         
     } catch (Exception $e) {
         $db->rollBack();
         error_log("Expense creation error: " . $e->getMessage());
-        Response::error('Failed to create expense: ' . $e->getMessage());
+        Response::error('خطا در ایجاد هزینه: ' . $e->getMessage());
     }
 }
 
@@ -249,7 +249,7 @@ function handleUpdateExpense($expenseId) {
     $stmt = $db->prepare("SELECT id FROM expenses WHERE id = ?");
     $stmt->execute([$expenseId]);
     if (!$stmt->fetch()) {
-        Response::error('Expense not found', 404);
+        Response::error('هزینه یافت نشد', 404);
     }
     
     $fields = [];
@@ -270,7 +270,7 @@ function handleUpdateExpense($expenseId) {
                 Response::error('تاریخ هزینه نامعتبر است');
             }
             if ($field === 'amount' && !Sanitizer::validateAmount($data[$field])) {
-                Response::error('Invalid amount');
+                Response::error('مبلغ نامعتبر');
             }
             $fields[] = "{$field} = ?";
             $params[] = Sanitizer::sanitizeInput($data[$field]);
@@ -278,7 +278,7 @@ function handleUpdateExpense($expenseId) {
     }
     
     if (empty($fields)) {
-        Response::error('No fields to update');
+        Response::error('هیچ فیلدی برای به‌روزرسانی ارسال نشده');
     }
     
     $params[] = $expenseId;
@@ -286,9 +286,9 @@ function handleUpdateExpense($expenseId) {
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
     
-    Audit::log($user['id'], 'update', 'expenses', $expenseId, 'Updated expense');
+    Audit::log($user['id'], 'update', 'expenses', $expenseId, 'به‌روزرسانی هزینه');
     
-    Response::success(null, 'Expense updated successfully');
+    Response::success(null, 'هزینه با موفقیت به‌روزرسانی شد');
 }
 
 /**
@@ -303,15 +303,15 @@ function handleDeleteExpense($expenseId) {
     $expense = $stmt->fetch();
     
     if (!$expense) {
-        Response::error('Expense not found', 404);
+        Response::error('هزینه یافت نشد', 404);
     }
     
     $stmt = $db->prepare("DELETE FROM expenses WHERE id = ?");
     $stmt->execute([$expenseId]);
     
-    Audit::log($user['id'], 'delete', 'expenses', $expenseId, "Deleted expense: {$expense['title']}");
+    Audit::log($user['id'], 'delete', 'expenses', $expenseId, "حذف هزینه: {$expense['title']}");
     
-    Response::success(null, 'Expense deleted successfully');
+    Response::success(null, 'هزینه با موفقیت حذف شد');
 }
 
 

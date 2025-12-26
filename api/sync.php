@@ -20,7 +20,7 @@ switch ($method) {
         if ($action === 'push') {
             handlePushChanges();
         } else {
-            Response::error('Invalid action');
+            Response::error('عملیات نامعتبر');
         }
         break;
         
@@ -28,12 +28,12 @@ switch ($method) {
         if ($action === 'pull') {
             handlePullChanges();
         } else {
-            Response::error('Invalid action');
+            Response::error('عملیات نامعتبر');
         }
         break;
         
     default:
-        Response::error('Method not allowed', 405);
+        Response::error('روش مجاز نیست', 405);
 }
 
 /**
@@ -45,7 +45,7 @@ function handlePushChanges() {
     $data = json_decode(file_get_contents('php://input'), true);
     
     if (!isset($data['changes']) || !is_array($data['changes'])) {
-        Response::error('Invalid changes data');
+        Response::error('داده‌های تغییرات نامعتبر');
     }
     
     $results = [];
@@ -53,7 +53,7 @@ function handlePushChanges() {
     
     foreach ($data['changes'] as $change) {
         if (!isset($change['table']) || !isset($change['action']) || !isset($change['data'])) {
-            $errors[] = 'Invalid change format';
+            $errors[] = 'فرمت تغییر نامعتبر';
             continue;
         }
         

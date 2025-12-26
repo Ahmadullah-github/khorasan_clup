@@ -467,7 +467,7 @@
                     fileInput.files = dt.files;
                     showFilePreview(file);
                 } else {
-                    showAlert('فقط فایل‌های تصویری و PDF مجاز هستند', 'warning');
+                    notify._showSnackbar('فقط فایل‌های تصویری و PDF مجاز هستند', 'warning');
                 }
             }
         });
@@ -597,7 +597,7 @@
                     }
                 }
             } catch (error) {
-                showAlert('خطا در بارگذاری لیست', 'danger');
+                notify.error('خطا در بارگذاری لیست');
             }
         }
 
@@ -620,7 +620,7 @@
             if (receiptFile) {
                 // Validate file size (5MB max)
                 if (receiptFile.size > 5 * 1024 * 1024) {
-                    showAlert('حجم فایل نباید بیشتر از 5 مگابایت باشد', 'warning');
+                    notify._showSnackbar('حجم فایل نباید بیشتر از 5 مگابایت باشد', 'warning');
                     submitBtn.disabled = false;
                     btnSpinner.classList.add('d-none');
                     btnText.textContent = 'ذخیره';
@@ -639,11 +639,11 @@
                     if (uploadData.success) {
                         receiptPath = uploadData.data.file_path;
                     } else {
-                        showAlert('خطا در آپلود رسید: ' + (uploadData.error || 'خطای نامشخص'), 'warning');
+                        notify._showSnackbar('خطا در آپلود رسید: ' + (uploadData.error || 'خطای نامشخص'), 'warning');
                     }
                 } catch (error) {
                     console.error('Receipt upload error:', error);
-                    showAlert('خطا در آپلود رسید. هزینه بدون رسید ثبت می‌شود.', 'warning');
+                    notify._showSnackbar('خطا در آپلود رسید. هزینه بدون رسید ثبت می‌شود.', 'warning');
                 }
                 btnText.textContent = 'در حال ذخیره...';
             }
@@ -667,7 +667,7 @@
             
             // Validate date format (YYYY-MM-DD)
             if (!expenseDate || !validateJalaliDate(expenseDate)) {
-                showAlert('لطفاً تاریخ معتبر وارد کنید', 'warning');
+                notify.validation('لطفاً تاریخ معتبر وارد کنید', document.getElementById('expenseDate'));
                 submitBtn.disabled = false;
                 btnSpinner.classList.add('d-none');
                 btnText.textContent = 'ذخیره';
@@ -698,14 +698,14 @@
                 }
                 
                 if (result.success) {
-                    showAlert(editingExpenseId ? 'هزینه با موفقیت ویرایش شد' : 'هزینه با موفقیت ثبت شد', 'success');
+                    notify.success(editingExpenseId ? 'هزینه با موفقیت ویرایش شد' : 'هزینه با موفقیت ثبت شد');
                     bootstrap.Modal.getInstance(document.getElementById('expenseModal')).hide();
                     expenseForm.reset();
                     editingExpenseId = null;
                     loadExpenses();
                 }
             } catch (error) {
-                showAlert(error.message || 'خطا در ثبت هزینه', 'danger');
+                notify.error(error.message || 'خطا در ثبت هزینه');
             } finally {
                 submitBtn.disabled = false;
                 btnSpinner.classList.add('d-none');
@@ -794,7 +794,7 @@
                     new bootstrap.Modal(document.getElementById('expenseModal')).show();
                 }
             } catch (error) {
-                showAlert('خطا در بارگذاری اطلاعات هزینه', 'danger');
+                notify.error('خطا در بارگذاری اطلاعات هزینه');
             }
         }
         
@@ -813,6 +813,15 @@
         // Initialize
         loadExpenses();
         initDarkMode();
+        
+        // Set current Jalali date as placeholder
+        document.addEventListener('DOMContentLoaded', function() {
+            const expenseDate = document.getElementById('expenseDate');
+            if (expenseDate && typeof getCurrentJalaliDate === 'function') {
+                const currentDate = getCurrentJalaliDate();
+                expenseDate.placeholder = currentDate.replace(/-/g, '/');
+            }
+        });
         
         // Check edit mode after page loads
         setTimeout(checkEditMode, 500);

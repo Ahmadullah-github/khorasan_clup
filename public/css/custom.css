@@ -27,6 +27,206 @@
     --info-color: #17a2b8;
 }
 
+/* ============================================
+   Toast Notifications - Bottom Left (RTL friendly)
+   ============================================ */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 999999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 400px;
+}
+
+.toast-notification {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: var(--card-bg);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    border-right: 4px solid;
+    transform: translateX(-120%);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast-notification.toast-show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast-notification.toast-hide {
+    transform: translateX(-120%);
+    opacity: 0;
+}
+
+.toast-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text-color);
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--secondary-color);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.toast-close:hover {
+    opacity: 1;
+}
+
+/* Toast Types */
+.toast-success {
+    border-color: var(--success-color);
+}
+.toast-success .toast-icon {
+    background: var(--success-color);
+    color: white;
+}
+
+.toast-danger {
+    border-color: var(--danger-color);
+}
+.toast-danger .toast-icon {
+    background: var(--danger-color);
+    color: white;
+}
+
+.toast-warning {
+    border-color: var(--warning-color);
+}
+.toast-warning .toast-icon {
+    background: var(--warning-color);
+    color: #212529;
+}
+
+.toast-info {
+    border-color: var(--info-color);
+}
+.toast-info .toast-icon {
+    background: var(--info-color);
+    color: white;
+}
+
+@media (max-width: 480px) {
+    .toast-container {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        max-width: none;
+    }
+}
+
+/* ============================================
+   Fixed Alert Container - Legacy Support
+   ============================================ */
+.alert-container-fixed {
+    position: fixed !important;
+    top: 20px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 999999 !important; /* Must be higher than everything */
+    min-width: 320px;
+    max-width: 90vw;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+}
+
+.alert-container-fixed .alert {
+    pointer-events: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    border-radius: 0.5rem;
+    margin: 0;
+    border: none;
+}
+
+.alert-animated {
+    animation: alertSlideIn 0.3s ease-out;
+}
+
+.alert-fade-out {
+    animation: alertSlideOut 0.3s ease-in forwards;
+}
+
+@keyframes alertSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes alertSlideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+/* Ensure existing alertContainer also has proper styling */
+#alertContainer:not(.alert-container-fixed) {
+    margin-bottom: 1rem;
+}
+
+/* ============================================
+   Enhanced Form Validation Styles
+   ============================================ */
+.form-control.is-invalid,
+.form-control-app.is-invalid,
+.form-select.is-invalid,
+.form-select-app.is-invalid {
+    border-color: var(--danger-color) !important;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2) !important;
+    animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+/* Inline validation message for required fields */
+.form-control.is-invalid::placeholder,
+.form-control-app.is-invalid::placeholder {
+    color: var(--danger-color);
+    opacity: 0.7;
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -1632,5 +1832,291 @@ body {
     
     .billing-table .col-period {
         display: none;
+    }
+}
+
+
+/* ============================================
+   New Notification System Styles
+   ============================================ */
+
+/* 1. Snackbar - Bottom Center (Success messages) */
+.notify-snackbar-container {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.notify-snackbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    background: var(--card-bg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: auto;
+    min-width: 200px;
+    max-width: 400px;
+}
+
+.notify-snackbar-show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.notify-snackbar-hide {
+    transform: translateY(20px);
+    opacity: 0;
+}
+
+.notify-snackbar-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.notify-snackbar-message {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* Snackbar Types */
+.notify-snackbar--success {
+    border-right: 4px solid var(--success-color);
+}
+.notify-snackbar--success .notify-snackbar-icon {
+    color: var(--success-color);
+}
+
+.notify-snackbar--warning {
+    border-right: 4px solid var(--warning-color);
+}
+.notify-snackbar--warning .notify-snackbar-icon {
+    color: var(--warning-color);
+}
+
+.notify-snackbar--error {
+    border-right: 4px solid var(--danger-color);
+}
+.notify-snackbar--error .notify-snackbar-icon {
+    color: var(--danger-color);
+}
+
+.notify-snackbar--info {
+    border-right: 4px solid var(--info-color);
+}
+.notify-snackbar--info .notify-snackbar-icon {
+    color: var(--info-color);
+}
+
+/* 2. Inline Validation Error */
+.notify-inline-error {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--danger-color);
+    background: rgba(220, 53, 69, 0.08);
+    border-radius: 6px;
+    border-right: 3px solid var(--danger-color);
+    animation: notifyShake 0.4s ease-in-out;
+}
+
+.notify-inline-error i {
+    font-size: 14px;
+}
+
+.notify-inline-show {
+    display: flex;
+}
+
+@keyframes notifyShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+}
+
+/* 3. Top Banner (API/Server Errors) */
+.notify-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999998;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    transform: translateY(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.notify-banner-show {
+    transform: translateY(0);
+}
+
+.notify-banner--error {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+}
+
+.notify-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.notify-banner-icon {
+    font-size: 20px;
+    opacity: 0.9;
+}
+
+.notify-banner-message {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.notify-banner-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.notify-banner-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Adjust main content when banner is shown */
+.notify-banner-show ~ .navbar-app,
+.notify-banner-show + .navbar-app {
+    margin-top: 52px;
+}
+
+/* 4. Critical Modal */
+.notify-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000000;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.notify-modal-show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.notify-modal {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.notify-modal-show .notify-modal {
+    transform: scale(1);
+}
+
+.notify-modal-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notify-modal-icon i {
+    font-size: 32px;
+    color: var(--danger-color);
+}
+
+.notify-modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 12px;
+}
+
+.notify-modal-message {
+    font-size: 15px;
+    color: var(--secondary-color);
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.notify-modal-btn {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, var(--danger-color) 0%, #c82333 100%);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.notify-modal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .notify-snackbar-container {
+        left: 16px;
+        right: 16px;
+        transform: none;
+    }
+    
+    .notify-snackbar {
+        width: 100%;
+        max-width: none;
+    }
+    
+    .notify-banner {
+        padding: 10px 16px;
+    }
+    
+    .notify-modal {
+        padding: 24px;
     }
 }

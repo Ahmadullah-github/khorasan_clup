@@ -224,8 +224,9 @@
         if (!user) {
             window.location.href = 'login.html';
         } else if (user.role !== 'admin') {
-            showAlert('شما دسترسی به این صفحه ندارید', 'danger');
-            setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+            notify.critical('شما دسترسی به این صفحه ندارید', () => {
+                window.location.href = 'index.html';
+            });
         } else {
             currentUser = user;
             document.getElementById('userName').textContent = user.username;
@@ -240,7 +241,7 @@
                     renderUsers();
                 }
             } catch (error) {
-                showAlert('خطا در بارگذاری لیست کاربران', 'danger');
+                notify.error('خطا در بارگذاری لیست کاربران');
                 document.getElementById('usersTableBody').innerHTML = `
                     <tr><td colspan="5">
                         <div class="table-empty">
@@ -317,7 +318,7 @@
             const role = document.getElementById('role').value;
 
             if (password.length < 6) {
-                showAlert('رمز عبور باید حداقل 6 کاراکتر باشد', 'danger');
+                notify.validation('رمز عبور باید حداقل 6 کاراکتر باشد', document.getElementById('password'));
                 return;
             }
 
@@ -328,13 +329,13 @@
             try {
                 const result = await APIClient.post('auth.php?action=users', { username, password, role });
                 if (result.success) {
-                    showAlert('کاربر با موفقیت افزوده شد', 'success');
+                    notify.success('کاربر با موفقیت افزوده شد');
                     bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
                     document.getElementById('userForm').reset();
                     await loadUsers();
                 }
             } catch (error) {
-                showAlert(error.message || 'خطا در افزودن کاربر', 'danger');
+                notify.error(error.message || 'خطا در افزودن کاربر');
             } finally {
                 submitBtn.disabled = false;
                 btnSpinner.classList.add('d-none');
@@ -344,16 +345,18 @@
 
         // Delete user
         async function deleteUser(userId, username) {
-            if (!confirm(`آیا مطمئن هستید که می‌خواهید کاربر "${username}" را حذف کنید؟`)) return;
-            try {
-                const result = await APIClient.delete(`auth.php?action=users&id=${userId}`);
-                if (result.success) {
-                    showAlert('کاربر با موفقیت حذف شد', 'success');
-                    await loadUsers();
+            // Use our critical modal instead of native confirm
+            notify.critical(`آیا مطمئن هستید که می‌خواهید کاربر "${username}" را حذف کنید؟`, async () => {
+                try {
+                    const result = await APIClient.delete(`auth.php?action=users&id=${userId}`);
+                    if (result.success) {
+                        notify.success('کاربر با موفقیت حذف شد');
+                        await loadUsers();
+                    }
+                } catch (error) {
+                    notify.error(error.message || 'خطا در حذف کاربر');
                 }
-            } catch (error) {
-                showAlert(error.message || 'خطا در حذف کاربر', 'danger');
-            }
+            });
         }
 
         // Search

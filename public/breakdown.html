@@ -79,7 +79,7 @@
                 // Validate parameters
                 if (!month || !year || !type) {
                     console.error('Missing params:', { month, year, type, id });
-                    showAlert('پارامترهای ناقص', 'danger');
+                    notify.error('پارامترهای ناقص');
                     return;
                 }
                 
@@ -166,7 +166,7 @@
                     }
                     document.getElementById('breakdownContent').innerHTML = html || '<div class="alert-app alert-app--warning"><i class="bi bi-info-circle"></i> اطلاعاتی یافت نشد</div>';
                 }
-            } catch (error) { showAlert('خطا در بارگذاری اطلاعات', 'danger'); }
+            } catch (error) { notify.error('خطا در بارگذاری اطلاعات'); }
         }
         loadBreakdown();
         initDarkMode();

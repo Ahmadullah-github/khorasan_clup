@@ -45,7 +45,7 @@ switch ($method) {
         if ($coachId) {
             handleUpdateCoach($coachId);
         } else {
-            Response::error('Coach ID required');
+            Response::error('شناسه مربی الزامی است');
         }
         break;
         
@@ -53,12 +53,12 @@ switch ($method) {
         if ($coachId) {
             handleDeleteCoach($coachId);
         } else {
-            Response::error('Coach ID required');
+            Response::error('شناسه مربی الزامی است');
         }
         break;
         
     default:
-        Response::error('Method not allowed', 405);
+        Response::error('روش مجاز نیست', 405);
 }
 
 /**
@@ -144,7 +144,7 @@ function handleGetCoach($coachId) {
     $coach = $stmt->fetch();
     
     if (!$coach) {
-        Response::error('Coach not found', 404);
+        Response::error('مربی یافت نشد', 404);
     }
     
     $coach = enrichCoachData($coach);
@@ -176,7 +176,7 @@ function handleGetContractHistory($coachId) {
     $coach = $stmt->fetch();
     
     if (!$coach) {
-        Response::error('Coach not found', 404);
+        Response::error('مربی یافت نشد', 404);
     }
     
     $page = (int)($_GET['page'] ?? 1);
@@ -216,29 +216,29 @@ function handleCreateCoach() {
     $data = json_decode(file_get_contents('php://input'), true);
     
     if (!isset($data['first_name']) || !isset($data['last_name'])) {
-        Response::error('First name and last name required');
+        Response::error('نام و نام خانوادگی الزامی است');
     }
     
     if (!isset($data['time_slot_ids']) || !is_array($data['time_slot_ids']) || empty($data['time_slot_ids'])) {
-        Response::error('At least one time slot required');
+        Response::error('حداقل یک زمان کلاس الزامی است');
     }
     
     // Validate contract type
     $contractType = $data['contract_type'] ?? 'percentage';
     if (!in_array($contractType, ['percentage', 'salary', 'hybrid'])) {
-        Response::error('Invalid contract type');
+        Response::error('نوع قرارداد نامعتبر');
     }
     
     // Validate percentage rate
     $percentageRate = floatval($data['percentage_rate'] ?? 50);
     if ($percentageRate < 0 || $percentageRate > 100) {
-        Response::error('Percentage rate must be between 0 and 100');
+        Response::error('نرخ درصد باید بین 0 تا 100 باشد');
     }
     
     // Validate monthly salary
     $monthlySalary = floatval($data['monthly_salary'] ?? 0);
     if ($monthlySalary < 0) {
-        Response::error('Monthly salary cannot be negative');
+        Response::error('حقوق ماهانه نمی‌تواند منفی باشد');
     }
     
     try {
@@ -292,18 +292,18 @@ function handleCreateCoach() {
         
         $db->commit();
         
-        Audit::log($user['id'], 'create', 'coaches', $coachId, "Created coach: {$data['first_name']} {$data['last_name']}");
+        Audit::log($user['id'], 'create', 'coaches', $coachId, "ایجاد مربی: {$data['first_name']} {$data['last_name']}");
         
         Response::success([
             'id' => $coachId,
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name']
-        ], 'Coach created successfully');
+        ], 'مربی با موفقیت ایجاد شد');
         
     } catch (Exception $e) {
         $db->rollBack();
         error_log("Coach creation error: " . $e->getMessage());
-        Response::error('Failed to create coach: ' . $e->getMessage());
+        Response::error('خطا در ایجاد مربی: ' . $e->getMessage());
     }
 }
 
@@ -322,12 +322,12 @@ function handleUpdateCoach($coachId) {
     $existingCoach = $stmt->fetch();
     
     if (!$existingCoach) {
-        Response::error('Coach not found', 404);
+        Response::error('مربی یافت نشد', 404);
     }
     
     // Check if coach is soft-deleted
     if ($existingCoach['status'] === 'inactive' && $existingCoach['deleted_at'] !== null) {
-        Response::error('Cannot update a deleted coach');
+        Response::error('نمی‌توان مربی حذف شده را به‌روزرسانی کرد');
     }
     
     try {
@@ -366,7 +366,7 @@ function handleUpdateCoach($coachId) {
             $rate = floatval($data['percentage_rate']);
             if ($rate < 0 || $rate > 100) {
                 $db->rollBack();
-                Response::error('Percentage rate must be between 0 and 100');
+                Response::error('نرخ درصد باید بین 0 تا 100 باشد');
             }
             if ($rate != floatval($existingCoach['percentage_rate'])) {
                 $contractChanged = true;
@@ -380,7 +380,7 @@ function handleUpdateCoach($coachId) {
             $salary = floatval($data['monthly_salary']);
             if ($salary < 0) {
                 $db->rollBack();
-                Response::error('Monthly salary cannot be negative');
+                Response::error('حقوق ماهانه نمی‌تواند منفی باشد');
             }
             if ($salary != floatval($existingCoach['monthly_salary'])) {
                 $contractChanged = true;
@@ -459,14 +459,14 @@ function handleUpdateCoach($coachId) {
         
         $db->commit();
         
-        Audit::log($user['id'], 'update', 'coaches', $coachId, 'Updated coach');
+        Audit::log($user['id'], 'update', 'coaches', $coachId, 'به‌روزرسانی مربی');
         
-        Response::success(null, 'Coach updated successfully');
+        Response::success(null, 'مربی با موفقیت به‌روزرسانی شد');
         
     } catch (Exception $e) {
         $db->rollBack();
         error_log("Coach update error: " . $e->getMessage());
-        Response::error('Failed to update coach: ' . $e->getMessage());
+        Response::error('خطا در به‌روزرسانی مربی: ' . $e->getMessage());
     }
 }
 
@@ -482,12 +482,12 @@ function handleDeleteCoach($coachId) {
     $coach = $stmt->fetch();
     
     if (!$coach) {
-        Response::error('Coach not found', 404);
+        Response::error('مربی یافت نشد', 404);
     }
     
     // Check if already deleted
     if ($coach['status'] === 'inactive' && $coach['deleted_at'] !== null) {
-        Response::error('Coach is already deleted');
+        Response::error('مربی قبلاً حذف شده است');
     }
     
     // Check if coach has active registrations
@@ -496,7 +496,7 @@ function handleDeleteCoach($coachId) {
     $count = $stmt->fetch()['count'];
     
     if ($count > 0) {
-        Response::error('Cannot delete coach with active registrations. Please reassign or cancel registrations first.');
+        Response::error('نمی‌توان مربی با ثبت‌نام‌های فعال را حذف کرد. لطفاً ابتدا ثبت‌نام‌ها را منتقل یا لغو کنید.');
     }
     
     // Soft delete: set status to inactive and record deletion time
@@ -504,12 +504,12 @@ function handleDeleteCoach($coachId) {
     $stmt->execute([$coachId]);
     
     Audit::log($user['id'], 'delete', 'coaches', $coachId, 
-        "Soft deleted coach: {$coach['first_name']} {$coach['last_name']} (will be permanently deleted after 60 days)");
+        "حذف نرم مربی: {$coach['first_name']} {$coach['last_name']} (پس از 60 روز به طور دائم حذف خواهد شد)");
     
     Response::success([
         'deleted_at' => date('Y-m-d H:i:s'),
         'permanent_deletion_date' => date('Y-m-d', strtotime('+60 days'))
-    ], 'Coach deleted successfully. Data will be permanently removed after 60 days.');
+    ], 'مربی با موفقیت حذف شد. داده‌ها پس از 60 روز به طور دائم حذف خواهند شد.');
 }
 
 /**
@@ -519,24 +519,24 @@ function handlePhotoUpload() {
     global $user;
     
     if (!isset($_FILES['photo'])) {
-        Response::error('No photo uploaded');
+        Response::error('هیچ عکسی آپلود نشده است');
     }
     
     $file = $_FILES['photo'];
     
     // Validate file
     if ($file['error'] !== UPLOAD_ERR_OK) {
-        Response::error('File upload error: ' . $file['error']);
+        Response::error('خطا در آپلود فایل: ' . $file['error']);
     }
     
     if ($file['size'] > MAX_UPLOAD_SIZE) {
-        Response::error('File too large. Maximum size: ' . (MAX_UPLOAD_SIZE / 1024 / 1024) . 'MB');
+        Response::error('فایل بیش از حد بزرگ است. حداکثر اندازه: ' . (MAX_UPLOAD_SIZE / 1024 / 1024) . ' مگابایت');
     }
     
     // Validate file type
     $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!in_array($file['type'], $allowedTypes)) {
-        Response::error('Invalid file type. Allowed: JPEG, PNG, GIF, WebP');
+        Response::error('نوع فایل نامعتبر. مجاز: JPEG, PNG, GIF, WebP');
     }
     
     // Upload directory for coach photos
@@ -555,13 +555,13 @@ function handlePhotoUpload() {
     
     // Move uploaded file
     if (!move_uploaded_file($file['tmp_name'], $filepath)) {
-        Response::error('Failed to save file');
+        Response::error('خطا در ذخیره فایل');
     }
     
     // Return relative path for database storage
     $relativePath = 'assets/uploads/coaches/' . $filename;
     
-    Audit::log($user['id'], 'upload', 'coaches', $coachId !== 'new' ? (int)$coachId : null, "Uploaded coach photo: {$filename}");
+    Audit::log($user['id'], 'upload', 'coaches', $coachId !== 'new' ? (int)$coachId : null, "آپلود عکس مربی: {$filename}");
     
     Response::success([
         'file_path' => $relativePath,
@@ -601,7 +601,7 @@ function handleCleanupDeletedCoaches() {
     
     // Only admin can run cleanup
     if ($user['role'] !== 'admin') {
-        Response::error('Admin access required', 403);
+        Response::error('دسترسی مدیر مورد نیاز است', 403);
     }
     
     try {
@@ -616,7 +616,7 @@ function handleCleanupDeletedCoaches() {
         $coachesToDelete = $stmt->fetchAll();
         
         if (empty($coachesToDelete)) {
-            Response::success(['deleted_count' => 0], 'No coaches to clean up');
+            Response::success(['deleted_count' => 0], 'هیچ مربی برای پاکسازی وجود ندارد');
         }
         
         // Delete old coach photos
@@ -640,7 +640,7 @@ function handleCleanupDeletedCoaches() {
         }, $coachesToDelete);
         
         Audit::log($user['id'], 'cleanup', 'coaches', null, 
-            "Permanently deleted {$deletedCount} coaches: " . implode(', ', $coachNames));
+            "حذف دائم {$deletedCount} مربی: " . implode(', ', $coachNames));
         
         Response::success([
             'deleted_count' => $deletedCount,
@@ -649,7 +649,7 @@ function handleCleanupDeletedCoaches() {
         
     } catch (Exception $e) {
         error_log("Coach cleanup error: " . $e->getMessage());
-        Response::error('Failed to cleanup coaches: ' . $e->getMessage());
+        Response::error('خطا در پاکسازی مربیان: ' . $e->getMessage());
     }
 }
 
@@ -757,7 +757,7 @@ function handleRestoreCoach($coachId) {
     global $db, $user;
     
     if ($user['role'] !== 'admin') {
-        Response::error('Admin access required', 403);
+        Response::error('دسترسی مدیر مورد نیاز است', 403);
     }
     
     $stmt = $db->prepare("SELECT * FROM coaches WHERE id = ? AND status = 'inactive' AND deleted_at IS NOT NULL");
@@ -765,14 +765,14 @@ function handleRestoreCoach($coachId) {
     $coach = $stmt->fetch();
     
     if (!$coach) {
-        Response::error('Deleted coach not found', 404);
+        Response::error('مربی حذف شده یافت نشد', 404);
     }
     
     $stmt = $db->prepare("UPDATE coaches SET status = 'active', deleted_at = NULL WHERE id = ?");
     $stmt->execute([$coachId]);
     
     Audit::log($user['id'], 'restore', 'coaches', $coachId, 
-        "Restored coach: {$coach['first_name']} {$coach['last_name']}");
+        "بازیابی مربی: {$coach['first_name']} {$coach['last_name']}");
     
-    Response::success(null, 'Coach restored successfully');
+    Response::success(null, 'مربی با موفقیت بازیابی شد');
 }

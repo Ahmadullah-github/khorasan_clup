@@ -103,10 +103,10 @@
                 if (result.success && result.data.whatsapp_link) {
                     window.open(result.data.whatsapp_link, '_blank');
                 } else {
-                    alert('خطا در ایجاد لینک واتساپ');
+                    notify.error('خطا در ایجاد لینک واتساپ');
                 }
             })
-            .catch(function() { alert('خطا در ایجاد لینک واتساپ'); })
+            .catch(function() { notify.error('خطا در ایجاد لینک واتساپ'); })
             .finally(function() { btn.disabled = false; btn.innerHTML = originalHTML; });
     };
 
