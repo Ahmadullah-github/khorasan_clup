@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>راه‌اندازی اولیه سیستم</title>
+    <link href="vendor/bootstrap/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/setup-wizard.css">
+</head>
+<body>
+    <div class="wizard-container">
+        <!-- Progress Header -->
+        <div class="wizard-header">
+            <div class="wizard-logo">🏢</div>
+            <h1 class="wizard-title">راه‌اندازی سیستم</h1>
+            <p class="wizard-subtitle">در چند قدم ساده، سیستم را برای سازمان خود تنظیم کنید</p>
+            
+            <!-- Progress Steps -->
+            <div class="wizard-progress">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-number">۱</div>
+                    <div class="step-label">اطلاعات سازمان</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-number">۲</div>
+                    <div class="step-label">مدیر/مسئول</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-number">۳</div>
+                    <div class="step-label">تنظیمات مالی</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-number">۴</div>
+                    <div class="step-label">دسته‌بندی‌ها</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="5">
+                    <div class="step-number">۵</div>
+                    <div class="step-label">تأیید نهایی</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wizard Content -->
+        <div class="wizard-content">
+            <!-- Step 1: Organization Info -->
+            <div class="wizard-step active" data-step="1">
+                <div class="step-header">
+                    <div class="step-icon">🏢</div>
+                    <h2 class="step-title">اطلاعات سازمان</h2>
+                    <p class="step-desc">نام و مشخصات باشگاه یا سازمان خود را وارد کنید</p>
+                </div>
+                
+                <div class="step-body">
+                    <div class="form-group">
+                        <label class="form-label-wizard required">
+                            <i class="bi bi-building"></i>
+                            نام سازمان (فارسی/دری)
+                        </label>
+                        <input type="text" class="form-control-wizard" id="orgNameFa" 
+                               placeholder="مثال: باشگاه ورزشی خراسان"
+                               maxlength="100" required>
+                        <div class="char-counter"><span id="orgNameFaCount">0</span>/100</div>
+                        <div class="validation-message" id="orgNameFaError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label-wizard">
+                            <i class="bi bi-globe"></i>
+                            نام سازمان (انگلیسی) - اختیاری
+                        </label>
+                        <input type="text" class="form-control-wizard" id="orgNameEn" 
+                               placeholder="e.g. Khorasan Sports Club"
+                               maxlength="100" dir="ltr">
+                        <div class="char-counter"><span id="orgNameEnCount">0</span>/100</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label-wizard">
+                            <i class="bi bi-card-text"></i>
+                            شعار یا توضیح کوتاه
+                        </label>
+                        <input type="text" class="form-control-wizard" id="orgSlogan" 
+                               placeholder="مثال: سیستم مدیریت باشگاه ورزشی"
+                               maxlength="150">
+                        <div class="char-counter"><span id="orgSloganCount">0</span>/150</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label-wizard">
+                                <i class="bi bi-telephone"></i>
+                                شماره تماس
+                            </label>
+                            <input type="tel" class="form-control-wizard" id="orgPhone" 
+                                   placeholder="07XXXXXXXX"
+                                   pattern="^0[0-9]{9,10}$" maxlength="11" dir="ltr">
+                            <div class="validation-message" id="orgPhoneError"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label-wizard">
+                                <i class="bi bi-geo-alt"></i>
+                                شهر
+                            </label>
+                            <input type="text" class="form-control-wizard" id="orgCity" 
+                                   placeholder="مثال: کابل"
+                                   maxlength="50">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label-wizard">
+                            <i class="bi bi-pin-map"></i>
+                            آدرس کامل
+                        </label>
+                        <textarea class="form-control-wizard" id="orgAddress" rows="2"
+                                  placeholder="آدرس دقیق سازمان..."
+                                  maxlength="300"></textarea>
+                        <div class="char-counter"><span id="orgAddressCount">0</span>/300</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Manager Info -->
+            <div class="wizard-step" data-step="2">
+                <div class="step-header">
+                    <div class="step-icon">👤</div>
+                    <h2 class="step-title">اطلاعات مدیر/مسئول</h2>
+                    <p class="step-desc">مشخصات شخص مسئول که در فاکتورها و اسناد نمایش داده می‌شود</p>
+                </div>
+                
+                <div class="step-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label-wizard required">
+                                <i class="bi bi-person"></i>
+                                نام مسئول (فارسی/دری)
+                            </label>
+                            <input type="text" class="form-control-wizard" id="managerNameFa" 
+                                   placeholder="مثال: احمد محمدی"
+                                   maxlength="60" required>
+                            <div class="validation-message" id="managerNameFaError"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label-wizard">
+                                <i class="bi bi-person"></i>
+                                نام مسئول (انگلیسی)
+                            </label>
+                            <input type="text" class="form-control-wizard" id="managerNameEn" 
+                                   placeholder="e.g. Ahmad Mohammadi"
+                                   maxlength="60" dir="ltr">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label-wizard required">
+                            <i class="bi bi-briefcase"></i>
+                            سمت/عنوان
+                        </label>
+                        <input type="text" class="form-control-wizard" id="managerTitle" 
+                               placeholder="مثال: مدیر باشگاه"
+                               maxlength="50" required>
+                        <div class="validation-message" id="managerTitleError"></div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label-wizard">
+                                <i class="bi bi-telephone"></i>
+                                شماره تماس مدیر
+                            </label>
+                            <input type="tel" class="form-control-wizard" id="managerPhone" 
+                                   placeholder="07XXXXXXXX"
+                                   pattern="^0[0-9]{9,10}$" maxlength="11" dir="ltr">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label-wizard">
+                                <i class="bi bi-envelope"></i>
+                                ایمیل
+                            </label>
+                            <input type="email" class="form-control-wizard" id="managerEmail" 
+                                   placeholder="example@email.com"
+                                   maxlength="100" dir="ltr">
+                            <div class="validation-message" id="managerEmailError"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <i class="bi bi-info-circle"></i>
+                        <span>این اطلاعات در امضای فاکتورها و اسناد رسمی نمایش داده می‌شود</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Financial Settings -->
+            <div class="wizard-step" data-step="3">
+                <div class="step-header">
+                    <div class="step-icon">💰</div>
+                    <h2 class="step-title">تنظیمات مالی</h2>
+                    <p class="step-desc">واحد پول و تنظیمات پیش‌فرض قراردادها</p>
+                </div>
+                
+                <div class="step-body">
+                    <div class="form-group">
+                        <label class="form-label-wizard required">
+                            <i class="bi bi-currency-exchange"></i>
+                            واحد پول
+                        </label>
+                        <select class="form-control-wizard" id="currency" required>
+                            <option value="AFN">افغانی (AFN)</option>
+                            <option value="IRR">ریال ایران (IRR)</option>
+                            <option value="USD">دلار آمریکا (USD)</option>
+                            <option value="EUR">یورو (EUR)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label-wizard">
+                            <i class="bi bi-cash"></i>
+                            نام واحد پول (برای نمایش)
+                        </label>
+                        <input type="text" class="form-control-wizard" id="currencyLabel" 
+                               placeholder="مثال: افغانی"
+                               maxlength="30" value="افغانی">
+                    </div>
+                    
+                    <div class="section-divider">
+                        <span>تنظیمات پیش‌فرض قرارداد مربیان</span>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label-wizard">
+                                <i class="bi bi-percent"></i>
+                                درصد پیش‌فرض مربی
+                            </label>
+                            <div class="input-with-suffix">
+                                <input type="number" class="form-control-wizard" id="defaultPercentage" 
+                                       value="50" min="0" max="100" step="0.5">
+                                <span class="input-suffix">%</span>
+                            </div>
+                            <div class="form-hint">درصد سهم مربی از هر دانش‌آموز</div>
+                            <div class="validation-message" id="defaultPercentageError"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label-wizard">
+                                <i class="bi bi-percent"></i>
+                                درصد ترکیبی پیش‌فرض
+                            </label>
+                            <div class="input-with-suffix">
+                                <input type="number" class="form-control-wizard" id="defaultHybridPercentage" 
+                                       value="25" min="0" max="100" step="0.5">
+                                <span class="input-suffix">%</span>
+                            </div>
+                            <div class="form-hint">برای قراردادهای ترکیبی</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label-wizard">
+                            <i class="bi bi-calendar3"></i>
+                            سال مالی شروع
+                        </label>
+                        <input type="number" class="form-control-wizard" id="fiscalYearStart" 
+                               value="1404" min="1400" max="1450" dir="ltr">
+                        <div class="form-hint">سال جلالی شروع فعالیت سیستم</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Categories -->
+            <div class="wizard-step" data-step="4">
+                <div class="step-header">
+                    <div class="step-icon">📂</div>
+                    <h2 class="step-title">دسته‌بندی هزینه‌ها</h2>
+                    <p class="step-desc">دسته‌بندی‌های هزینه را تعریف کنید (قابل ویرایش در آینده)</p>
+                </div>
+                
+                <div class="step-body">
+                    <div class="categories-list" id="categoriesList">
+                        <!-- Categories will be rendered here -->
+                    </div>
+                    
+                    <div class="add-category-form">
+                        <input type="text" class="form-control-wizard" id="newCategoryKey" 
+                               placeholder="کلید (انگلیسی)" maxlength="30" dir="ltr">
+                        <input type="text" class="form-control-wizard" id="newCategoryLabel" 
+                               placeholder="نام دسته (فارسی)" maxlength="50">
+                        <button type="button" class="btn-wizard btn-wizard--secondary" id="addCategoryBtn">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                    <div class="validation-message" id="categoryError"></div>
+                    
+                    <div class="info-box mt-4">
+                        <i class="bi bi-lightbulb"></i>
+                        <span>می‌توانید بعداً از بخش تنظیمات، دسته‌بندی‌ها را ویرایش کنید</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Confirmation -->
+            <div class="wizard-step" data-step="5">
+                <div class="step-header">
+                    <div class="step-icon">✅</div>
+                    <h2 class="step-title">تأیید و ذخیره</h2>
+                    <p class="step-desc">اطلاعات وارد شده را بررسی و تأیید کنید</p>
+                </div>
+                
+                <div class="step-body">
+                    <div class="summary-section">
+                        <h3 class="summary-title"><i class="bi bi-building"></i> سازمان</h3>
+                        <div class="summary-grid" id="summaryOrg"></div>
+                    </div>
+                    
+                    <div class="summary-section">
+                        <h3 class="summary-title"><i class="bi bi-person"></i> مدیر/مسئول</h3>
+                        <div class="summary-grid" id="summaryManager"></div>
+                    </div>
+                    
+                    <div class="summary-section">
+                        <h3 class="summary-title"><i class="bi bi-cash"></i> تنظیمات مالی</h3>
+                        <div class="summary-grid" id="summaryFinancial"></div>
+                    </div>
+                    
+                    <div class="summary-section">
+                        <h3 class="summary-title"><i class="bi bi-folder"></i> دسته‌بندی‌ها</h3>
+                        <div class="summary-categories" id="summaryCategories"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wizard Footer -->
+        <div class="wizard-footer">
+            <button type="button" class="btn-wizard btn-wizard--ghost" id="skipBtn">
+                <i class="bi bi-skip-forward"></i>
+                رد کردن (استفاده از پیش‌فرض‌ها)
+            </button>
+            
+            <div class="wizard-nav">
+                <button type="button" class="btn-wizard btn-wizard--secondary" id="prevBtn" disabled>
+                    <i class="bi bi-arrow-right"></i>
+                    قبلی
+                </button>
+                <button type="button" class="btn-wizard btn-wizard--primary" id="nextBtn">
+                    بعدی
+                    <i class="bi bi-arrow-left"></i>
+                </button>
+                <button type="button" class="btn-wizard btn-wizard--success" id="finishBtn" style="display: none;">
+                    <i class="bi bi-check-lg"></i>
+                    ذخیره و شروع
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skip Confirmation Modal -->
+    <div class="modal-overlay" id="skipModal">
+        <div class="modal-wizard">
+            <div class="modal-wizard-header">
+                <i class="bi bi-exclamation-triangle text-warning"></i>
+                <h3>رد کردن راه‌اندازی؟</h3>
+            </div>
+            <div class="modal-wizard-body">
+                <p>با رد کردن، سیستم با مقادیر پیش‌فرض راه‌اندازی می‌شود:</p>
+                <ul class="default-values-list">
+                    <li><strong>نام سازمان:</strong> کمپ خراسان</li>
+                    <li><strong>مدیر:</strong> کامران منصوری</li>
+                    <li><strong>واحد پول:</strong> افغانی</li>
+                </ul>
+                <p class="text-muted">می‌توانید بعداً از بخش تنظیمات تغییر دهید.</p>
+            </div>
+            <div class="modal-wizard-footer">
+                <button type="button" class="btn-wizard btn-wizard--secondary" id="cancelSkipBtn">
+                    بازگشت
+                </button>
+                <button type="button" class="btn-wizard btn-wizard--warning" id="confirmSkipBtn">
+                    <i class="bi bi-skip-forward"></i>
+                    رد کردن و ادامه
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-wizard modal-wizard--success">
+            <div class="success-animation">
+                <div class="success-checkmark">
+                    <i class="bi bi-check-lg"></i>
+                </div>
+            </div>
+            <h3>راه‌اندازی با موفقیت انجام شد!</h3>
+            <p>سیستم آماده استفاده است</p>
+            <button type="button" class="btn-wizard btn-wizard--success" id="goToDashboardBtn">
+                <i class="bi bi-house"></i>
+                ورود به داشبورد
+            </button>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/setup-wizard.js"></script>
+</body>
+</html>

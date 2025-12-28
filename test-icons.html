@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Test - کمپ خراسان</title>
+    <link href="public/vendor/bootstrap/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="public/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { padding: 2rem; }
+        .icon-test { font-size: 2rem; margin: 1rem; }
+        .icon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .icon-item { padding: 1rem; border: 1px solid #ddd; border-radius: 8px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>Bootstrap Icons Test</h1>
+    <p>If you can see the icons below, the offline setup is working correctly!</p>
+    
+    <div class="icon-grid">
+        <div class="icon-item">
+            <i class="bi bi-people icon-test"></i>
+            <div>bi-people</div>
+        </div>
+        <div class="icon-item">
+            <i class="bi bi-person-badge icon-test"></i>
+            <div>bi-person-badge</div>
+        </div>
+        <div class="icon-item">
+            <i class="bi bi-cash-stack icon-test"></i>
+            <div>bi-cash-stack</div>
+        </div>
+        <div class="icon-item">
+            <i class="bi bi-house icon-test"></i>
+            <div>bi-house</div>
+        </div>
+        <div class="icon-item">
+            <i class="bi bi-calculator icon-test"></i>
+            <div>bi-calculator</div>
+        </div>
+        <div class="icon-item">
+            <i class="bi bi-bar-chart icon-test"></i>
+            <div>bi-bar-chart</div>
+        </div>
+        <div class="icon-item">
+            <i class="bi bi-gear icon-test"></i>
+            <div>bi-gear</div>
+        </div>
+        <div class="icon-item">
+            <i class="bi bi-box-arrow-right icon-test"></i>
+            <div>bi-box-arrow-right</div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <h3>Status:</h3>
+        <div id="status" class="alert alert-info">
+            Testing icon loading...
+        </div>
+    </div>
+    
+    <script>
+        // Test if icons are loaded by checking computed font-family
+        setTimeout(() => {
+            const iconElement = document.querySelector('.bi');
+            const computedStyle = window.getComputedStyle(iconElement, '::before');
+            const fontFamily = computedStyle.getPropertyValue('font-family');
+            
+            const statusDiv = document.getElementById('status');
+            if (fontFamily.includes('bootstrap-icons')) {
+                statusDiv.className = 'alert alert-success';
+                statusDiv.innerHTML = '✅ Icons are loading correctly! Font family: ' + fontFamily;
+            } else {
+                statusDiv.className = 'alert alert-danger';
+                statusDiv.innerHTML = '❌ Icons are not loading. Font family: ' + fontFamily;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

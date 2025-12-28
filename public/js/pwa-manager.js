@@ -153,6 +153,10 @@ class PWAManager {
             }
         }
         
+        const orgName = (typeof AppSettings !== 'undefined' && AppSettings.getOrgName) 
+            ? AppSettings.getOrgName() 
+            : 'کمپ خراسان';
+        
         const prompt = document.createElement('div');
         prompt.id = 'pwaInstallPrompt';
         prompt.className = 'pwa-install-prompt';
@@ -161,7 +165,7 @@ class PWAManager {
                 <div class="pwa-install-text">
                     <div class="pwa-install-title">
                         <i class="bi bi-download"></i>
-                        نصب کمپ خراسان
+                        نصب ${orgName}
                     </div>
                     <div class="pwa-install-description">
                         برای دسترسی سریع‌تر و استفاده آفلاین، اپلیکیشن را نصب کنید

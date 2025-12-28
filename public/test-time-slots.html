@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست مدیریت زمان‌ها - کمپ خراسان</title>
+    <link href="vendor/bootstrap/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar-app">
+        <a class="navbar-brand" href="index.html">
+            <span class="navbar-brand-icon">🤸‍♂️</span>
+            کمپ خراسان
+        </a>
+        <div class="navbar-actions">
+            <button type="button" class="theme-switch" id="themeSwitch" title="تغییر تم">
+                <span class="theme-switch-icons">
+                    <span class="theme-switch-icon theme-switch-icon--sun">☀️</span>
+                    <span class="theme-switch-icon theme-switch-icon--moon">🌙</span>
+                </span>
+                <span class="theme-switch-slider"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="app-main" style="margin-right: 0;">
+        <div class="container-app" style="max-width: 600px;">
+            <div class="text-center mb-5">
+                <h1 class="page-title">
+                    <i class="bi bi-clock me-2"></i>
+                    تست مدیریت زمان‌ها
+                </h1>
+                <p class="text-muted">این صفحه برای تست عملکرد مدیریت زمان‌های کلاس است</p>
+            </div>
+
+            <div class="card-app">
+                <div class="card-app-body text-center">
+                    <h3 class="mb-4">دو روش مدیریت زمان‌ها</h3>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="border rounded p-4">
+                                <i class="bi bi-window" style="font-size: 2rem; color: var(--color-primary-500);"></i>
+                                <h5 class="mt-3">مدال درون‌خطی</h5>
+                                <p class="text-muted small">مدیریت زمان‌ها در همین صفحه</p>
+                                <button class="btn-app btn-app--primary btn-app--sm" onclick="timeSlotsModal.open()">
+                                    <i class="bi bi-gear"></i>
+                                    باز کردن مدال
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="border rounded p-4">
+                                <i class="bi bi-window-fullscreen" style="font-size: 2rem; color: var(--color-success-500);"></i>
+                                <h5 class="mt-3">صفحه مستقل</h5>
+                                <p class="text-muted small">صفحه کامل برای مدیریت</p>
+                                <a href="time-slots-manager.html" class="btn-app btn-app--success btn-app--sm">
+                                    <i class="bi bi-arrow-left"></i>
+                                    رفتن به صفحه
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-5 p-3 bg-info-subtle rounded">
+                        <h6><i class="bi bi-info-circle"></i> نکته</h6>
+                        <p class="small mb-0">
+                            هر دو روش از همان API استفاده می‌کنند. مدال برای استفاده سریع در فرم مربی مناسب است، 
+                            و صفحه مستقل برای مدیریت کامل زمان‌ها.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="vendor/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/app-settings.js"></script>
+    <script src="js/time-slots-modal.js"></script>
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initDarkMode();
+        });
+    </script>
+</body>
+</html>

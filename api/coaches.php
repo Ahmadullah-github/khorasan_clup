@@ -34,6 +34,8 @@ switch ($method) {
     case 'POST':
         if ($action === 'upload-photo') {
             handlePhotoUpload();
+        } elseif ($action === 'time-slots') {
+            handleCreateTimeSlot();
         } elseif ($action === 'cleanup') {
             handleCleanupDeletedCoaches();
         } else {
@@ -42,18 +44,22 @@ switch ($method) {
         break;
         
     case 'PUT':
-        if ($coachId) {
+        if ($action === 'time-slots' && isset($_GET['id'])) {
+            handleUpdateTimeSlot($_GET['id']);
+        } elseif ($coachId) {
             handleUpdateCoach($coachId);
         } else {
-            Response::error('شناسه مربی الزامی است');
+            Response::error('شناسه الزامی است');
         }
         break;
         
     case 'DELETE':
-        if ($coachId) {
+        if ($action === 'time-slots' && isset($_GET['id'])) {
+            handleDeleteTimeSlot($_GET['id']);
+        } elseif ($coachId) {
             handleDeleteCoach($coachId);
         } else {
-            Response::error('شناسه مربی الزامی است');
+            Response::error('شناسه الزامی است');
         }
         break;
         
@@ -653,10 +659,208 @@ function handleCleanupDeletedCoaches() {
     }
 }
 
+/**
+ * Create new time slot
+ */
+function handleCreateTimeSlot() {
+    global $db, $user;
+    
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    if (!isset($data['name']) || !isset($data['start_time']) || !isset($data['end_time'])) {
+        Response::error('نام، زمان شروع و زمان پایان الزامی است');
+    }
+    
+    $name = Sanitizer::sanitizeInput($data['name']);
+    $startTime = Sanitizer::sanitizeInput($data['start_time']);
+    $endTime = Sanitizer::sanitizeInput($data['end_time']);
+    $description = isset($data['description']) ? Sanitizer::sanitizeInput($data['description']) : null;
+    
+    // Validate time format (HH:MM)
+    if (!preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $startTime)) {
+        Response::error('فرمت زمان شروع نامعتبر (HH:MM)');
+    }
+    
+    if (!preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $endTime)) {
+        Response::error('فرمت زمان پایان نامعتبر (HH:MM)');
+    }
+    
+    // Validate that end time is after start time
+    $startMinutes = timeToMinutes($startTime);
+    $endMinutes = timeToMinutes($endTime);
+    
+    if ($endMinutes <= $startMinutes) {
+        Response::error('زمان پایان باید بعد از زمان شروع باشد');
+    }
+    
+    // Check for duplicate name
+    $stmt = $db->prepare("SELECT id FROM time_slots WHERE name = ?");
+    $stmt->execute([$name]);
+    if ($stmt->fetch()) {
+        Response::error('نام زمان تکراری است');
+    }
+    
+    try {
+        $stmt = $db->prepare("
+            INSERT INTO time_slots (name, start_time, end_time, description, created_at)
+            VALUES (?, ?, ?, ?, NOW())
+        ");
+        
+        $stmt->execute([$name, $startTime, $endTime, $description]);
+        $timeSlotId = $db->lastInsertId();
+        
+        Audit::log($user['id'], 'create', 'time_slots', $timeSlotId, "ایجاد زمان کلاس: {$name} ({$startTime}-{$endTime})");
+        
+        Response::success([
+            'id' => $timeSlotId,
+            'name' => $name,
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+            'description' => $description
+        ], 'زمان کلاس با موفقیت ایجاد شد');
+        
+    } catch (Exception $e) {
+        error_log("Time slot creation error: " . $e->getMessage());
+        Response::error('خطا در ایجاد زمان کلاس: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Update time slot
+ */
+function handleUpdateTimeSlot($timeSlotId) {
+    global $db, $user;
+    
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    // Check if time slot exists
+    $stmt = $db->prepare("SELECT * FROM time_slots WHERE id = ?");
+    $stmt->execute([$timeSlotId]);
+    $existingSlot = $stmt->fetch();
+    
+    if (!$existingSlot) {
+        Response::error('زمان کلاس یافت نشد', 404);
+    }
+    
+    $fields = [];
+    $params = [];
+    
+    if (isset($data['name'])) {
+        $name = Sanitizer::sanitizeInput($data['name']);
+        
+        // Check for duplicate name (excluding current slot)
+        $stmt = $db->prepare("SELECT id FROM time_slots WHERE name = ? AND id != ?");
+        $stmt->execute([$name, $timeSlotId]);
+        if ($stmt->fetch()) {
+            Response::error('نام زمان تکراری است');
+        }
+        
+        $fields[] = "name = ?";
+        $params[] = $name;
+    }
+    
+    if (isset($data['start_time'])) {
+        $startTime = Sanitizer::sanitizeInput($data['start_time']);
+        if (!preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $startTime)) {
+            Response::error('فرمت زمان شروع نامعتبر (HH:MM)');
+        }
+        $fields[] = "start_time = ?";
+        $params[] = $startTime;
+    }
+    
+    if (isset($data['end_time'])) {
+        $endTime = Sanitizer::sanitizeInput($data['end_time']);
+        if (!preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $endTime)) {
+            Response::error('فرمت زمان پایان نامعتبر (HH:MM)');
+        }
+        $fields[] = "end_time = ?";
+        $params[] = $endTime;
+    }
+    
+    if (isset($data['description'])) {
+        $fields[] = "description = ?";
+        $params[] = $data['description'] ? Sanitizer::sanitizeInput($data['description']) : null;
+    }
+    
+    // Validate time logic if both times are being updated
+    $finalStartTime = $data['start_time'] ?? $existingSlot['start_time'];
+    $finalEndTime = $data['end_time'] ?? $existingSlot['end_time'];
+    
+    if (timeToMinutes($finalEndTime) <= timeToMinutes($finalStartTime)) {
+        Response::error('زمان پایان باید بعد از زمان شروع باشد');
+    }
+    
+    if (empty($fields)) {
+        Response::error('هیچ فیلدی برای به‌روزرسانی ارسال نشده');
+    }
+    
+    try {
+        $params[] = $timeSlotId;
+        $sql = "UPDATE time_slots SET " . implode(', ', $fields) . " WHERE id = ?";
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+        
+        $finalName = $data['name'] ?? $existingSlot['name'];
+        Audit::log($user['id'], 'update', 'time_slots', $timeSlotId, "به‌روزرسانی زمان کلاس: {$finalName}");
+        
+        Response::success(null, 'زمان کلاس با موفقیت به‌روزرسانی شد');
+        
+    } catch (Exception $e) {
+        error_log("Time slot update error: " . $e->getMessage());
+        Response::error('خطا در به‌روزرسانی زمان کلاس: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Delete time slot
+ */
+function handleDeleteTimeSlot($timeSlotId) {
+    global $db, $user;
+    
+    // Check if time slot exists
+    $stmt = $db->prepare("SELECT name FROM time_slots WHERE id = ?");
+    $stmt->execute([$timeSlotId]);
+    $timeSlot = $stmt->fetch();
+    
+    if (!$timeSlot) {
+        Response::error('زمان کلاس یافت نشد', 404);
+    }
+    
+    // Check if time slot is being used by any coaches
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM coach_time_slot WHERE time_slot_id = ?");
+    $stmt->execute([$timeSlotId]);
+    $count = $stmt->fetch()['count'];
+    
+    if ($count > 0) {
+        Response::error('نمی‌توان زمان کلاس مورد استفاده توسط مربیان را حذف کرد');
+    }
+    
+    try {
+        $stmt = $db->prepare("DELETE FROM time_slots WHERE id = ?");
+        $stmt->execute([$timeSlotId]);
+        
+        Audit::log($user['id'], 'delete', 'time_slots', $timeSlotId, "حذف زمان کلاس: {$timeSlot['name']}");
+        
+        Response::success(null, 'زمان کلاس با موفقیت حذف شد');
+        
+    } catch (Exception $e) {
+        error_log("Time slot deletion error: " . $e->getMessage());
+        Response::error('خطا در حذف زمان کلاس: ' . $e->getMessage());
+    }
+}
+
 
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
+
+/**
+ * Convert time string (HH:MM) to minutes
+ */
+function timeToMinutes($time) {
+    list($hours, $minutes) = explode(':', $time);
+    return (int)$hours * 60 + (int)$minutes;
+}
 
 /**
  * Enrich coach data with time slots and statistics

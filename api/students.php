@@ -114,7 +114,7 @@ function handleListStudents() {
 function handleGetFormData() {
     global $db;
     
-    // Get coaches with their time slots
+    // Get active coaches with their time slots
     $stmt = $db->query("
         SELECT c.id, c.first_name, c.last_name,
                GROUP_CONCAT(ts.id) as time_slot_ids,
@@ -122,7 +122,9 @@ function handleGetFormData() {
         FROM coaches c
         LEFT JOIN coach_time_slot cts ON c.id = cts.coach_id
         LEFT JOIN time_slots ts ON cts.time_slot_id = ts.id
+        WHERE c.status = 'active'
         GROUP BY c.id
+        ORDER BY c.first_name, c.last_name
     ");
     $coaches = $stmt->fetchAll();
     

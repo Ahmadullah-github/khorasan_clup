@@ -4,26 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>داشبورد - کمپ خراسان</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="vendor/bootstrap/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/custom.css">
     <link rel="stylesheet" href="css/pwa-styles.css">
     
     <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.php">
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#3b82f6">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="کمپ خراسان">
     <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon-180x180.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16x16.png">
     
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js (UMD build) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -135,6 +135,12 @@
             
             <div class="sidebar-section-title">سیستم</div>
             
+            <div class="sidebar-nav-item">
+                <a href="settings.html" class="sidebar-nav-link">
+                    <i class="bi bi-gear sidebar-nav-icon"></i>
+                    تنظیمات
+                </a>
+            </div>
             <div class="sidebar-nav-item" id="adminSidebarItem" style="display: none;">
                 <a href="admin.html" class="sidebar-nav-link">
                     <i class="bi bi-gear sidebar-nav-icon"></i>
@@ -225,7 +231,7 @@
                                 <div class="kpi-card-value" id="monthlyRevenue">
                                     <div class="skeleton skeleton-title" style="width: 80px;"></div>
                                 </div>
-                                <div class="kpi-card-label">درآمد این ماه (افغانی)</div>
+                                <div class="kpi-card-label" id="revenueLabel">درآمد این ماه (<span id="revenueCurrencyLabel">افغانی</span>)</div>
                             </div>
                             <div class="kpi-card-icon mb-0">
                                 <i class="bi bi-cash-coin"></i>
@@ -328,7 +334,7 @@
                                     <thead class="bg-light">
                                         <tr>
                                             <th class="ps-4">نام دانش‌آموز</th>
-                                            <th>مبلغ (افغانی)</th>
+                                            <th>مبلغ (<span id="tableCurrencyLabel">افغانی</span>)</th>
                                             <th>تاریخ</th>
                                             <th class="text-end pe-4">وضعیت</th>
                                         </tr>
@@ -377,8 +383,9 @@
     <!-- Mobile Sidebar Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="vendor/bootstrap/bootstrap.bundle.min.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/app-settings.js"></script>
     <script src="js/offline-manager.js"></script>
     <script src="js/pwa-manager.js"></script>
     <script src="js/jalali.js?v=2"></script>
@@ -720,6 +727,15 @@
         // Initialize
         loadDashboard();
         initDarkMode();
+        
+        // Update currency labels when settings are loaded
+        window.addEventListener('settingsLoaded', function() {
+            const currencyLabel = AppSettings.getCurrencyLabel();
+            const revenueCurrencyEl = document.getElementById('revenueCurrencyLabel');
+            const tableCurrencyEl = document.getElementById('tableCurrencyLabel');
+            if (revenueCurrencyEl) revenueCurrencyEl.textContent = currencyLabel;
+            if (tableCurrencyEl) tableCurrencyEl.textContent = currencyLabel;
+        });
         
         // Debug function for PWA testing
         window.debugPWA = async function() {

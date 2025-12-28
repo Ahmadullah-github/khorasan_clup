@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ورود به سیستم - کمپ خراسان</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="vendor/bootstrap/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/pwa-styles.css">
     
     <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.php">
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#3b82f6">
@@ -176,16 +176,36 @@
             </div>
             
             <div class="login-footer">
-                <p class="login-footer-text">
+                <p class="login-footer-text" id="loginFooterText">
                     © ۱۴۰۴ باشگاه ورزشی خراسان - تمامی حقوق محفوظ است
                 </p>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="vendor/bootstrap/bootstrap.bundle.min.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/app-settings.js"></script>
     <script>
+        // Load dynamic settings for login page
+        (async function() {
+            try {
+                await AppSettings.load();
+                const org = AppSettings.getOrganization();
+                
+                // Update title
+                document.querySelector('.login-title').textContent = org.name_fa;
+                document.querySelector('.login-subtitle').textContent = org.slogan || 'سیستم مدیریت باشگاه ورزشی';
+                document.title = 'ورود به سیستم - ' + org.name_fa;
+                
+                // Update footer
+                const currentYear = new Date().toLocaleDateString('fa-IR', { year: 'numeric' });
+                document.getElementById('loginFooterText').textContent = `© ${currentYear} ${org.name_fa} - تمامی حقوق محفوظ است`;
+            } catch (e) {
+                console.warn('Could not load settings for login page');
+            }
+        })();
+        
         // Check if already logged in
         if (localStorage.getItem('user')) {
             window.location.href = 'index.html';
@@ -234,6 +254,21 @@
 
                 if (response.ok && data.success) {
                     localStorage.setItem('user', JSON.stringify(data.data.user));
+                    
+                    // Check if setup wizard needs to be shown (first-time setup)
+                    try {
+                        const setupCheck = await fetch(API_BASE + 'settings.php?action=check-setup');
+                        const setupResult = await setupCheck.json();
+                        
+                        if (setupResult.success && !setupResult.data.setup_complete) {
+                            // First time - show setup wizard
+                            window.location.href = 'setup-wizard.html';
+                            return;
+                        }
+                    } catch (setupError) {
+                        console.warn('Setup check failed, proceeding to dashboard');
+                    }
+                    
                     window.location.href = 'index.html';
                 } else {
                     errorText.textContent = data.error || 'خطا در ورود';

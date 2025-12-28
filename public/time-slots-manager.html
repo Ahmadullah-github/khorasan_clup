@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت زمان‌های کلاس - کمپ خراسان</title>
+    <link href="vendor/bootstrap/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <style>
+        .time-slot-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            background: var(--bg-primary);
+            transition: all 0.2s ease;
+        }
+        .time-slot-card:hover {
+            border-color: var(--color-primary-400);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .time-slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .time-slot-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+        .time-slot-time {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        .time-slot-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 1rem;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .time-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .time-input-wrapper input {
+            width: 70px;
+            text-align: center;
+        }
+        .time-input-wrapper .separator {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar-app">
+        <a class="navbar-brand" href="index.html">
+            <span class="navbar-brand-icon">🤸‍♂️</span>
+            کمپ خراسان
+        </a>
+        <div class="navbar-actions">
+            <a href="coaches.html" class="btn-app btn-app--secondary btn-app--sm">
+                <i class="bi bi-arrow-right"></i> بازگشت
+            </a>
+            <button type="button" class="theme-switch" id="themeSwitch" title="تغییر تم">
+                <span class="theme-switch-icons">
+                    <span class="theme-switch-icon theme-switch-icon--sun">☀️</span>
+                    <span class="theme-switch-icon theme-switch-icon--moon">🌙</span>
+                </span>
+                <span class="theme-switch-slider"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="app-main" style="margin-right: 0;">
+        <div class="container-app" style="max-width: 800px;">
+            <div class="page-header">
+                <h1 class="page-title mb-0">
+                    <i class="bi bi-clock me-2"></i>
+                    مدیریت زمان‌های کلاس
+                </h1>
+                <button class="btn-app btn-app--primary" id="addTimeSlotBtn">
+                    <i class="bi bi-plus-lg"></i>
+                    افزودن زمان جدید
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="text-center py-5">
+                <div class="spinner-app mx-auto mb-3"></div>
+                <div class="text-muted">در حال بارگذاری...</div>
+            </div>
+
+            <!-- Time Slots List -->
+            <div id="timeSlotsContainer" style="display: none;"></div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">🕐</div>
+                <h3>هیچ زمان کلاسی تعریف نشده</h3>
+                <p class="text-muted mb-4">برای شروع، اولین زمان کلاس را اضافه کنید</p>
+                <button class="btn-app btn-app--primary" id="addFirstSlotBtn">
+                    <i class="bi bi-plus-lg"></i>
+                    افزودن زمان اول
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Time Slot Modal -->
+    <div class="modal fade" id="timeSlotModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">افزودن زمان جدید</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="timeSlotForm" novalidate>
+                        <div class="mb-3">
+                            <label class="form-label-app required">
+                                <i class="bi bi-tag"></i> نام زمان
+                            </label>
+                            <input type="text" class="form-control-app" id="slotName" 
+                                   placeholder="مثال: صبح، ظهر، شام" required>
+                            <div class="invalid-feedback">نام زمان الزامی است</div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label-app required">
+                                    <i class="bi bi-clock"></i> زمان شروع
+                                </label>
+                                <div class="time-input-wrapper">
+                                    <input type="number" class="form-control-app" id="startHour" 
+                                           placeholder="ساعت" min="0" max="23" required>
+                                    <span class="separator">:</span>
+                                    <input type="number" class="form-control-app" id="startMinute" 
+                                           placeholder="دقیقه" min="0" max="59" value="0">
+                                </div>
+                                <div class="invalid-feedback" id="startTimeError">زمان شروع الزامی است</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label-app required">
+                                    <i class="bi bi-clock-fill"></i> زمان پایان
+                                </label>
+                                <div class="time-input-wrapper">
+                                    <input type="number" class="form-control-app" id="endHour" 
+                                           placeholder="ساعت" min="0" max="23" required>
+                                    <span class="separator">:</span>
+                                    <input type="number" class="form-control-app" id="endMinute" 
+                                           placeholder="دقیقه" min="0" max="59" value="0">
+                                </div>
+                                <div class="invalid-feedback" id="endTimeError">زمان پایان الزامی است</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label-app">
+                                <i class="bi bi-info-circle"></i> توضیحات
+                            </label>
+                            <textarea class="form-control-app" id="slotDescription" rows="2" 
+                                      placeholder="توضیحات اختیاری..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-app btn-app--secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="button" class="btn-app btn-app--primary" id="submitBtn">
+                        <span class="spinner-border spinner-border-sm d-none" id="btnSpinner"></span>
+                        <i class="bi bi-check-lg" id="btnIcon"></i>
+                        <span id="btnText">ذخیره</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تأیید حذف</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+                </div>
+                <div class="modal-body">
+                    <p>آیا از حذف زمان <strong id="deleteSlotName"></strong> اطمینان دارید؟</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-app btn-app--secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="button" class="btn-app btn-app--danger" id="confirmDeleteBtn">
+                        <i class="bi bi-trash"></i> حذف
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="vendor/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/app-settings.js"></script>
+    <script>
+        // Auth check
+        const user = checkAuth();
+        if (!user) window.location.href = 'login.html';
+
+        // State
+        let timeSlots = [];
+        let editingSlotId = null;
+        let deletingSlotId = null;
+
+        // DOM Elements
+        const loadingState = document.getElementById('loadingState');
+        const timeSlotsContainer = document.getElementById('timeSlotsContainer');
+        const emptyState = document.getElementById('emptyState');
+        const timeSlotForm = document.getElementById('timeSlotForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const btnIcon = document.getElementById('btnIcon');
+        const btnText = document.getElementById('btnText');
+
+        // Bootstrap Modals
+        let timeSlotModal, deleteModal;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initDarkMode();
+            
+            // Initialize Bootstrap modals
+            timeSlotModal = new bootstrap.Modal(document.getElementById('timeSlotModal'));
+            deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            
+            // Event listeners
+            document.getElementById('addTimeSlotBtn').addEventListener('click', () => openModal());
+            document.getElementById('addFirstSlotBtn').addEventListener('click', () => openModal());
+            document.getElementById('submitBtn').addEventListener('click', handleSubmit);
+            document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+            
+            // Reset form when modal closes
+            document.getElementById('timeSlotModal').addEventListener('hidden.bs.modal', resetForm);
+            
+            // Load data
+            loadTimeSlots();
+        });
+
+        // Load time slots from API
+        async function loadTimeSlots() {
+            showLoading();
+            
+            try {
+                const response = await APIClient.get('coaches.php', { action: 'time-slots' });
+                
+                if (response.success && Array.isArray(response.data)) {
+                    timeSlots = response.data;
+                    renderTimeSlots();
+                } else {
+                    throw new Error(response.error || 'خطا در دریافت داده‌ها');
+                }
+            } catch (error) {
+                console.error('Error loading time slots:', error);
+                notify.error('خطا در بارگذاری زمان‌ها: ' + error.message);
+                loadingState.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        خطا در بارگذاری. <a href="#" onclick="loadTimeSlots(); return false;">تلاش مجدد</a>
+                    </div>
+                `;
+            }
+        }
+
+        // Show loading state
+        function showLoading() {
+            loadingState.style.display = 'block';
+            timeSlotsContainer.style.display = 'none';
+            emptyState.style.display = 'none';
+        }
+
+        // Render time slots
+        function renderTimeSlots() {
+            loadingState.style.display = 'none';
+            
+            if (timeSlots.length === 0) {
+                timeSlotsContainer.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            timeSlotsContainer.style.display = 'block';
+            
+            timeSlotsContainer.innerHTML = timeSlots.map(slot => `
+                <div class="time-slot-card" data-id="${slot.id}">
+                    <div class="time-slot-header">
+                        <div>
+                            <div class="time-slot-name">${escapeHtml(slot.name)}</div>
+                            <div class="time-slot-time">
+                                <i class="bi bi-clock"></i>
+                                ${slot.start_time} - ${slot.end_time}
+                            </div>
+                            ${slot.description ? `<div class="text-muted small mt-1">${escapeHtml(slot.description)}</div>` : ''}
+                        </div>
+                        <div class="time-slot-actions">
+                            <button class="btn-app btn-app--secondary btn-app--sm" 
+                                    onclick="editTimeSlot(${slot.id})" title="ویرایش">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn-app btn-app--danger btn-app--sm" 
+                                    onclick="deleteTimeSlot(${slot.id})" title="حذف">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Open modal for add/edit
+        function openModal(slotId = null) {
+            // Reset form first (but don't clear editingSlotId yet)
+            timeSlotForm.reset();
+            clearValidation();
+            setSubmitLoading(false);
+            
+            // Now set the editing ID
+            editingSlotId = slotId;
+            
+            const modalTitle = document.getElementById('modalTitle');
+            
+            if (slotId) {
+                const slot = timeSlots.find(s => s.id === slotId);
+                if (!slot) return;
+                
+                modalTitle.textContent = 'ویرایش زمان';
+                btnText.textContent = 'بروزرسانی';
+                
+                document.getElementById('slotName').value = slot.name;
+                document.getElementById('slotDescription').value = slot.description || '';
+                
+                // Parse times (format: HH:MM or HH:MM:SS)
+                const [startH, startM] = slot.start_time.split(':');
+                const [endH, endM] = slot.end_time.split(':');
+                
+                document.getElementById('startHour').value = parseInt(startH, 10);
+                document.getElementById('startMinute').value = parseInt(startM, 10);
+                document.getElementById('endHour').value = parseInt(endH, 10);
+                document.getElementById('endMinute').value = parseInt(endM, 10);
+            } else {
+                modalTitle.textContent = 'افزودن زمان جدید';
+                btnText.textContent = 'ذخیره';
+            }
+            
+            timeSlotModal.show();
+        }
+
+        // Edit time slot
+        function editTimeSlot(slotId) {
+            openModal(slotId);
+        }
+
+        // Delete time slot - show confirmation
+        function deleteTimeSlot(slotId) {
+            const slot = timeSlots.find(s => s.id === slotId);
+            if (!slot) return;
+            
+            deletingSlotId = slotId;
+            document.getElementById('deleteSlotName').textContent = slot.name;
+            deleteModal.show();
+        }
+
+        // Confirm delete
+        async function confirmDelete() {
+            if (!deletingSlotId) return;
+            
+            const btn = document.getElementById('confirmDeleteBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> در حال حذف...';
+            
+            try {
+                const result = await APIClient.delete(`coaches.php?action=time-slots&id=${deletingSlotId}`);
+                
+                if (result.success) {
+                    notify.success('زمان با موفقیت حذف شد');
+                    deleteModal.hide();
+                    await loadTimeSlots();
+                } else {
+                    throw new Error(result.error || 'خطا در حذف');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                notify.error('خطا در حذف: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-trash"></i> حذف';
+                deletingSlotId = null;
+            }
+        }
+
+        // Handle form submit
+        async function handleSubmit() {
+            // Clear previous errors
+            clearValidation();
+            
+            // Get values
+            const name = document.getElementById('slotName').value.trim();
+            const startHour = parseInt(document.getElementById('startHour').value);
+            const startMinute = parseInt(document.getElementById('startMinute').value) || 0;
+            const endHour = parseInt(document.getElementById('endHour').value);
+            const endMinute = parseInt(document.getElementById('endMinute').value) || 0;
+            const description = document.getElementById('slotDescription').value.trim();
+            
+            // Validation
+            let isValid = true;
+            
+            if (!name) {
+                document.getElementById('slotName').classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            if (isNaN(startHour) || startHour < 0 || startHour > 23) {
+                document.getElementById('startHour').classList.add('is-invalid');
+                document.getElementById('startTimeError').textContent = 'ساعت شروع نامعتبر است';
+                isValid = false;
+            }
+            
+            if (isNaN(endHour) || endHour < 0 || endHour > 23) {
+                document.getElementById('endHour').classList.add('is-invalid');
+                document.getElementById('endTimeError').textContent = 'ساعت پایان نامعتبر است';
+                isValid = false;
+            }
+            
+            // Check time logic
+            if (isValid) {
+                const startTotal = startHour * 60 + startMinute;
+                const endTotal = endHour * 60 + endMinute;
+                
+                if (endTotal <= startTotal) {
+                    document.getElementById('endHour').classList.add('is-invalid');
+                    document.getElementById('endTimeError').textContent = 'زمان پایان باید بعد از زمان شروع باشد';
+                    isValid = false;
+                }
+            }
+            
+            if (!isValid) {
+                notify._showSnackbar('لطفاً اطلاعات را صحیح وارد کنید', 'warning');
+                return;
+            }
+            
+            // Format times
+            const startTime = `${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`;
+            const endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+            
+            const formData = {
+                name,
+                start_time: startTime,
+                end_time: endTime,
+                description: description || null
+            };
+            
+            // Show loading
+            setSubmitLoading(true);
+            
+            try {
+                let result;
+                if (editingSlotId) {
+                    result = await APIClient.put(`coaches.php?action=time-slots&id=${editingSlotId}`, formData);
+                } else {
+                    result = await APIClient.post('coaches.php?action=time-slots', formData);
+                }
+                
+                if (result.success) {
+                    notify.success(editingSlotId ? 'زمان با موفقیت بروزرسانی شد' : 'زمان با موفقیت افزوده شد');
+                    timeSlotModal.hide();
+                    await loadTimeSlots();
+                } else {
+                    throw new Error(result.error || 'خطای نامشخص');
+                }
+            } catch (error) {
+                console.error('Submit error:', error);
+                notify.error('خطا در ذخیره: ' + error.message);
+            } finally {
+                setSubmitLoading(false);
+            }
+        }
+
+        // Set submit button loading state
+        function setSubmitLoading(loading) {
+            submitBtn.disabled = loading;
+            btnSpinner.classList.toggle('d-none', !loading);
+            btnIcon.classList.toggle('d-none', loading);
+            btnText.textContent = loading ? 'در حال ذخیره...' : (editingSlotId ? 'بروزرسانی' : 'ذخیره');
+        }
+
+        // Reset form (only used when modal closes)
+        function resetForm() {
+            timeSlotForm.reset();
+            clearValidation();
+            editingSlotId = null;
+            setSubmitLoading(false);
+        }
+
+        // Clear validation errors
+        function clearValidation() {
+            timeSlotForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

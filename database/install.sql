@@ -268,6 +268,16 @@ CREATE TABLE IF NOT EXISTS `coach_contract_history` (
   KEY `idx_coach_dates` (`coach_id`, `start_date_jalali`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS app_settings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    setting_key VARCHAR(100) NOT NULL UNIQUE,
+    setting_value TEXT,
+    setting_group VARCHAR(50) DEFAULT 'general',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_setting_group (setting_group),
+    INDEX idx_setting_key (setting_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
 -- اضافه کردن کلیدهای خارجی / ADD FOREIGN KEYS
@@ -319,6 +329,38 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- =====================================================
 -- داده‌های پیش‌فرض / DEFAULT DATA
 -- =====================================================
+
+-- Insert default values (these will be overwritten by setup wizard)
+INSERT INTO app_settings (setting_key, setting_value, setting_group) VALUES
+-- Organization settings
+('org_name_fa', 'کمپ خراسان', 'organization'),
+('org_name_en', 'Khorasan Sports Camp', 'organization'),
+('org_slogan', 'سیستم مدیریت باشگاه ورزشی', 'organization'),
+('org_phone', '', 'organization'),
+('org_city', '', 'organization'),
+('org_address', '', 'organization'),
+
+-- Manager settings
+('manager_name_fa', 'کامران منصوری', 'manager'),
+('manager_name_en', 'Kamran Mansoori', 'manager'),
+('manager_title', 'مدیر باشگاه', 'manager'),
+('manager_phone', '', 'manager'),
+('manager_email', '', 'manager'),
+
+-- Financial settings
+('currency', 'AFN', 'financial'),
+('currency_label', 'افغانی', 'financial'),
+('default_percentage', '50', 'financial'),
+('default_hybrid_percentage', '25', 'financial'),
+('fiscal_year_start', '1404', 'financial'),
+
+-- Categories (JSON array)
+('expense_categories', '[{"key":"Rent","label":"اجاره"},{"key":"Equipment","label":"تجهیزات"},{"key":"Taxes","label":"مالیات"},{"key":"Services","label":"خدمات"},{"key":"Other","label":"سایر"}]', 'categories'),
+
+-- System settings
+('setup_complete', 'false', 'system')
+
+ON DUPLICATE KEY UPDATE setting_key = setting_key;
 
 -- وقت‌های پیش‌فرض / Default Time Slots
 INSERT INTO `time_slots` (`name`, `start_time`, `end_time`, `description`) VALUES

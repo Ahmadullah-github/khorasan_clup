@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>دانش‌آموزان - کمپ خراسان</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+    <link href="vendor/bootstrap/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="vendor/persian-datepicker/persian-datepicker.min.css">
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/custom.css">
 </head>
@@ -214,7 +214,7 @@
                                             </label>
                                             <div class="input-group-app">
                                                 <input type="number" class="form-control-app" id="feeAmount" min="0" required placeholder="0">
-                                                <span class="input-group-prepend">افغانی</span>
+                                                <span class="input-group-prepend" id="feeCurrencyLabel">افغانی</span>
                                            
                                             </div>
                                         </div>
@@ -482,11 +482,12 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.0.0/dist/persian-date.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <script src="vendor/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/persian-datepicker/persian-date.min.js"></script>
+    <script src="vendor/persian-datepicker/persian-datepicker.min.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/app-settings.js"></script>
     <script src="js/jalali.js"></script>
     <script>
         let currentPage = 1;
@@ -527,32 +528,90 @@
             document.querySelector('[data-tab="newStudent"]').click();
         }
 
+        // Store coaches data globally for filtering
+        let coachesData = [];
+        let allTimeSlots = [];
+
         // Load form data
         async function loadFormData() {
             try {
                 const data = await APIClient.get('students.php?action=new');
                 if (data.success) {
+                    // Store data globally
+                    coachesData = data.data.coaches;
+                    allTimeSlots = data.data.time_slots;
+                    
                     const coachSelect = document.getElementById('coachId');
                     const timeSlotSelect = document.getElementById('timeSlotId');
                     
+                    // Populate coaches dropdown
                     coachSelect.innerHTML = '<option value="">انتخاب کنید...</option>';
-                    data.data.coaches.forEach(coach => {
+                    coachesData.forEach(coach => {
                         const option = document.createElement('option');
                         option.value = coach.id;
                         option.textContent = `${coach.first_name} ${coach.last_name}`;
                         coachSelect.appendChild(option);
                     });
 
-                    timeSlotSelect.innerHTML = '<option value="">انتخاب کنید...</option>';
-                    data.data.time_slots.forEach(slot => {
-                        const option = document.createElement('option');
-                        option.value = slot.id;
-                        option.textContent = slot.name;
-                        timeSlotSelect.appendChild(option);
+                    // Initially disable time slot until coach is selected
+                    timeSlotSelect.innerHTML = '<option value="">ابتدا مربی را انتخاب کنید...</option>';
+                    timeSlotSelect.disabled = true;
+                    
+                    // Add coach change listener
+                    coachSelect.addEventListener('change', function() {
+                        updateTimeSlotsByCoach(this.value);
                     });
                 }
             } catch (error) {
                 notify.error('خطا در بارگذاری اطلاعات');
+            }
+        }
+
+        // Update time slots based on selected coach
+        function updateTimeSlotsByCoach(coachId) {
+            const timeSlotSelect = document.getElementById('timeSlotId');
+            
+            if (!coachId) {
+                timeSlotSelect.innerHTML = '<option value="">ابتدا مربی را انتخاب کنید...</option>';
+                timeSlotSelect.disabled = true;
+                return;
+            }
+            
+            // Find the selected coach
+            const coach = coachesData.find(c => c.id == coachId);
+            
+            if (!coach || !coach.time_slot_ids) {
+                timeSlotSelect.innerHTML = '<option value="">این مربی زمان کلاسی ندارد</option>';
+                timeSlotSelect.disabled = true;
+                return;
+            }
+            
+            // Parse coach's time slot IDs
+            const coachTimeSlotIds = coach.time_slot_ids.split(',').map(id => parseInt(id.trim()));
+            
+            // Filter time slots for this coach
+            const coachTimeSlots = allTimeSlots.filter(slot => coachTimeSlotIds.includes(slot.id));
+            
+            if (coachTimeSlots.length === 0) {
+                timeSlotSelect.innerHTML = '<option value="">این مربی زمان کلاسی ندارد</option>';
+                timeSlotSelect.disabled = true;
+                return;
+            }
+            
+            // Populate time slots dropdown
+            timeSlotSelect.innerHTML = '<option value="">انتخاب کنید...</option>';
+            coachTimeSlots.forEach(slot => {
+                const option = document.createElement('option');
+                option.value = slot.id;
+                option.textContent = slot.name;
+                timeSlotSelect.appendChild(option);
+            });
+            
+            timeSlotSelect.disabled = false;
+            
+            // Auto-select if only one time slot
+            if (coachTimeSlots.length === 1) {
+                timeSlotSelect.value = coachTimeSlots[0].id;
             }
         }
 
@@ -1216,6 +1275,13 @@
         loadFormData();
         loadStudents();
         initDarkMode();
+        
+        // Update currency labels when settings are loaded
+        window.addEventListener('settingsLoaded', function() {
+            const currencyLabel = AppSettings.getCurrencyLabel();
+            const feeCurrencyEl = document.getElementById('feeCurrencyLabel');
+            if (feeCurrencyEl) feeCurrencyEl.textContent = currencyLabel;
+        });
         
         // Set current Jalali date as placeholder
         document.addEventListener('DOMContentLoaded', function() {

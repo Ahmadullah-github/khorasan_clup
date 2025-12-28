@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تنظیمات سیستم - کمپ خراسان</title>
+    <link href="vendor/bootstrap/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <style>
+        .settings-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .settings-tab {
+            padding: 12px 20px;
+            background: var(--bg-secondary);
+            border: 2px solid transparent;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .settings-tab:hover {
+            background: var(--bg-tertiary);
+        }
+        .settings-tab.active {
+            background: var(--color-primary-50);
+            border-color: var(--color-primary-500);
+            color: var(--color-primary-600);
+        }
+        [data-theme="dark"] .settings-tab.active {
+            background: rgba(59, 130, 246, 0.15);
+        }
+        .settings-panel {
+            display: none;
+        }
+        .settings-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .settings-section {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+        .settings-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .settings-section-title i {
+            color: var(--color-primary-500);
+        }
+        .settings-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .category-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .category-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+        }
+        .category-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .category-key {
+            font-family: monospace;
+            font-size: 12px;
+            background: var(--bg-tertiary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: var(--text-muted);
+        }
+        .add-category-row {
+            display: flex;
+            gap: 8px;
+        }
+        .add-category-row input {
+            flex: 1;
+        }
+        .save-indicator {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-success-500);
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--radius-full);
+            box-shadow: var(--shadow-lg);
+            display: none;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+        }
+        .save-indicator.show {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar-app">
+        <a class="navbar-brand" href="index.html">
+            <span class="navbar-brand-icon">🤸‍♂️</span>
+            <span id="navBrandName">کمپ خراسان</span>
+        </a>
+        <ul class="navbar-nav-app">
+            <li><a class="nav-link-app" href="index.html">داشبورد</a></li>
+            <li><a class="nav-link-app" href="students.html">دانش‌آموزان</a></li>
+            <li><a class="nav-link-app" href="coaches.html">مربیان</a></li>
+            <li><a class="nav-link-app" href="expenses.html">هزینه‌ها</a></li>
+            <li><a class="nav-link-app" href="accounting.html">درآمد خالص</a></li>
+            <li><a class="nav-link-app" href="reports.html">گزارش‌ها</a></li>
+            <li id="adminNavItem" style="display: none;">
+                <a class="nav-link-app" href="admin.html">مدیر</a>
+            </li>
+        </ul>
+        <div class="navbar-actions">
+            <button type="button" class="theme-switch" id="themeSwitch" title="تغییر تم">
+                <span class="theme-switch-icons">
+                    <span class="theme-switch-icon theme-switch-icon--sun">☀️</span>
+                    <span class="theme-switch-icon theme-switch-icon--moon">🌙</span>
+                </span>
+                <span class="theme-switch-slider"></span>
+            </button>
+            <div class="navbar-user">
+                <span class="navbar-user-icon"><i class="bi bi-person"></i></span>
+                <span id="userName"></span>
+            </div>
+            <button class="navbar-logout" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>خروج</span>
+            </button>
+        </div>
+        <button class="navbar-mobile-toggle" id="mobileMenuToggle"><i class="bi bi-list"></i></button>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar-app" id="sidebar">
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-item"><a href="index.html" class="sidebar-nav-link"><i class="bi bi-grid-1x2 sidebar-nav-icon"></i>داشبورد</a></div>
+            <div class="sidebar-section-title">مدیریت</div>
+            <div class="sidebar-nav-item"><a href="students.html" class="sidebar-nav-link"><i class="bi bi-people sidebar-nav-icon"></i>دانش‌آموزان</a></div>
+            <div class="sidebar-nav-item"><a href="coaches.html" class="sidebar-nav-link"><i class="bi bi-person-badge sidebar-nav-icon"></i>مربیان</a></div>
+            <div class="sidebar-section-title">مالی</div>
+            <div class="sidebar-nav-item"><a href="expenses.html" class="sidebar-nav-link"><i class="bi bi-cash-stack sidebar-nav-icon"></i>هزینه‌ها</a></div>
+            <div class="sidebar-nav-item"><a href="accounting.html" class="sidebar-nav-link"><i class="bi bi-calculator sidebar-nav-icon"></i>درآمد خالص</a></div>
+            <div class="sidebar-nav-item"><a href="reports.html" class="sidebar-nav-link"><i class="bi bi-bar-chart sidebar-nav-icon"></i>گزارش‌ها</a></div>
+            <div class="sidebar-section-title">سیستم</div>
+            <div class="sidebar-nav-item"><a href="settings.html" class="sidebar-nav-link active"><i class="bi bi-gear sidebar-nav-icon"></i>تنظیمات</a></div>
+            <div class="sidebar-nav-item" id="adminSidebarItem" style="display: none;"><a href="admin.html" class="sidebar-nav-link"><i class="bi bi-shield-lock sidebar-nav-icon"></i>مدیر</a></div>
+            <div class="sidebar-nav-item"><a href="#" class="sidebar-nav-link" onclick="logout()"><i class="bi bi-box-arrow-right sidebar-nav-icon"></i>خروج</a></div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="container-app">
+            <!-- Page Header -->
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="page-title mb-1">
+                        <i class="bi bi-gear me-2"></i>
+                        تنظیمات سیستم
+                    </h1>
+                    <p class="text-secondary">مدیریت اطلاعات سازمان، مدیر و تنظیمات مالی</p>
+                </div>
+                <button class="btn-app btn-app--primary" id="saveAllBtn">
+                    <i class="bi bi-check-lg"></i>
+                    ذخیره تغییرات
+                </button>
+            </div>
+
+            <!-- Settings Tabs -->
+            <div class="settings-tabs">
+                <button class="settings-tab active" data-tab="organization">
+                    <i class="bi bi-building"></i>
+                    سازمان
+                </button>
+                <button class="settings-tab" data-tab="manager">
+                    <i class="bi bi-person"></i>
+                    مدیر/مسئول
+                </button>
+                <button class="settings-tab" data-tab="financial">
+                    <i class="bi bi-cash-coin"></i>
+                    مالی
+                </button>
+                <button class="settings-tab" data-tab="categories">
+                    <i class="bi bi-folder"></i>
+                    دسته‌بندی‌ها
+                </button>
+            </div>
+
+            <!-- Organization Panel -->
+            <div class="settings-panel active" data-panel="organization">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <i class="bi bi-building"></i>
+                        اطلاعات سازمان
+                    </h3>
+                    <div class="settings-row">
+                        <div class="form-group">
+                            <label class="form-label-app required">نام سازمان (فارسی/دری)</label>
+                            <input type="text" class="form-control-app" id="orgNameFa" maxlength="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app">نام سازمان (انگلیسی)</label>
+                            <input type="text" class="form-control-app" id="orgNameEn" maxlength="100" dir="ltr">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label-app">شعار یا توضیح کوتاه</label>
+                        <input type="text" class="form-control-app" id="orgSlogan" maxlength="150">
+                    </div>
+                    <div class="settings-row">
+                        <div class="form-group">
+                            <label class="form-label-app">شماره تماس</label>
+                            <input type="tel" class="form-control-app" id="orgPhone" maxlength="11" dir="ltr">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app">شهر</label>
+                            <input type="text" class="form-control-app" id="orgCity" maxlength="50">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label-app">آدرس کامل</label>
+                        <textarea class="form-control-app" id="orgAddress" rows="2" maxlength="300"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manager Panel -->
+            <div class="settings-panel" data-panel="manager">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <i class="bi bi-person"></i>
+                        اطلاعات مدیر/مسئول
+                    </h3>
+                    <div class="settings-row">
+                        <div class="form-group">
+                            <label class="form-label-app required">نام مسئول (فارسی/دری)</label>
+                            <input type="text" class="form-control-app" id="managerNameFa" maxlength="60">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app">نام مسئول (انگلیسی)</label>
+                            <input type="text" class="form-control-app" id="managerNameEn" maxlength="60" dir="ltr">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label-app required">سمت/عنوان</label>
+                        <input type="text" class="form-control-app" id="managerTitle" maxlength="50">
+                    </div>
+                    <div class="settings-row">
+                        <div class="form-group">
+                            <label class="form-label-app">شماره تماس</label>
+                            <input type="tel" class="form-control-app" id="managerPhone" maxlength="11" dir="ltr">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app">ایمیل</label>
+                            <input type="email" class="form-control-app" id="managerEmail" maxlength="100" dir="ltr">
+                        </div>
+                    </div>
+                    <div class="info-box mt-4">
+                        <i class="bi bi-info-circle"></i>
+                        <span>این اطلاعات در امضای فاکتورها و اسناد رسمی نمایش داده می‌شود</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Panel -->
+            <div class="settings-panel" data-panel="financial">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <i class="bi bi-cash-coin"></i>
+                        تنظیمات مالی
+                    </h3>
+                    <div class="settings-row">
+                        <div class="form-group">
+                            <label class="form-label-app required">واحد پول</label>
+                            <select class="form-control-app form-select-app" id="currency">
+                                <option value="AFN">افغانی (AFN)</option>
+                                <option value="IRR">ریال ایران (IRR)</option>
+                                <option value="USD">دلار آمریکا (USD)</option>
+                                <option value="EUR">یورو (EUR)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app">نام واحد پول (برای نمایش)</label>
+                            <input type="text" class="form-control-app" id="currencyLabel" maxlength="30">
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="form-group">
+                            <label class="form-label-app">درصد پیش‌فرض مربی</label>
+                            <div class="input-group-app">
+                                <input type="number" class="form-control-app" id="defaultPercentage" min="0" max="100" step="0.5">
+                                <span class="input-group-append">%</span>
+                            </div>
+                            <div class="form-text">درصد سهم مربی از هر دانش‌آموز</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-app">درصد ترکیبی پیش‌فرض</label>
+                            <div class="input-group-app">
+                                <input type="number" class="form-control-app" id="defaultHybridPercentage" min="0" max="100" step="0.5">
+                                <span class="input-group-append">%</span>
+                            </div>
+                            <div class="form-text">برای قراردادهای ترکیبی</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label-app">سال مالی شروع</label>
+                        <input type="number" class="form-control-app" id="fiscalYearStart" min="1400" max="1450" style="max-width: 200px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Panel -->
+            <div class="settings-panel" data-panel="categories">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <i class="bi bi-folder"></i>
+                        دسته‌بندی هزینه‌ها
+                    </h3>
+                    <div class="category-list" id="categoryList">
+                        <!-- Categories rendered here -->
+                    </div>
+                    <div class="add-category-row">
+                        <input type="text" class="form-control-app" id="newCategoryKey" placeholder="کلید (انگلیسی)" maxlength="30" dir="ltr">
+                        <input type="text" class="form-control-app" id="newCategoryLabel" placeholder="نام دسته (فارسی)" maxlength="50">
+                        <button type="button" class="btn-app btn-app--secondary" id="addCategoryBtn">
+                            <i class="bi bi-plus"></i>
+                            افزودن
+                        </button>
+                    </div>
+                    <div class="validation-message text-danger mt-2" id="categoryError"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Save Indicator -->
+    <div class="save-indicator" id="saveIndicator">
+        <i class="bi bi-check-circle"></i>
+        تغییرات ذخیره شد
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <script src="vendor/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/app-settings.js"></script>
+    <script>
+        // Check authentication
+        const user = checkAuth();
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = user.username;
+            if (user.role === 'admin') {
+                document.getElementById('adminNavItem').style.display = 'block';
+                document.getElementById('adminSidebarItem').style.display = 'block';
+            }
+        }
+
+        let categories = [];
+        let hasChanges = false;
+
+        // Tab switching
+        document.querySelectorAll('.settings-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelector(`[data-panel="${tab.dataset.tab}"]`).classList.add('active');
+            });
+        });
+
+        // Load settings
+        async function loadSettings() {
+            try {
+                const settings = await AppSettings.load();
+                
+                // Organization
+                document.getElementById('orgNameFa').value = settings.organization.name_fa || '';
+                document.getElementById('orgNameEn').value = settings.organization.name_en || '';
+                document.getElementById('orgSlogan').value = settings.organization.slogan || '';
+                document.getElementById('orgPhone').value = settings.organization.phone || '';
+                document.getElementById('orgCity').value = settings.organization.city || '';
+                document.getElementById('orgAddress').value = settings.organization.address || '';
+                
+                // Manager
+                document.getElementById('managerNameFa').value = settings.manager.name_fa || '';
+                document.getElementById('managerNameEn').value = settings.manager.name_en || '';
+                document.getElementById('managerTitle').value = settings.manager.title || '';
+                document.getElementById('managerPhone').value = settings.manager.phone || '';
+                document.getElementById('managerEmail').value = settings.manager.email || '';
+                
+                // Financial
+                document.getElementById('currency').value = settings.financial.currency || 'AFN';
+                document.getElementById('currencyLabel').value = settings.financial.currency_label || 'افغانی';
+                document.getElementById('defaultPercentage').value = settings.financial.default_percentage || 50;
+                document.getElementById('defaultHybridPercentage').value = settings.financial.default_hybrid_percentage || 25;
+                document.getElementById('fiscalYearStart').value = settings.financial.fiscal_year_start || 1404;
+                
+                // Categories
+                categories = settings.categories || [];
+                renderCategories();
+                
+                // Update navbar brand
+                document.getElementById('navBrandName').textContent = settings.organization.name_fa;
+                
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                notify.error('خطا در بارگذاری تنظیمات');
+            }
+        }
+
+        // Render categories
+        function renderCategories() {
+            const list = document.getElementById('categoryList');
+            list.innerHTML = categories.map((cat, index) => `
+                <div class="category-item">
+                    <div class="category-info">
+                        <span class="category-key">${cat.key}</span>
+                        <span>${cat.label}</span>
+                    </div>
+                    <button type="button" class="btn-app btn-app--danger btn-app--sm" onclick="removeCategory(${index})"
+                            ${categories.length <= 1 ? 'disabled' : ''}>
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Add category
+        document.getElementById('addCategoryBtn').addEventListener('click', () => {
+            const keyInput = document.getElementById('newCategoryKey');
+            const labelInput = document.getElementById('newCategoryLabel');
+            const errorEl = document.getElementById('categoryError');
+            
+            const key = keyInput.value.trim();
+            const label = labelInput.value.trim();
+            
+            // Validate
+            if (!key || !label) {
+                errorEl.textContent = 'کلید و نام دسته الزامی است';
+                return;
+            }
+            
+            if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(key)) {
+                errorEl.textContent = 'کلید باید با حرف انگلیسی شروع شود';
+                return;
+            }
+            
+            if (categories.some(c => c.key.toLowerCase() === key.toLowerCase())) {
+                errorEl.textContent = 'این کلید قبلاً استفاده شده است';
+                return;
+            }
+            
+            categories.push({ key, label });
+            renderCategories();
+            keyInput.value = '';
+            labelInput.value = '';
+            errorEl.textContent = '';
+            hasChanges = true;
+        });
+
+        // Remove category
+        window.removeCategory = function(index) {
+            if (categories.length <= 1) return;
+            categories.splice(index, 1);
+            renderCategories();
+            hasChanges = true;
+        };
+
+        // Save all settings
+        document.getElementById('saveAllBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('saveAllBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-app spinner-app--sm"></span> در حال ذخیره...';
+            
+            const data = {
+                organization: {
+                    name_fa: document.getElementById('orgNameFa').value.trim(),
+                    name_en: document.getElementById('orgNameEn').value.trim(),
+                    slogan: document.getElementById('orgSlogan').value.trim(),
+                    phone: document.getElementById('orgPhone').value.trim(),
+                    city: document.getElementById('orgCity').value.trim(),
+                    address: document.getElementById('orgAddress').value.trim()
+                },
+                manager: {
+                    name_fa: document.getElementById('managerNameFa').value.trim(),
+                    name_en: document.getElementById('managerNameEn').value.trim(),
+                    title: document.getElementById('managerTitle').value.trim(),
+                    phone: document.getElementById('managerPhone').value.trim(),
+                    email: document.getElementById('managerEmail').value.trim()
+                },
+                financial: {
+                    currency: document.getElementById('currency').value,
+                    currency_label: document.getElementById('currencyLabel').value.trim(),
+                    default_percentage: parseFloat(document.getElementById('defaultPercentage').value) || 50,
+                    default_hybrid_percentage: parseFloat(document.getElementById('defaultHybridPercentage').value) || 25,
+                    fiscal_year_start: parseInt(document.getElementById('fiscalYearStart').value) || 1404
+                },
+                categories: categories
+            };
+            
+            // Validate required fields
+            if (!data.organization.name_fa) {
+                notify.error('نام سازمان الزامی است');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> ذخیره تغییرات';
+                return;
+            }
+            
+            if (!data.manager.name_fa || !data.manager.title) {
+                notify.error('نام و سمت مسئول الزامی است');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> ذخیره تغییرات';
+                return;
+            }
+            
+            try {
+                const response = await fetch(API_BASE + 'settings.php?action=setup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Clear cache and reload
+                    AppSettings.clearCache();
+                    localStorage.setItem('app_settings', JSON.stringify(data));
+                    
+                    // Show success indicator
+                    const indicator = document.getElementById('saveIndicator');
+                    indicator.classList.add('show');
+                    setTimeout(() => indicator.classList.remove('show'), 3000);
+                    
+                    // Update navbar
+                    document.getElementById('navBrandName').textContent = data.organization.name_fa;
+                    
+                    hasChanges = false;
+                } else {
+                    notify.error(result.error || 'خطا در ذخیره تنظیمات');
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                notify.error('خطا در ذخیره تنظیمات');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> ذخیره تغییرات';
+            }
+        });
+
+        // Track changes
+        document.querySelectorAll('input, select, textarea').forEach(el => {
+            el.addEventListener('change', () => hasChanges = true);
+        });
+
+        // Warn before leaving with unsaved changes
+        window.addEventListener('beforeunload', (e) => {
+            if (hasChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Mobile sidebar
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+                sidebarOverlay.classList.toggle('show');
+            });
+        }
+        
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        }
+
+        // Initialize
+        loadSettings();
+        initDarkMode();
+    </script>
+</body>
+</html>

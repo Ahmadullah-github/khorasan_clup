@@ -447,9 +447,12 @@ function formatNumber(num) {
     return new Intl.NumberFormat('fa-IR').format(num);
 }
 
-// Format Currency
+// Format Currency - Uses dynamic currency label from AppSettings
 function formatCurrency(amount) {
-    return formatNumber(amount) + ' افغانی';
+    const currencyLabel = (typeof AppSettings !== 'undefined' && AppSettings.getCurrencyLabel) 
+        ? AppSettings.getCurrencyLabel() 
+        : 'افغانی';
+    return formatNumber(amount) + ' ' + currencyLabel;
 }
 
 // Loading Spinner

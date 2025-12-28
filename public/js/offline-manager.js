@@ -49,7 +49,7 @@ class OfflineManager {
                 // Coaches table
                 if (!db.objectStoreNames.contains('coaches')) {
                     const coachesStore = db.createObjectStore('coaches', { keyPath: 'id' });
-                    studentsStore.createIndex('updated_at', 'updated_at', { unique: false });
+                    coachesStore.createIndex('updated_at', 'updated_at', { unique: false });
                 }
                 
                 // Expenses table

@@ -1,6 +1,7 @@
 /**
  * Invoice Page JavaScript
  * Handles invoice loading, rendering, and sharing
+ * Uses dynamic settings from AppSettings
  */
 
 (function() {
@@ -8,6 +9,7 @@
     
     var invoiceId = new URLSearchParams(window.location.search).get('id');
     var invoiceData = null;
+    var appSettings = null;
 
     var DARI_MONTHS = ['حمل', 'ثور', 'جوزا', 'سرطان', 'اسد', 'سنبله', 'میزان', 'عقرب', 'قوس', 'جدی', 'دلو', 'حوت'];
 
@@ -34,7 +36,8 @@
 
     function formatCurrencyFormal(amount) {
         var formatted = Number(amount).toLocaleString('en-US');
-        return toPersianDigits(formatted) + ' افغانی';
+        var currencyLabel = appSettings ? appSettings.financial.currency_label : 'افغانی';
+        return toPersianDigits(formatted) + ' ' + currencyLabel;
     }
 
     function numberToWords(num) {
@@ -58,8 +61,13 @@
     }
 
 
-    function loadInvoice() {
+    async function loadInvoice() {
         if (!invoiceId) { showError('شناسه فاکتور مشخص نشده است'); return; }
+        
+        // Load settings first
+        if (typeof AppSettings !== 'undefined') {
+            appSettings = await AppSettings.load();
+        }
         
         APIClient.get('invoices.php?id=' + invoiceId)
             .then(function(data) {
@@ -112,6 +120,11 @@
 
 
     function renderInvoice(inv) {
+        // Get dynamic settings
+        var org = appSettings ? appSettings.organization : { name_fa: 'کمپ خراسان', name_en: 'Khorasan Sports Camp' };
+        var mgr = appSettings ? appSettings.manager : { name_fa: 'کامران منصوری', name_en: 'Kamran Mansoori', title: 'مدیر' };
+        var fin = appSettings ? appSettings.financial : { currency_label: 'افغانی' };
+        
         var jalaliDate = formatJalaliDateFormal(inv.issued_date_jalali);
         var gregorianDate = getGregorianDate();
         var periodStart = formatJalaliDateFormal(inv.start_date_jalali);
@@ -122,7 +135,7 @@
         
         var html = '<div class="invoice-border"><div class="invoice-border-inner">';
         
-        // Header
+        // Header - Using dynamic organization name
         html += '<header class="invoice-header-official">';
         html += '<div class="header-side header-right"><div class="official-seal">';
         html += '<div class="seal-outer"><div class="seal-inner"><span class="seal-icon">🤸‍♂️</span></div></div>';
@@ -130,8 +143,8 @@
         
         html += '<div class="header-center">';
         html += '<div class="header-emblem">⚜️</div>';
-        html += '<h1 class="header-title">کمپ ورزشی خراسان</h1>';
-        html += '<p class="header-subtitle">KHORASAN SPORTS CAMP</p>';
+        html += '<h1 class="header-title">' + org.name_fa + '</h1>';
+        html += '<p class="header-subtitle">' + (org.name_en || '').toUpperCase() + '</p>';
         html += '<div class="header-divider"></div>';
         html += '<h2 class="document-title">فاکتور رسمی</h2>';
         html += '<p class="document-subtitle">OFFICIAL INVOICE</p></div>';
@@ -187,7 +200,7 @@
         html += '<tr class="subtotal-row"><td colspan="5" class="text-left">جمع جزء (Subtotal):</td>';
         html += '<td>' + amountFormatted + '</td></tr>';
         html += '<tr class="discount-row"><td colspan="5" class="text-left">تخفیف (Discount):</td>';
-        html += '<td>' + toPersianDigits(0) + ' افغانی</td></tr>';
+        html += '<td>' + toPersianDigits(0) + ' ' + fin.currency_label + '</td></tr>';
         html += '<tr class="grand-total-row"><td colspan="5" class="text-left"><strong>مبلغ قابل پرداخت (Total Due):</strong></td>';
         html += '<td><strong>' + amountFormatted + '</strong></td></tr>';
         html += '</tfoot></table></section>';
@@ -195,7 +208,7 @@
         // Amount in words
         html += '<div class="amount-words">';
         html += '<span class="amount-words-label">مبلغ به حروف:</span>';
-        html += '<span class="amount-words-value">' + amountWords + ' افغانی</span></div>';
+        html += '<span class="amount-words-value">' + amountWords + ' ' + fin.currency_label + '</span></div>';
         html += '</main>';
 
         
@@ -205,7 +218,7 @@
         html += '<li>این فاکتور به منزله رسید پرداخت می‌باشد.</li>';
         html += '<li>This invoice serves as proof of payment.</li></ul></div>';
         
-        // Signatures
+        // Signatures - Using dynamic manager name
         html += '<div class="signatures-row">';
         html += '<div class="signature-box"><div class="signature-line"></div>';
         html += '<p class="signature-title">امضای دریافت کننده</p>';
@@ -213,15 +226,15 @@
         
         html += '<div class="signature-box signature-box--filled">';
         html += '<div class="digital-signature">';
-        html += '<span class="signature-text">کامران منصوری</span>';
-        html += '<span class="signature-text-en">Kamran Mansoori</span></div>';
+        html += '<span class="signature-text">' + mgr.name_fa + '</span>';
+        html += '<span class="signature-text-en">' + (mgr.name_en || '') + '</span></div>';
         html += '<div class="signature-line"></div>';
-        html += '<p class="signature-title">امضای مسئول / مدیر</p>';
+        html += '<p class="signature-title">امضای ' + (mgr.title || 'مسئول') + '</p>';
         html += '<p class="signature-subtitle">Authorized Signature</p></div></div>';
         
-        // Footer bottom
+        // Footer bottom - Using dynamic organization name
         html += '<div class="footer-bottom">';
-        html += '<div class="footer-brand"><span>🤸‍♂️</span><span>کمپ ورزشی خراسان</span></div>';
+        html += '<div class="footer-brand"><span>🤸‍♂️</span><span>' + org.name_fa + '</span></div>';
         html += '<div class="footer-copy">© ' + currentYear + ' - تمامی حقوق محفوظ است</div>';
         html += '</div></footer>';
         
